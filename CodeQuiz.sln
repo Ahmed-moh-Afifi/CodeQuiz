@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36616.10 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeQuizDesktop", "CodeQuizDesktop\CodeQuizDesktop.csproj", "{4933F614-F559-47E0-8A45-0CE4E9B75E8F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeQuizBackend", "CodeQuizBackend\CodeQuizBackend.csproj", "{209CF325-5948-47A3-A67B-804A34290595}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4933F614-F559-47E0-8A45-0CE4E9B75E8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4933F614-F559-47E0-8A45-0CE4E9B75E8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4933F614-F559-47E0-8A45-0CE4E9B75E8F}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{4933F614-F559-47E0-8A45-0CE4E9B75E8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4933F614-F559-47E0-8A45-0CE4E9B75E8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4933F614-F559-47E0-8A45-0CE4E9B75E8F}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{209CF325-5948-47A3-A67B-804A34290595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{209CF325-5948-47A3-A67B-804A34290595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{209CF325-5948-47A3-A67B-804A34290595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{209CF325-5948-47A3-A67B-804A34290595}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {960BA45F-1D2F-44D5-B440-05B0DD6FC6C7}
+	EndGlobalSection
+EndGlobal
