@@ -2,7 +2,6 @@
 using CodeQuizBackend.Authentication.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace CodeQuizBackend.Authentication.Controllers
 {
