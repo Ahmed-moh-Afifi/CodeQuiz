@@ -2,6 +2,8 @@ using CodeQuizBackend.Authentication.Models;
 using CodeQuizBackend.Authentication.Repositories;
 using CodeQuizBackend.Authentication.Services;
 using CodeQuizBackend.Core.Data;
+using CodeQuizBackend.Core.Logging;
+using CodeQuizBackend.Core.Middlewares;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -91,6 +93,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 // Add services here
+builder.Services.AddScoped(typeof(IAppLogger<>), typeof(AppLogger<>));
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IAuthenticationService, JWTAuthenticationService>();
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
@@ -103,6 +106,8 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
