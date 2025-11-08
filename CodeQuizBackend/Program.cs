@@ -4,6 +4,7 @@ using CodeQuizBackend.Authentication.Services;
 using CodeQuizBackend.Core.Data;
 using CodeQuizBackend.Core.Logging;
 using CodeQuizBackend.Core.Middlewares;
+using CodeQuizBackend.Execution.Services;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -97,6 +98,9 @@ builder.Services.AddScoped(typeof(IAppLogger<>), typeof(AppLogger<>));
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IAuthenticationService, JWTAuthenticationService>();
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+builder.Services.AddScoped<ICodeRunner, CSharpCodeRunner>();
+builder.Services.AddScoped<ICodeRunnerFactory, CodeRunnerFactory>();
+builder.Services.AddScoped<IEvaluator, Evaluator>();
 
 var app = builder.Build();
 
@@ -107,9 +111,9 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate();
 }
 
+// Configure the HTTP request pipeline.
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
