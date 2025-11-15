@@ -6,7 +6,7 @@
 
         public CodeRunnerFactory(IEnumerable<ICodeRunner> codeRunners)
         {
-            this.codeRunners = codeRunners.ToDictionary(r => r.GetType().Name.Replace("CodeRunner", "").ToLower(), r => r);
+            this.codeRunners = codeRunners.ToDictionary(r => r.Language.ToLower(), r => r);
         }
 
         public ICodeRunner Create(string language)

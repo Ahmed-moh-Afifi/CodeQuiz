@@ -14,7 +14,7 @@ namespace CodeQuizBackend.Execution.Services
                 ContainError = true
             });
 
-            return result.Success && result.Output!.Trim() == testCase.ExpectedOutput.Trim();
+            return result.Success && result.Output?.Trim() == testCase.ExpectedOutput.Trim();
         }
     }
 }

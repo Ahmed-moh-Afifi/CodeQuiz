@@ -5,9 +5,11 @@ using System.Diagnostics;
 
 namespace CodeQuizBackend.Execution.Services
 {
-    public class CSharpCodeRunner(IConfiguration configuration) : ICodeRunner
+    public class CSharpCodeRunner(IConfiguration configuration, IAppLogger<CSharpCodeRunner> logger) : ICodeRunner
     {
         private readonly string baseCodeFilePath = configuration["CodeFilesPath"]!;
+        public string Language { get => "CSharp"; }
+
         public async Task<CodeRunnerResult> RunCodeAsync(string code, CodeRunnerOptions? options = null)
         {
             return await Task.Run(() => RunCode(code, options));
@@ -24,7 +26,7 @@ namespace CodeQuizBackend.Execution.Services
                 code = "#pragma warning disable\n" + code;
                 File.WriteAllText(filePath, code);
 
-                Process process = new Process();
+                using Process process = new Process();
                 process.StartInfo.WorkingDirectory = baseCodeFilePath;
                 process.StartInfo.FileName = configuration["CSharpCompilerPath"];
                 process.StartInfo.Arguments = $"run {filePath}";
@@ -43,27 +45,35 @@ namespace CodeQuizBackend.Execution.Services
                 }
                 process.StandardInput.Close();
 
+                process.WaitForExit();
+
                 string output = process.StandardOutput.ReadToEnd().Trim();
                 string errors = process.StandardError.ReadToEnd().Trim();
 
-                process.WaitForExit();
 
                 return new CodeRunnerResult
                 {
                     Success = process.ExitCode == 0,
-                    Output = options.ContainOutput ? output : null,
-                    Error = options.ContainError ? errors : null
+                    Output = process.ExitCode == 0 ? output : null,
+                    Error = process.ExitCode != 0 ? output : null
                 };
             }
             catch (Exception)
             {
-                throw new CodeRunnerException();
+                throw new CodeRunnerException("Failed to execute code");
             }
             finally
             {
                 if (File.Exists(filePath))
                 {
-                    File.Delete(filePath);
+                    try
+                    {
+                        File.Delete(filePath);
+                    }
+                    catch (Exception)
+                    {
+                        logger.LogWarning("Failed to delete temporary code file: {FilePath}", filePath);
+                    }
                 }
             }
         }
