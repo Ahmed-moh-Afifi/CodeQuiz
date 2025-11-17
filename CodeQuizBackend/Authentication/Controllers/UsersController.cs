@@ -12,7 +12,7 @@ namespace CodeQuizBackend.Authentication.Controllers
     {
         [HttpGet]
         [Route("{userId}")]
-        [Authorize()] // Protected endpoint (clients must provide a valid JWT)
+        [Authorize] // Protected endpoint (clients must provide a valid JWT)
         public async Task<ActionResult<UserDTO>> GetUser(string userId)
         {
             UserDTO? user = await usersRepository.GetUser(userId);
