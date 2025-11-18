@@ -1,5 +1,7 @@
 ﻿using CodeQuizBackend.Authentication.Models;
+using CodeQuizBackend.Authentication.Models.DTOs;
 using CodeQuizBackend.Authentication.Services;
+using CodeQuizBackend.Core.Data.models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CodeQuizBackend.Authentication.Controllers
@@ -9,45 +11,75 @@ namespace CodeQuizBackend.Authentication.Controllers
     public class AuthenticationController(IAuthenticationService authenticationService) : ControllerBase
     {
         [HttpPost("Register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        public async Task<ActionResult<ApiResponse<UserDTO>>> Register([FromBody] RegisterModel model)
         {
-            return Ok(await authenticationService.Register(model));
+            return Ok(new ApiResponse<UserDTO>()
+            {
+                Success = true,
+                Data = await authenticationService.Register(model),
+                Message = "User registered successfully"
+            });
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        public async Task<ActionResult<ApiResponse<LoginResult>>> Login([FromBody] LoginModel model)
         {
-            return Ok(await authenticationService.Login(model));
+            return Ok(new ApiResponse<LoginResult>()
+            {
+                Success = true,
+                Data = await authenticationService.Login(model),
+                Message = "User logged in successfully"
+            });
         }
 
         [HttpPost("Refresh")]
-        public async Task<IActionResult> Refresh([FromBody] TokenModel model)
+        public async Task<ActionResult<ApiResponse<TokenModel>>> Refresh([FromBody] TokenModel model)
         {
-            return Ok(await authenticationService.RefreshToken(model));
+            return Ok(new ApiResponse<TokenModel>()
+            {
+                Success = true,
+                Data = await authenticationService.RefreshToken(model),
+                Message = "Token refreshed successfully"
+            });
         }
 
         [HttpPut]
         [Route("ResetPassword")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel resetPasswordModel)
+        public async Task<ActionResult<ApiResponse<object>>> ResetPassword([FromBody] ResetPasswordModel resetPasswordModel)
         {
             await authenticationService.ResetPassword(resetPasswordModel);
-            return Ok();
+            return Ok(new ApiResponse<object>()
+            {
+                Success = true,
+                Data = null,
+                Message = "Password reset successfully"
+            });
         }
 
         [HttpPost]
         [Route("ForgetPasswordRequest")]
-        public async Task<IActionResult> ForgetPasswordRequest([FromBody] ForgetPasswordModel forgetPasswordModel)
+        public async Task<ActionResult<ApiResponse<object>>> ForgetPasswordRequest([FromBody] ForgetPasswordModel forgetPasswordModel)
         {
             await authenticationService.ForgetPassword(forgetPasswordModel);
-            return Ok();
+            return Ok(new ApiResponse<object>()
+            {
+                Success = true,
+                Data = null,
+                Message = "If the email exists, a password reset link has been sent."
+            });
         }
 
         [HttpPut]
         [Route("ResetPasswordTn")]
-        public async Task<IActionResult> ResetPasswordTn([FromBody] ResetPasswordTnModel resetPasswordTnModel)
+        public async Task<ActionResult<ApiResponse<object>>> ResetPasswordTn([FromBody] ResetPasswordTnModel resetPasswordTnModel)
         {
             await authenticationService.ResetPasswordWithToken(resetPasswordTnModel);
-            return Ok();
+            return Ok(new ApiResponse<object>()
+            {
+                Success = true,
+                Data = null,
+                Message = "Password has been reset successfully."
+            });
         }
     }
 }
