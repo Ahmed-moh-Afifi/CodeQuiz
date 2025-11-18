@@ -4,6 +4,9 @@ using CodeQuizBackend.Authentication.Services;
 using CodeQuizBackend.Core.Data;
 using CodeQuizBackend.Core.Logging;
 using CodeQuizBackend.Core.Middlewares;
+using CodeQuizBackend.Execution.Services;
+using CodeQuizBackend.Quiz.Repositories;
+using CodeQuizBackend.Quiz.Services;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -36,7 +39,6 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
         Scheme = "Bearer"
-
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -77,26 +79,41 @@ builder.Services.AddIdentity<User, IdentityRole>(options => options.User.Require
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Issuer"],
-            ValidAudience = builder.Configuration["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTKey"]!))
-        };
-    });
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+  {
+      options.TokenValidationParameters = new TokenValidationParameters
+      {
+          ValidateIssuer = true,
+          ValidateAudience = true,
+          ValidateLifetime = true,
+          ValidateIssuerSigningKey = true,
+          ValidIssuer = builder.Configuration["Issuer"],
+          ValidAudience = builder.Configuration["Audience"],
+          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTKey"]!))
+      };
+  });
 
 // Add services here
-builder.Services.AddScoped(typeof(IAppLogger<>), typeof(AppLogger<>));
-builder.Services.AddScoped<TokenService>();
+builder.Services.AddSingleton(typeof(IAppLogger<>), typeof(AppLogger<>));
 builder.Services.AddScoped<IAuthenticationService, JWTAuthenticationService>();
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+builder.Services.AddScoped<IQuizzesRepository, QuizzesRepository>();
+builder.Services.AddScoped<IQuizzesService, QuizzesService>();
+builder.Services.AddScoped<IAttemptsService, AttemptsService>();
+builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<QuizCodeGenerator>();
+
+// Running code services
+builder.Services.AddScoped<ICodeRunner, CSharpCodeRunner>();
+builder.Services.AddScoped<ICodeRunnerFactory, CodeRunnerFactory>();
+builder.Services.AddScoped<IEvaluator, Evaluator>();
+
+// Background services
+builder.Services.AddHostedService<AttemptTimerService>();
 
 var app = builder.Build();
 
@@ -107,9 +124,9 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate();
 }
 
+// Configure the HTTP request pipeline.
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -117,6 +134,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
