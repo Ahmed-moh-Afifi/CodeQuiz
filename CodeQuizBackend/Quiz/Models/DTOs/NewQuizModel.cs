@@ -24,7 +24,8 @@
                 ExaminerId = ExaminerId,
                 GlobalQuestionConfiguration = GlobalQuestionConfiguration,
                 AllowMultipleAttempts = AllowMultipleAttempts,
-                Questions = Questions.Select(q => q.ToQuestion()).ToList()
+                Questions = Questions.Select(q => q.ToQuestion()).ToList(),
+                TotalPoints = Questions.Sum(q => q.Points)
             };
         }
 

@@ -11,5 +11,6 @@ namespace CodeQuizBackend.Quiz.Models.DTOs
         public required List<TestCase> TestCases { get; set; }
         public required int QuizId { get; set; }
         public required int Order { get; set; }
+        public required float Points { get; set; }
     }
 }

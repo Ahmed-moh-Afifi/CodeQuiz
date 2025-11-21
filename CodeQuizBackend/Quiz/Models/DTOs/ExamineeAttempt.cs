@@ -8,6 +8,17 @@
         public required int QuizId { get; set; }
         public required string ExamineeId { get; set; }
         public float? Grade { get; set; }
+        public float? GradePercentage
+        {
+            get
+            {
+                if (Grade == null || Quiz.TotalPoints == 0)
+                {
+                    return null;
+                }
+                return (Grade / Quiz.TotalPoints) * 100;
+            }
+        }
         public required ExamineeQuiz Quiz { get; set; }
         public required List<SolutionDTO> Solutions { get; set; }
 

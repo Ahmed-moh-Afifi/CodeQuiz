@@ -12,5 +12,10 @@
         public required QuestionConfiguration GlobalQuestionConfiguration { get; set; }
         public required bool AllowMultipleAttempts { get; set; }
         public required List<QuestionDTO> Questions { get; set; }
+        public int QustionsCount { get => Questions.Count; }
+        public required int AttemptsCount { get; set; }
+        public required int SubmittedAttemptsCount { get; set; }
+        public required float AverageAttemptScore { get; set; }
+        public required float TotalPoints { get; set; }
     }
 }
