@@ -9,6 +9,7 @@ namespace CodeQuizBackend.Quiz.Models.DTOs
         public QuestionConfiguration? QuestionConfiguration { get; set; }
         public required List<TestCase> TestCases { get; set; }
         public required int Order { get; set; }
+        public required float Points { get; set; }
 
         public Models.Question ToQuestion()
         {
@@ -20,7 +21,8 @@ namespace CodeQuizBackend.Quiz.Models.DTOs
                 QuestionConfiguration = QuestionConfiguration,
                 TestCases = TestCases,
                 QuizId = 0,
-                Order = Order
+                Order = Order,
+                Points = Points
             };
         }
 

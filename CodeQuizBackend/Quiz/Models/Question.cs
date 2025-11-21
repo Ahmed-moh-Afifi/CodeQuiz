@@ -12,6 +12,7 @@ namespace CodeQuizBackend.Quiz.Models
         public List<TestCase> TestCases { get; set; } = [];
         public required int QuizId { get; set; }
         public required int Order { get; set; }
+        public required float Points { get; set; }
 
         public virtual Quiz Quiz { get; set; } = null!;
 
@@ -25,7 +26,8 @@ namespace CodeQuizBackend.Quiz.Models
                 QuestionConfiguration = questionConfiguration,
                 TestCases = TestCases,
                 QuizId = QuizId,
-                Order = Order
+                Order = Order,
+                Points = Points
             };
         }
     }

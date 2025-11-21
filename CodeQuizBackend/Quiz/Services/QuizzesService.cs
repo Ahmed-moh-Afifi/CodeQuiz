@@ -1,6 +1,7 @@
 ﻿using CodeQuizBackend.Core.Data;
 using CodeQuizBackend.Core.Exceptions;
 using CodeQuizBackend.Core.Logging;
+using CodeQuizBackend.Quiz.Models;
 using CodeQuizBackend.Quiz.Models.DTOs;
 using CodeQuizBackend.Quiz.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,7 @@ namespace CodeQuizBackend.Quiz.Services
 
                 var createdQuiz = await quizzesRepository.CreateQuizAsync(quiz);
 
-                return createdQuiz.ToExaminerQuiz();
+                return createdQuiz.ToExaminerQuiz(0, 0, 0);
             }
             catch (Exception e)
             {
@@ -49,8 +50,19 @@ namespace CodeQuizBackend.Quiz.Services
 
         public async Task<List<ExaminerQuiz>> GetUserQuizzes(string userId)
         {
-            var quizzes = await quizzesRepository.GetUserQuizzesAsync(userId);
-            return quizzes.Select(q => q.ToExaminerQuiz()).ToList();
+            var quizzesStatistics  = await dbContext.Quizzes
+                .Where(q => q.ExaminerId == userId)
+                .Include(q => q.Questions)
+                .Select(q => new
+                {
+                    Quiz = q,
+                    AttemptsCount = q.Attempts.Count,
+                    SubmittedAttemptsCount = q.Attempts.Count(a => a.EndTime != null),
+                    AverageAttemptScore = q.Attempts.Where(a => a.Grade != null).Select(a => a.Grade).DefaultIfEmpty().Average() ?? 0
+                })
+                .ToListAsync();
+
+            return quizzesStatistics.Select(qs => qs.Quiz.ToExaminerQuiz(qs.AttemptsCount, qs.SubmittedAttemptsCount, qs.AverageAttemptScore)).ToList();
         }
 
         public async Task<ExaminerQuiz> UpdateQuiz(ExaminerQuiz quiz)
@@ -72,7 +84,8 @@ namespace CodeQuizBackend.Quiz.Services
                 ExaminerId = quiz.ExaminerId,
                 GlobalQuestionConfiguration = quiz.GlobalQuestionConfiguration,
                 AllowMultipleAttempts = quiz.AllowMultipleAttempts,
-                Questions = quiz.Questions.Select(q => new Models.Question
+                TotalPoints = quiz.TotalPoints,
+                Questions = quiz.Questions.Select(q => new Question
                 {
                     Id = q.Id,
                     Statement = q.Statement,
@@ -80,12 +93,19 @@ namespace CodeQuizBackend.Quiz.Services
                     QuestionConfiguration = q.QuestionConfiguration,
                     TestCases = q.TestCases,
                     QuizId = q.QuizId,
-                    Order = q.Order
+                    Order = q.Order,
+                    Points = q.Points
                 }).ToList()
             };
 
             var updatedQuiz = await quizzesRepository.UpdateQuizAsync(quizEntity);
-            return updatedQuiz.ToExaminerQuiz();
+            var statistics = await dbContext.Quizzes.Where(q => q.Id == updatedQuiz.Id).Select(q => new 
+            {
+                AttemptsCount = q.Attempts.Count,
+                SubmittedAttemptsCount = q.Attempts.Count(a => a.EndTime != null),
+                AverageAttemptScore = q.Attempts.Where(a => a.Grade != null).Select(a => a.Grade).DefaultIfEmpty().Average() ?? 0
+            }).FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found"); // This approach is going be changed after the demo :)
+            return updatedQuiz.ToExaminerQuiz(statistics.AttemptsCount, statistics.SubmittedAttemptsCount, statistics.AverageAttemptScore);
         }
     }
 }
