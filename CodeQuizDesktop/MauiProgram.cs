@@ -1,6 +1,4 @@
-﻿using CodeQuizDesktop.Viewmodels;
-using CodeQuizDesktop.Views;
-using CommunityToolkit.Maui;
+﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Services;
 using Microsoft.Extensions.Logging;
 using Sharpnado.MaterialFrame;
@@ -30,19 +28,6 @@ namespace CodeQuizDesktop
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif
-            builder.Services.AddScoped<AddQuestionDialog, AddQuestionDialogVM>();
-            builder.Services.AddScoped<QuizSettingsDialog, QuizSettingsDialogVM>();
-
-            builder.Services.AddScoped<LoginVM>();
-            builder.Services.AddScoped<RegisterVM>();
-            builder.Services.AddScoped<DashboardVM>();
-            builder.Services.AddScoped<CreatedQuizzesVM>();
-            builder.Services.AddScoped<JoinedQuizzesVM>();
-            builder.Services.AddScoped<CreateQuizVM>();
-            builder.Services.AddScoped<JoinQuizVM>();
-            builder.Services.AddScoped<ExaminerViewQuizVM>();
-
-            builder.Services.AddSingleton<IPopupService, PopupService>();
 
             return builder.Build();
         }
