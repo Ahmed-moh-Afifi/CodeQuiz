@@ -20,6 +20,6 @@ namespace CodeQuizDesktop.APIs
         public Task<Models.ApiResponse<bool>> IsUsernameAvailable(string username);
 
         [Put("/Users/{userId}")]
-        public Task<Models.ApiResponse<User>> UpdateUser(string userId, [Body] User updateUser);
+        public Task<Models.ApiResponse<User>> UpdateUser(string userId, [Body] User updatedUser);
     }
 }
