@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:rv="http://sharpnado.com"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="CodeQuizDesktop.Views.AddQuestionDialog"
+             BackgroundColor="Transparent"
+             Padding="0"
+             Margin="0"
+             CanBeDismissedByTappingOutsideOfPopup="False"
+             x:TypeArguments="x:String">
+
+    <!--Title="AddQuestionDialog"
+             BackgroundColor="#88000000"-->
+
+    
+    <Grid VerticalOptions="Center" HorizontalOptions="Center" >
+        <Border BackgroundColor="#222222" MaximumHeightRequest="900" WidthRequest="700" HeightRequest="900" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="0" VerticalOptions="Center" HorizontalOptions="Center">
+
+
+            <Grid RowDefinitions="Auto, *, Auto">
+                <Grid ColumnDefinitions="*, Auto">
+                    <Label Text="Add Question" FontSize="20" Margin="20" TextColor="White" VerticalOptions="Center" />
+
+                    <Border Grid.Column="1" WidthRequest="30" HeightRequest="30" HorizontalOptions="End" Margin="20" StrokeThickness="0" BackgroundColor="#f7fafc" StrokeShape="RoundRectangle 15">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer/>
+                        </Border.GestureRecognizers>
+                        <Label Text="✕" FontSize="18" TextColor="#222222" VerticalOptions="Center" HorizontalOptions="Center" />
+                    </Border>
+                </Grid>
+
+                <BoxView HeightRequest="1" Color="#e2e8f0" VerticalOptions="End" />
+                <ScrollView Grid.Row="1">
+
+                    <VerticalStackLayout Margin="20" Spacing="20">
+                        <Label Text="Question Statement" FontSize="18" TextColor="White"/>
+                        <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e">
+
+                            <Editor MinimumHeightRequest="60" MaximumHeightRequest="150" AutoSize="TextChanges" TextColor="White"/>
+
+                        </Border>
+                        <Label Text="Starter Code in Editor" FontSize="18" TextColor="White"/>
+                        <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" WidthRequest="655" HeightRequest="250">
+                            <WebView Source="file:///C:/Users/Passant/Downloads/monaco-editor-0.54.0/monaco-editor-0.54.0/package/min/editor.html"/>
+                        </Border>
+                        <Grid ColumnDefinitions="3*,*">
+                            <Label Text="Test Cases" TextColor="White" FontSize="18" VerticalOptions="Center"/>
+                            <Button Grid.Column="1" Text="Add Testcase" HorizontalOptions="End" VerticalOptions="Center" BackgroundColor="#591c21"/>
+                        </Grid>
+
+
+
+                        <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e" Padding="25,25">
+
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="15" >
+                                <HorizontalStackLayout Spacing="10" HorizontalOptions="End" VerticalOptions="Start">
+
+                                    <Border WidthRequest="30" HeightRequest="35" StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="White">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer/>
+                                        </Border.GestureRecognizers>
+                                        <Border.Shadow>
+                                            <Shadow Opacity="0" Radius="0"/>
+                                        </Border.Shadow>
+                                        <Image Source="trash.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                            <Image.Behaviors>
+                                                <toolkit:IconTintColorBehavior TintColor="White" />
+                                            </Image.Behaviors>
+                                        </Image>
+                                    </Border>
+
+                                </HorizontalStackLayout>
+                                <Label Text="Test Case 1" TextColor="White" FontSize="16" VerticalOptions="End"/>
+                                <Label Grid.Row="1" Text="Input" TextColor="White" FontSize="16"/>
+                                <Border Grid.Row="2" Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#222222">
+                                    <Editor MinimumHeightRequest="60" MaximumHeightRequest="150" AutoSize="TextChanges" TextColor="White" />
+                                </Border>
+                                <Label Grid.Row="3" Text="Output" TextColor="White" FontSize="16"/>
+                                <Border Grid.Row="4" Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#222222">
+                                    <Editor MinimumHeightRequest="60" MaximumHeightRequest="150" AutoSize="TextChanges" TextColor="White"/>
+                                </Border>
+                            </Grid>
+
+                        </Border>
+
+                        
+                        <Grid>
+                            <!--<CheckBox VerticalOptions="Center" Color="#591c21"/>-->
+                            <Label Text="Configure this question independently" FontSize="18" TextColor="White" VerticalOptions="Center"/>
+                            <Switch  Grid.Column="1" OnColor="#591c21" ThumbColor="White" HorizontalOptions="End" MinimumWidthRequest="0" WidthRequest="50" />
+                            <!--<Switch Grid.Column="1" OnColor="#591c21" ThumbColor="White" Background="red"/>-->
+                            
+                        </Grid>
+
+                        <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e" Padding="25,25">
+
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,*" RowSpacing="15" >
+                                <Label Grid.ColumnSpan="2" Text="Programming Language" TextColor="White" FontSize="16"/>
+                                <Border Grid.ColumnSpan="2" Grid.Row="1" Stroke="#3b3b3b" StrokeThickness="0.8" HeightRequest="45" StrokeShape="RoundRectangle 20" BackgroundColor="#222222">
+                                    <Picker TextColor="White" TitleColor="White" />
+                                </Border>
+                                <HorizontalStackLayout Grid.Column="0" Grid.Row="2">
+                                    <CheckBox VerticalOptions="Center" Color="#591c21"/>
+                                    <Label Text="Show Output" FontSize="16" TextColor="White" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Grid.Column="1" Grid.Row="2">
+                                    <CheckBox VerticalOptions="Center" Color="#591c21"/>
+                                    <Label Text="Show Errors" FontSize="16" TextColor="White" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Grid.Column="0" Grid.Row="3">
+                                    <CheckBox VerticalOptions="Center" Color="#591c21"/>
+                                    <Label Text="Allow IntelliSense" FontSize="16" TextColor="White" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Grid.Column="1" Grid.Row="3">
+                                    <CheckBox VerticalOptions="Center" Color="#591c21"/>
+                                    <Label Text="Allow Signature Help" FontSize="16" TextColor="White" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                
+                            </Grid>
+                        </Border>
+
+                    </VerticalStackLayout>
+
+                </ScrollView>
+                <!--<BoxView Grid.Row="2" HeightRequest="1" Color="#e2e8f0" VerticalOptions="Start" />-->
+                <Grid Grid.Row="2" Margin="20" ColumnDefinitions="*,*" ColumnSpacing="20">
+                    <Button Text="Cancel" FontSize="18" TextColor="White" VerticalOptions="Center" BackgroundColor="#591c21" Clicked="OnCloseButtonClicked"/>
+                    <Button Grid.Column="1" Text="Save" FontSize="18" TextColor="White" VerticalOptions="Center" BackgroundColor="#591c21" Clicked="OnAddButtonClicked"/>
+
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</toolkit:Popup>
