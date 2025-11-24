@@ -58,14 +58,14 @@
                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5">
                                 <Label Text="&quot;username&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
                                 <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
-                                    <Entry Placeholder="&quot;adalovelace&quot;" TextColor="#ce9178"/>
+                                    <Entry Placeholder="&quot;adalovelace&quot;" TextColor="#ce9178" Text="{Binding Username}"/>
                                 </Border>
                                 <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
                             </Grid>
                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5">
                                 <Label Text="&quot;password&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
                                 <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
-                                    <Entry Placeholder="&quot;***********&quot;" TextColor="#ce9178" IsPassword="True"/>
+                                    <Entry Placeholder="&quot;***********&quot;" TextColor="#ce9178" IsPassword="True" Text="{Binding Password}"/>
                                 </Border>
                                 <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
                             </Grid>

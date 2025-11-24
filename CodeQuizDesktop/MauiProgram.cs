@@ -1,8 +1,12 @@
-﻿using CodeQuizDesktop.Viewmodels;
+﻿using CodeQuizDesktop.APIs;
+using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
+using CodeQuizDesktop.Viewmodels;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Services;
 using Microsoft.Extensions.Logging;
+using Refit;
 using Sharpnado.MaterialFrame;
 
 namespace CodeQuizDesktop
@@ -28,7 +32,7 @@ namespace CodeQuizDesktop
 
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             builder.Services.AddScoped<AddQuestionDialog, AddQuestionDialogVM>();
@@ -42,8 +46,14 @@ namespace CodeQuizDesktop
             builder.Services.AddScoped<CreateQuizVM>();
             builder.Services.AddScoped<JoinQuizVM>();
             builder.Services.AddScoped<ExaminerViewQuizVM>();
+            builder.Services.AddScoped<StartupViewModel>();
 
             builder.Services.AddSingleton<IPopupService, PopupService>();
+
+            builder.Services.AddRefitClient<IAuthAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri("http://100.73.135.6:5062/api"));
+            builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
+            builder.Services.AddSingleton<IAuthenticationRepository, AuthenticationRepository>();
+            builder.Services.AddSingleton<ITokenService, TokenService>();
 
 
             return builder.Build();
