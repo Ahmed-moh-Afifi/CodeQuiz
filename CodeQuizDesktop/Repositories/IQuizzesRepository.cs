@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CodeQuizDesktop.Repositories
 {
-    public interface IQuizzesRepository
+    public interface IQuizzesRepository : ITwoTypesObservableRepository<ExaminerQuiz, ExamineeQuiz>
     {
         public Task<ExaminerQuiz> CreateQuiz(NewQuizModel newQuizModel);
         public Task<ExaminerQuiz> UpdateQuiz(ExaminerQuiz quiz);

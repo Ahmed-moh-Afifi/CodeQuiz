@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CodeQuizDesktop.Repositories
 {
-    public interface IAttemptsRepository
+    public interface IAttemptsRepository : IObservableRepository<ExamineeAttempt>
     {
         public Task<ExamineeAttempt> BeginAttempt(BeginAttemptRequest beginAttemptRequest);
         public Task<ExamineeAttempt> SubmitAttempt(int attemptId);

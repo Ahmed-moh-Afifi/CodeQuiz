@@ -8,13 +8,15 @@ using System.Threading.Tasks;
 
 namespace CodeQuizDesktop.Repositories
 {
-    public class AttemptsRepository(IAttemptsAPI attemptsAPI) : IAttemptsRepository
+    public class AttemptsRepository(IAttemptsAPI attemptsAPI) : BaseObservableRepository<ExamineeAttempt>, IAttemptsRepository
     {
         public async Task<ExamineeAttempt> BeginAttempt(BeginAttemptRequest beginAttemptRequest)
         {
             try
             {
-                return (await attemptsAPI.BeginAttempt(beginAttemptRequest)).Data!;
+                var attempt = (await attemptsAPI.BeginAttempt(beginAttemptRequest)).Data!;
+                NotifyCreate(attempt);
+                return attempt;
             }
             catch (Exception)
             {
@@ -40,7 +42,9 @@ namespace CodeQuizDesktop.Repositories
         {
             try
             {
-                return (await attemptsAPI.SubmitAttempt(attemptId)).Data!;
+                var attempt = (await attemptsAPI.SubmitAttempt(attemptId)).Data!;
+                NotifyUpdate(attempt);
+                return attempt;
             }
             catch (Exception)
             {

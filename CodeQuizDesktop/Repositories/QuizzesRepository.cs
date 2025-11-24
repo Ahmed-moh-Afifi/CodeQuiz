@@ -8,13 +8,15 @@ using System.Threading.Tasks;
 
 namespace CodeQuizDesktop.Repositories
 {
-    public class QuizzesRepository(IQuizzesAPI quizzesAPI) : IQuizzesRepository
+    public class QuizzesRepository(IQuizzesAPI quizzesAPI) : BaseTwoTypesObservableRepository<ExaminerQuiz, ExamineeQuiz>, IQuizzesRepository
     {
         public async Task<ExaminerQuiz> CreateQuiz(NewQuizModel newQuizModel)
         {
             try
             {
-                return (await quizzesAPI.CreateQuiz(newQuizModel)).Data!;
+                var quiz = (await quizzesAPI.CreateQuiz(newQuizModel)).Data!;
+                NotifyCreate(quiz!);
+                return quiz;
             }
             catch (Exception)
             {
@@ -28,6 +30,8 @@ namespace CodeQuizDesktop.Repositories
             try
             {
                 await quizzesAPI.DeleteQuiz(quizId);
+                NotifyDelete<ExaminerQuiz>(quizId);
+                NotifyDelete<ExamineeQuiz>(quizId);
             }
             catch (Exception)
             {
@@ -79,7 +83,15 @@ namespace CodeQuizDesktop.Repositories
         {
             try
             {
-                return (await quizzesAPI.UpdateQuiz(quiz.Id, quiz)).Data!; 
+                var qz = (await quizzesAPI.UpdateQuiz(quiz.Id, quiz)).Data!;
+                // Get ExamineeQuiz counterpart and notify update
+                var examineeQuiz = (await quizzesAPI.GetQuizByCode(qz.Code)).Data!;
+                if (examineeQuiz.Id == qz.Id)
+                {
+                    NotifyUpdate(examineeQuiz!);
+                }
+                NotifyUpdate(qz!);
+                return qz;
             }
             catch (Exception)
             {
