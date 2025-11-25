@@ -2,6 +2,8 @@
 using CommunityToolkit.Maui.Services;
 using Microsoft.Extensions.Logging;
 using Sharpnado.MaterialFrame;
+using CodeQuizDesktop.Services.Logging;
+using CodeQuizDesktop.Services.Exceptions;
 
 namespace CodeQuizDesktop
 {
@@ -23,13 +25,21 @@ namespace CodeQuizDesktop
                     fonts.AddFont("Inter-ExtraBold.otf", "InterExtraBold");
                     fonts.AddFont("Inter-Black.otf", "InterBlack");
                 });
-                
-                
+
+
+            builder.Services.AddSingleton(typeof(AppLogger<>));
+            builder.Services.AddSingleton<GlobalExceptionHandler>();
+
+
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
-            return builder.Build();
+            var app = builder.Build();
+
+            app.Services.GetService<GlobalExceptionHandler>();
+
+            return app;
         }
     }
 }
