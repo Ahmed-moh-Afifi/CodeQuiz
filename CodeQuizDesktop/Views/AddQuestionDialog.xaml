@@ -4,11 +4,13 @@
              xmlns:rv="http://sharpnado.com"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="CodeQuizDesktop.Views.AddQuestionDialog"
+             xmlns:local="clr-namespace:CodeQuizDesktop.Controls"
+             xmlns:models="clr-namespace:CodeQuizDesktop.Models"
              BackgroundColor="Transparent"
              Padding="0"
              Margin="0"
              CanBeDismissedByTappingOutsideOfPopup="False"
-             x:TypeArguments="x:String">
+             x:TypeArguments="models:NewQuestionModel">
 
     <!--Title="AddQuestionDialog"
              BackgroundColor="#88000000"-->
@@ -41,9 +43,7 @@
 
                         </Border>
                         <Label Text="Starter Code in Editor" FontSize="18" TextColor="White"/>
-                        <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" WidthRequest="655" HeightRequest="250">
-                            <WebView Source="file:///C:/Users/Passant/Downloads/monaco-editor-0.54.0/monaco-editor-0.54.0/package/min/editor.html"/>
-                        </Border>
+                        <local:CodeEditor/>
                         <Grid ColumnDefinitions="3*,*">
                             <Label Text="Test Cases" TextColor="White" FontSize="18" VerticalOptions="Center"/>
                             <Button Grid.Column="1" Text="Add Testcase" HorizontalOptions="End" VerticalOptions="Center" BackgroundColor="#591c21"/>

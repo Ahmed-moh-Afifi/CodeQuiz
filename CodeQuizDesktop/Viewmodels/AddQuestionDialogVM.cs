@@ -8,8 +8,5 @@ namespace CodeQuizDesktop.Viewmodels
 {
     public class AddQuestionDialogVM : BaseViewModel
     {
-        public AddQuestionDialogVM()
-        {
-        }
     }
 }

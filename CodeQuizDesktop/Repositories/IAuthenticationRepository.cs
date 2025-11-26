@@ -10,7 +10,7 @@ namespace CodeQuizDesktop.Repositories
 {
     public interface IAuthenticationRepository
     {
-        public User? LoggedInUser { get; }
+        public User? LoggedInUser { get; set; }
         
         public Task<LoginResult> Login(LoginModel loginModel);
         public Task<User> Register(RegisterModel registerModel);

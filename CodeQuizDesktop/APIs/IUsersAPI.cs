@@ -10,10 +10,10 @@ namespace CodeQuizDesktop.APIs
 {
     public interface IUsersAPI
     {
-        [Get("/Users/{userId}")]
-        public Task<Models.ApiResponse<User>> GetUser(string userId);
-
         [Get("/Users")]
+        public Task<Models.ApiResponse<User>> GetUser();
+
+        [Get("/Users/Search")]
         public Task<Models.ApiResponse<List<User>>> Search([Query] string query);
 
         [Get("/Users/Username/{username}/Available")]

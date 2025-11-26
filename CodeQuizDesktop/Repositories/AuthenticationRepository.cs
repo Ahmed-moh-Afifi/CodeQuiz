@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace CodeQuizDesktop.Repositories
 {
-    public class AuthenticationRepository(IAuthAPI authAPI, ITokenService tokenService) : IAuthenticationRepository
+    public class AuthenticationRepository(IAuthAPI authAPI, ITokenService tokenService, IUsersRepository usersRepository) : IAuthenticationRepository
     {
         private User? loggedInUser;
-        public User? LoggedInUser { get => loggedInUser; }
+        public User? LoggedInUser { get => loggedInUser; set => loggedInUser = value; }
 
         public async Task ForgotPassword(ForgetPasswordModel forgetPasswordModel)
         {

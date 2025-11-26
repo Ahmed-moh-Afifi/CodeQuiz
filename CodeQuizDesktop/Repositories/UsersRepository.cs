@@ -10,11 +10,11 @@ namespace CodeQuizDesktop.Repositories
 {
     public class UsersRepository(IUsersAPI usersAPI) : IUsersRepository
     {
-        public async Task<User> GetUser(string userId)
+        public async Task<User> GetUser()
         {
             try
             {
-                return (await usersAPI.GetUser(userId)).Data!;
+                return (await usersAPI.GetUser()).Data!;
             }
             catch (Exception)
             {

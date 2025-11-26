@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              x:Class="CodeQuizDesktop.Views.JoinQuiz"
+             xmlns:local="clr-namespace:CodeQuizDesktop.Controls"
              Title="JoinQuiz"
              BackgroundColor="#1e1e1e">
 
@@ -213,9 +214,7 @@
                             </HorizontalStackLayout>
                         </Grid>
 
-                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" Padding="0,20" HorizontalOptions="FillAndExpand">
-                            <WebView Source="file:///C:/Users/Passant/Downloads/monaco-editor-0.54.0/monaco-editor-0.54.0/package/min/editor.html" MinimumHeightRequest="400" MaximumHeightRequest="1000"/>
-                        </Border>
+                        <local:CodeEditor/>
                         <Grid ColumnDefinitions="*,*">
                             <Border BackgroundColor="#2e2e2e" Padding="20" StrokeThickness="0" HeightRequest="80">
                                 <Label Text="&gt;&gt;- Output" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>

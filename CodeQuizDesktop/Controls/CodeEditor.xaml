@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CodeQuizDesktop.Controls.CodeEditor">
+    
+    <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" WidthRequest="655" HeightRequest="250">
+        <WebView Source="file:///C:/Users/Ahmed/projects/CodeQuiz/CodeQuizDesktop/wwwroot/monaco/AllHelpersEditor/editor.html"/>
+    </Border>
+</ContentView>
