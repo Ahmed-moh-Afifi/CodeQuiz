@@ -13,6 +13,7 @@ namespace CodeQuizDesktop
 {
     public static class MauiProgram
     {
+
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
@@ -49,11 +50,16 @@ namespace CodeQuizDesktop
             builder.Services.AddScoped<StartupViewModel>();
 
             builder.Services.AddSingleton<IPopupService, PopupService>();
+            builder.Services.AddSingleton<ITokenService, TokenService>();
 
-            builder.Services.AddRefitClient<IAuthAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri("http://100.73.135.6:5062/api"));
+            var uri = "http://localhost:5062/api";
+
+            builder.Services.AddRefitClient<IAuthAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri));
+            builder.Services.AddRefitClient<IAttemptsAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>();
             builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
             builder.Services.AddSingleton<IAuthenticationRepository, AuthenticationRepository>();
-            builder.Services.AddSingleton<ITokenService, TokenService>();
+            builder.Services.AddSingleton<IAttemptsRepository, AttemptsRepository>();
+            builder.Services.AddTransient<AuthHandler>();
 
 
             return builder.Build();
