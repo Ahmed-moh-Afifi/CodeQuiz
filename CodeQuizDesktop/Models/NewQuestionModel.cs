@@ -6,13 +6,22 @@ using System.Threading.Tasks;
 
 namespace CodeQuizDesktop.Models
 {
-    public class NewQuestionModel
+    public class NewQuestionModel : BaseObservableModel
     {
+        private int order;
         public required string Statement { get; set; }
         public required string EditorCode { get; set; }
         public QuestionConfiguration? QuestionConfiguration { get; set; }
         public required List<TestCase> TestCases { get; set; }
-        public required int Order { get; set; }
+        public required int Order
+        {
+            get => order;
+            set
+            {
+                order = value;
+                OnPropertyChanged();
+            }
+        }
         public required float Points { get; set; }
     }
 }

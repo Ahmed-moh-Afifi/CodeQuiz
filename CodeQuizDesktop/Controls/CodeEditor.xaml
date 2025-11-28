@@ -4,6 +4,6 @@
              x:Class="CodeQuizDesktop.Controls.CodeEditor">
     
     <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" WidthRequest="655" HeightRequest="250">
-        <WebView Source="file:///C:/Users/Ahmed/projects/CodeQuiz/CodeQuizDesktop/wwwroot/monaco/AllHelpersEditor/editor.html"/>
+        <WebView Source="wwwroot/monaco/AllHelpersEditor/editor.html"/>
     </Border>
 </ContentView>

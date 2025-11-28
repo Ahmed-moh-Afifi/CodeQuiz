@@ -1,14 +1,25 @@
-﻿using System;
+﻿using CodeQuizDesktop.Viewmodels;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace CodeQuizDesktop.Models
 {
-    public class TestCase
+    public class TestCase : BaseObservableModel
     {
-        public required int TestCaseNumber { get; set; }
+        private int testCaseNumber;
+        public required int TestCaseNumber
+        {
+            get => testCaseNumber;
+            set
+            {
+                testCaseNumber = value;
+                OnPropertyChanged();
+            }
+        }
         public required List<string> Input { get; set; }
         public required string ExpectedOutput { get; set; }
         public string InputInOneString

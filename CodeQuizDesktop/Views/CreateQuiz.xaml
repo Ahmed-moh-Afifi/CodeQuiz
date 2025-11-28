@@ -5,6 +5,7 @@
              xmlns:rv="http://sharpnado.com"
              xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
              xmlns:models="clr-namespace:CodeQuizDesktop.Models"
+             xmlns:views="clr-namespace:CodeQuizDesktop.Views"
              x:Class="CodeQuizDesktop.Views.CreateQuiz"
              Title="CreateQuiz"
              BackgroundColor="#1e1e1e"
@@ -36,9 +37,9 @@
 
         <Grid Grid.Row="1" ColumnDefinitions="Auto, *" Padding="30" ColumnSpacing="20">
             <!--Quiz Configuration-->
-            <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e" Padding="20" Grid.Column="0">
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e" Grid.Column="0">
                 <ScrollView>
-                    <VerticalStackLayout Spacing="20">
+                    <VerticalStackLayout Spacing="20" Margin="20">
                         <!--Quiz Title Section-->
                         <VerticalStackLayout Spacing="5">
                             <Label Text="Quiz Configuration" FontSize="18" TextColor="White" Margin="10, 0"/>
@@ -169,26 +170,30 @@
             </Border>
 
             <!--Questions-->
-            <ScrollView Grid.Column="1">
-                <VerticalStackLayout Spacing="20">
-                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e" Padding="20">
-                        <Border.Shadow>
-                            <Shadow Radius="2.5" Opacity="0.5" />
-                        </Border.Shadow>
-                        <Grid ColumnDefinitions="3*,*">
-                            <Label Text="Questions Overview" TextColor="White" FontSize="20" VerticalOptions="Center"/>
-                            <Button Grid.Column="1" Text="Add Question" HorizontalOptions="End" VerticalOptions="Center" BackgroundColor="#591c21" Command="{Binding AddQuestionCommand}"/>
-                        </Grid>
-                    </Border>
-                    
-                    <!--Questions List-->
-                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e">
-                        <Border.Shadow>
-                            <Shadow Radius="2.5" Opacity="0.5" />
-                        </Border.Shadow>
+            <Grid RowSpacing="20" Grid.Column="1" RowDefinitions="Auto, *">
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e" Padding="20">
+                    <Border.Shadow>
+                        <Shadow Radius="2.5" Opacity="0.5" />
+                    </Border.Shadow>
+                    <Grid ColumnDefinitions="3*,*">
+                        <Label Text="Questions Overview" TextColor="White" FontSize="20" VerticalOptions="Center"/>
+                        <Button Grid.Column="1" Text="Add Question" HorizontalOptions="End" VerticalOptions="Center" BackgroundColor="#591c21" Command="{Binding AddQuestionCommand}"/>
+                    </Grid>
+                </Border>
+
+                <!--Questions List-->
+                <Border Grid.Row="1" StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e">
+                    <Border.Shadow>
+                        <Shadow Radius="2.5" Opacity="0.5" />
+                    </Border.Shadow>
+                    <ScrollView>
                         <Grid RowDefinitions="Auto,Auto" Padding="20" RowSpacing="25">
-                            <Label Text="Questions" TextColor="White" FontSize="20"/>
-                            <CollectionView Grid.Row="1" ItemsSource="{Binding QuestionModels}" SelectionMode="None">
+                            <CollectionView ItemsSource="{Binding QuestionModels}" SelectionMode="None">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout 
+                                        Orientation="Vertical"
+                                        ItemSpacing="10"/>
+                                </CollectionView.ItemsLayout>
                                 <CollectionView.EmptyView>
                                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e" Padding="40">
                                         <Label Text="No questions added yet" TextColor="#878787" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center"/>
@@ -202,27 +207,27 @@
                                             </Border.Shadow>
                                             <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="15" Padding="25,25">
                                                 <HorizontalStackLayout Spacing="10" HorizontalOptions="End" VerticalOptions="Start">
-                                                    <Border WidthRequest="30" HeightRequest="35" StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="White">
+                                                    <Border StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="White" Background="#1e1e1e" InputTransparent="False" HorizontalOptions="End">
                                                         <Border.GestureRecognizers>
-                                                            <TapGestureRecognizer/>
+                                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreateQuizVM}}, Path=DeleteQuestionCommand}" CommandParameter="{Binding .}"/>
                                                         </Border.GestureRecognizers>
                                                         <Border.Shadow>
                                                             <Shadow Opacity="0" Radius="0"/>
                                                         </Border.Shadow>
-                                                        <Image Source="pencil.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                                        <Image Source="pencil.png" WidthRequest="22" HeightRequest="22" InputTransparent="True" Margin="10">
                                                             <Image.Behaviors>
                                                                 <toolkit:IconTintColorBehavior TintColor="White" />
                                                             </Image.Behaviors>
                                                         </Image>
                                                     </Border>
-                                                    <Border WidthRequest="30" HeightRequest="35" StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="White">
+                                                    <Border StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="White" Background="#1e1e1e" InputTransparent="False" HorizontalOptions="End">
                                                         <Border.GestureRecognizers>
-                                                            <TapGestureRecognizer/>
+                                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreateQuizVM}}, Path=DeleteQuestionCommand}" CommandParameter="{Binding .}"/>
                                                         </Border.GestureRecognizers>
                                                         <Border.Shadow>
                                                             <Shadow Opacity="0" Radius="0"/>
                                                         </Border.Shadow>
-                                                        <Image Source="trash.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                                        <Image Source="trash.png" WidthRequest="22" HeightRequest="22" InputTransparent="True" Margin="10">
                                                             <Image.Behaviors>
                                                                 <toolkit:IconTintColorBehavior TintColor="White" />
                                                             </Image.Behaviors>
@@ -236,7 +241,7 @@
                                                 <Label Grid.Row="1" Text="{Binding Statement}" TextColor="White" FontSize="16" LineBreakMode="WordWrap"/>
                                                 <Label Grid.Row="2" Text="{Binding TestCases.Count, StringFormat='Test Cases: {0}'}" TextColor="#878787" FontSize="14"/>
                                                 <Border Grid.Row="3" StrokeThickness="0.8" Stroke="#3b3b3b" StrokeShape="RoundRectangle 10" BackgroundColor="#171717" Padding="15">
-                                                    <Label Text="{Binding EditorCode}" TextColor="#c8c8c8" FontSize="12" FontFamily="Consolas" LineBreakMode="WordWrap"/>
+                                                    <Label Text="{Binding EditorCode}" TextColor="#c8c8c8" FontSize="12" LineBreakMode="WordWrap"/>
                                                 </Border>
                                             </Grid>
                                         </Border>
@@ -244,9 +249,9 @@
                                 </CollectionView.ItemTemplate>
                             </CollectionView>
                         </Grid>
-                    </Border>
-                </VerticalStackLayout>
-            </ScrollView>
+                    </ScrollView>
+                </Border>
+            </Grid>
         </Grid>
     </Grid>
 </ContentPage>

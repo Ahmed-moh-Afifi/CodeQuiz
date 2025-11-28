@@ -5,6 +5,7 @@ using CommunityToolkit.Maui;
 using Microsoft.Maui.Controls.Shapes;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
 {
-    public class CreateQuizVM(IPopupService popupService, IAuthenticationRepository authenticationRepository, IQuizzesRepository quizzesRepository) : BaseViewModel
+    public class CreateQuizVM : BaseViewModel
     {
         // UI properties
         private string? quizTitle;
@@ -198,33 +199,33 @@ namespace CodeQuizDesktop.Viewmodels
 
         }
 
-        private List<NewQuestionModel> questionModels =
+        private ObservableCollection<NewQuestionModel> questionModels =
         [
-            new()
-            {
-                Order = 1,
-                Points = 10,
-                Statement = "Write a program that prints \"Testing...\" to the console",
-                EditorCode = "// Write your code here",
-                QuestionConfiguration = new()
-                {
-                    AllowExecution = true,
-                    Language = "CSharp",
-                    ShowError = true,
-                    ShowOutput = true
-                },
-                TestCases =
-                [
-                    new() 
-                    {
-                        Input = [""],
-                        ExpectedOutput = "Testing...\n",
-                        TestCaseNumber = 1
-                    }
-                ]
-            }
+            //new()
+            //{
+            //    Order = 1,
+            //    Points = 10,
+            //    Statement = "Write a program that prints \"Testing...\" to the console",
+            //    EditorCode = "// Write your code here",
+            //    QuestionConfiguration = new()
+            //    {
+            //        AllowExecution = true,
+            //        Language = "CSharp",
+            //        ShowError = true,
+            //        ShowOutput = true
+            //    },
+            //    TestCases =
+            //    [
+            //        new() 
+            //        {
+            //            Input = [""],
+            //            ExpectedOutput = "Testing...\n",
+            //            TestCaseNumber = 1
+            //        }
+            //    ]
+            //}
         ];
-        public List<NewQuestionModel> QuestionModels
+        public ObservableCollection<NewQuestionModel> QuestionModels
         {
             get
             {
@@ -283,19 +284,38 @@ namespace CodeQuizDesktop.Viewmodels
         }
 
         // Button Commands, mapped to viewmodel methods
-        public ICommand AddQuestionCommand { get => new Command(OpenAddQuestionDialog); }
-        public ICommand QuizSettingsCommand { get => new Command(OpenQuizSettingsDialog); }
+        public ICommand AddQuestionCommand { get => new Command(AddQuestion); }
         public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }
         public ICommand SaveCommand { get => new Command(CreateQuiz); }
+        public ICommand DeleteQuestionCommand { get => new Command<NewQuestionModel>(DeleteQuestion); }
+
+        private readonly IPopupService popupService;
+        private readonly IAuthenticationRepository authenticationRepository;
+        private readonly IQuizzesRepository quizzesRepository;
+
+        public CreateQuizVM(IPopupService popupService, IAuthenticationRepository authenticationRepository, IQuizzesRepository quizzesRepository)
+        {
+            this.popupService = popupService;
+            this.authenticationRepository = authenticationRepository;
+            this.quizzesRepository = quizzesRepository;
+
+            QuestionModels.CollectionChanged += (item, e) =>
+            {
+                for(int i = 0; i < QuestionModels.Count; i++)
+                {
+                    QuestionModels[i].Order = i + 1;
+                }
+            };
+        }
 
         private async void ReturnToPreviousPage()
         {
             await Shell.Current.GoToAsync("///MainPage");
         }
 
-        public async void OpenAddQuestionDialog()
+        public async void AddQuestion()
         {
-            var result = await popupService.ShowPopupAsync<AddQuestionDialog, string?>(Shell.Current, new PopupOptions
+            var result = await popupService.ShowPopupAsync<AddQuestionDialog, NewQuestionModel?>(Shell.Current, new PopupOptions
             {
                 Shape = new RoundRectangle
                 {
@@ -303,20 +323,22 @@ namespace CodeQuizDesktop.Viewmodels
                     StrokeThickness = 0
                 }
             });
-            await Application.Current!.MainPage!.DisplayPromptAsync("Result", $"You selected: {result}", "OK");
+
+            if (result.Result != null)
+            {
+                QuestionModels.Add(result.Result);
+            }
+            //await Application.Current!.MainPage!.DisplayPromptAsync("Result", $"You selected: {result}", "OK");
         }
 
-        public async void OpenQuizSettingsDialog()
+        public void DeleteQuestion(NewQuestionModel q)
         {
-            var result = await popupService.ShowPopupAsync<QuizSettingsDialog, string?>(Shell.Current, new PopupOptions
-            {
-                Shape = new RoundRectangle
-                {
-                    CornerRadius = new CornerRadius(20),
-                    StrokeThickness = 0
-                }
-            });
-            await Application.Current!.MainPage!.DisplayPromptAsync("Result", $"You selected: {result}", "OK");
+            QuestionModels.Remove(q);
+        }
+
+        public async void EditQuestion()
+        {
+
         }
 
         /// <summary>
@@ -391,7 +413,7 @@ namespace CodeQuizDesktop.Viewmodels
                     ShowError = ShowErrors,
                     ShowOutput = ShowOutput
                 },
-                Questions = QuestionModels
+                Questions = QuestionModels.ToList()
             };
 
             var quiz = await quizzesRepository.CreateQuiz(newQuizModel);

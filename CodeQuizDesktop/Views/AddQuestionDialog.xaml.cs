@@ -1,21 +1,24 @@
 using CommunityToolkit.Maui.Views;
 using CodeQuizDesktop.Viewmodels;
 using CodeQuizDesktop.Models;
+using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 namespace CodeQuizDesktop.Views;
 
 public partial class AddQuestionDialog : Popup<NewQuestionModel?>
 {
-    private string statement;
-    private string editorCode;
-    private string language;
-    private bool allowExecution;
-    private bool showOutput;
-    private bool showError;
-    private List<TestCase> testCases;
-    private float points;
+    private string? statement;
+    private string editorCode = "";
+    private string? language;
+    private bool allowExecution = false;
+    private bool showOutput = false;
+    private bool showError = false;
+    private ObservableCollection<TestCase> testCases = [];
+    private float points = 0;
+    private bool independentlyConfigured = false;
 
-    public string Statement
+    public string? Statement
     {
         get => statement;
         set
@@ -33,7 +36,7 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
             OnPropertyChanged();
         }
     }
-    public List<TestCase> TestCases
+    public ObservableCollection<TestCase> TestCases
     {
         get => testCases;
         set
@@ -54,7 +57,7 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
     }
 
     // Configuration
-    public string Language
+    public string? Language
     {
         get => language;
         set
@@ -91,35 +94,134 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
         }
     }
 
-    public AddQuestionDialog()
-	{
-		InitializeComponent();
-		BindingContext = this;
-	}
+    public bool IndependentlyConfigured
+    {
+        get
+        {
+            return independentlyConfigured;
+        }
+        set
+        {
+            independentlyConfigured = value;
+            OnPropertyChanged();
+        }
+    }
 
-	private async void OnAddButtonClicked(object sender, EventArgs e)
-	{
+    //Commands
+    public ICommand AddTestCaseCommand { get => new Command(AddTestCase); }
+    public ICommand DeleteTestCaseCommand { get => new Command<TestCase>(DeleteTestCase); }
+
+    public AddQuestionDialog()
+    {
+        InitializeComponent();
+        BindingContext = this;
+
+        TestCases.CollectionChanged += (item, e) =>
+        {
+            for (int i = 0; i < TestCases.Count; i++)
+            {
+                TestCases[i].TestCaseNumber = i + 1;
+            }
+        };
+    }
+
+    public void AddTestCase()
+    {
+        TestCases.Add(new TestCase() { TestCaseNumber = -1, Input = [], ExpectedOutput = ""});
+    }
+
+    public void DeleteTestCase(TestCase tc)
+    {
+        TestCases.Remove(tc);
+    }
+
+    /// <summary>
+    /// Validates the current user input and returns a list of error messages describing any detected issues.
+    /// </summary>
+    /// <remarks>Validation includes checking that the question statement is not empty, that a programming
+    /// language is selected when required, and that all test cases are valid. This method does not throw exceptions for
+    /// validation failures; all errors are reported in the returned list.</remarks>
+    /// <returns>A list of strings containing error messages for each validation failure. The list is empty if no errors are
+    /// found.</returns>
+    public List<string> ValidateUserInput()
+    {
+        List<string> errorMessages = [];
+        if (string.IsNullOrEmpty(Statement?.Trim()))
+        {
+            // Title required error
+            errorMessages.Add("Question statement cannot be empty");
+        }
+
+        if (IndependentlyConfigured && string.IsNullOrEmpty(Language?.Trim()))
+        {
+            // Programming language not selected error
+            errorMessages.Add("Programming language not selected");
+        }
+
+        errorMessages.AddRange(ValidateTestCases());
+
+        return errorMessages;
+    }
+
+    /// <summary>
+    /// Validates the collection of test cases to ensure that no two test cases have identical input sequences.
+    /// </summary>
+    /// <remarks>This method checks for duplicate input sequences among all test cases. Each error message
+    /// identifies the test case number with a duplicate input. Use this method to verify the integrity of test case
+    /// inputs before adding tests.</remarks>
+    /// <returns>A list of error messages describing any test cases that share the same input. The list is empty if all test
+    /// cases have unique inputs.</returns>
+    public List<string> ValidateTestCases()
+    {
+        List<string> errors = [];
+        foreach (var tc in TestCases)
+        {
+            var inputString = string.Join('\n', tc.Input);
+            int count = 0;
+            foreach (var tc2 in TestCases)
+            {
+                var inputString2 = string.Join('\n', tc2.Input);
+                if (inputString == inputString2)
+                    count++;
+            }
+
+            if (count > 1)
+                errors.Add($"Same input cannot be used in more than one testcase. Test number {tc.TestCaseNumber}");
+        }
+
+        return errors;
+    }
+
+    private async void OnAddButtonClicked(object sender, EventArgs e)
+    {
+        var errors = ValidateUserInput();
+        if (errors.Count > 0)
+        {
+            System.Diagnostics.Debug.WriteLine(string.Join('\n', errors));
+            return;
+        }
+
         var newQuestion = new NewQuestionModel
         {
-            Statement = Statement,
-            EditorCode = EditorCode,
-            TestCases = TestCases,
+            Statement = Statement!,
+            EditorCode = EditorCode!,
+            TestCases = TestCases.ToList(),
             Points = Points,
             Order = Order,
-            QuestionConfiguration = new QuestionConfiguration
+            QuestionConfiguration = IndependentlyConfigured ? new QuestionConfiguration
             {
-                Language = Language,
+                Language = Language!,
                 AllowExecution = AllowExecution,
                 ShowOutput = ShowOutput,
                 ShowError = ShowError
-            }
+            } : null
         };
 
         await CloseAsync(newQuestion);
     }
 
     private async void OnCloseButtonClicked(object sender, EventArgs e)
-	{
-		await CloseAsync(null);
+    {
+        await CloseAsync(null);
     }
 }
