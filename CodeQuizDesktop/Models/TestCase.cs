@@ -11,5 +11,6 @@ namespace CodeQuizDesktop.Models
         public required int TestCaseNumber { get; set; }
         public required List<string> Input { get; set; }
         public required string ExpectedOutput { get; set; }
+        public string InputInOneString { get => string.Join('\n', Input); }
     }
 }
