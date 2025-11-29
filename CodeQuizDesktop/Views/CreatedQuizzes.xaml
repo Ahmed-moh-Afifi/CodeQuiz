@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:CodeQuizDesktop.Models"
+             xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
              x:Class="CodeQuizDesktop.Views.CreatedQuizzes"
              xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui">
 
 
-    <Grid RowDefinitions="Auto, Auto" RowSpacing="30">
+    <Grid RowDefinitions="Auto, *" RowSpacing="30">
 
         <Border Grid.Row="0" StrokeThickness="0">
             <Grid>
@@ -22,7 +24,7 @@
         </Border>
 
 
-        <Grid Grid.Row="1" RowDefinitions="Auto,Auto">
+        <Grid Grid.Row="1" RowDefinitions="Auto,*">
 
             <Grid RowDefinitions="*,*" ColumnDefinitions="200,Auto,Auto,*" ColumnSpacing="10" RowSpacing="5" Grid.Row="0">
 
@@ -41,11 +43,11 @@
             </Grid>
 
             <!--TABLE-->
-            <Border StrokeShape="RoundRectangle 10" Background="#2e2e2e" StrokeThickness="0" Grid.Row="1" Margin="0,20,0,0">
+            <Border Grid.Row="1" StrokeShape="RoundRectangle 10" Background="#2e2e2e" StrokeThickness="0" Margin="0,20,0,0">
                 <Border.Shadow>
                     <Shadow Radius="2.5" Opacity="0.5" />
                 </Border.Shadow>
-                <Grid RowDefinitions="Auto, *,*,*,*">
+                <Grid RowDefinitions="Auto,*">
 
 
                     <Grid Grid.Row="0" ColumnDefinitions="1.5*, *, 1.5*, *, *, *, *, *, *" BackgroundColor="#212121" Padding="20, 10">
@@ -63,79 +65,93 @@
                     </Grid>
 
 
-                    <BoxView Grid.Row="1" HeightRequest="1" Color="#2a2a2a" Margin="0,0" VerticalOptions="Start"/>
-
-                    <Grid Grid.Row="1" ColumnDefinitions="1.5*, *, 1.5*, *, *, *, *, *, *" Padding="20">
-                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="10">
-                            <Label Text="Python Basics Final" TextColor="White" VerticalOptions="Center"/>
-                            <Border VerticalOptions="Center" HorizontalOptions="Start" Padding="10,5" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="#888888">
-                                <Label Text="EXAM-2025-PY" TextColor="White" />
-                            </Border>
-                        </VerticalStackLayout>
-                        <Border Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Start" Padding="10,5" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="#888888">
-                            <Label Text="ENDED" TextColor="White" />
-                        </Border>
-                        <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" Spacing="5">
-                            <Label Text="Start:" TextColor="#888888" />
-                            <Label Text="01/11/2025 - 09:00 AM" TextColor="White" />
-                            <Label Text="End:" TextColor="#888888"  />
-                            <Label Text="01/11/2025 - 10:00 AM" TextColor="White"  />
-
-                        </VerticalStackLayout>
-
-                        <Label Text="90 min" TextColor="White" Grid.Column="3" VerticalOptions="Center"/>
-                        <Label Text="6" TextColor="White" Grid.Column="4" VerticalOptions="Center"/>
-                        <Label Text="45" TextColor="White" Grid.Column="5" VerticalOptions="Center"/>
-                        <Label Text="32/45" TextColor="White" Grid.Column="6" VerticalOptions="Center"/>
-                        <Label Text="78%" TextColor="White" Grid.Column="7" VerticalOptions="Center"/>
-                        <Grid Grid.Column="8">
-                            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
-                                <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" >
-                                    <Border.GestureRecognizers>
-                                        <!--<TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:AppointmentsViewModel}}, Path=TestCommand}"/>-->
-                                        <!--ViewQuizCommand-->
-                                    </Border.GestureRecognizers>
-                                    <Border.Shadow>
-                                        <Shadow Opacity="0" Radius="0"/>
-                                    </Border.Shadow>
-                                    <Image Source="eye.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
-                                        <Image.Behaviors>
-                                            <toolkit:IconTintColorBehavior TintColor="White" />
-                                        </Image.Behaviors>
-                                    </Image>
-                                </Border>
-                                <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" >
-                                    <Border.GestureRecognizers>
-                                        <!--<TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:AppointmentsViewModel}}, Path=TestCommand}"/>-->
-                                    </Border.GestureRecognizers>
-                                    <Border.Shadow>
-                                        <Shadow Opacity="0" Radius="0"/>
-                                    </Border.Shadow>
-                                    <Image Source="pencil.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
-                                        <Image.Behaviors>
-                                            <toolkit:IconTintColorBehavior TintColor="White" />
-                                        </Image.Behaviors>
-                                    </Image>
-                                </Border>
-                                <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" HorizontalOptions="End">
-                                    <Border.GestureRecognizers>
-                                        <!--<TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:AppointmentsViewModel}}, Path=TestCommand}"/>-->
-                                    </Border.GestureRecognizers>
-                                    <Border.Shadow>
-                                        <Shadow Opacity="0" Radius="0"/>
-                                    </Border.Shadow>
-                                    <Image Source="trash.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
-                                        <Image.Behaviors>
-                                            <toolkit:IconTintColorBehavior TintColor="White" />
-                                        </Image.Behaviors>
-                                    </Image>
-                                </Border>
-                            </HorizontalStackLayout>
-
-                        </Grid>
-                    </Grid>
+                    <CollectionView Grid.Row="1" ItemsSource="{Binding AllExaminerQuizzes}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:ExaminerQuiz">
 
 
+
+                                <Grid ColumnDefinitions="1.5*, *, 1.5*, *, *, *, *, *, *" Padding="20">
+                                    <BoxView Grid.ColumnSpan="9" HeightRequest="1" Color="#2a2a2a" Margin="0,0" VerticalOptions="Start"/>
+                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="10">
+                                        <Label Text="{Binding Title}" TextColor="White" VerticalOptions="Center"/>
+                                        <Border VerticalOptions="Center" HorizontalOptions="Start" Padding="10,5" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="#888888">
+                                            <Label Text="{Binding Code}" TextColor="White" />
+                                        </Border>
+                                    </VerticalStackLayout>
+                                    <Border Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Start" Padding="10,5" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="#888888">
+                                        <Label Text="{Binding Status}" TextColor="White" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" Spacing="5">
+                                        <Label Text="Start:" TextColor="#888888" />
+                                        <Label Text="{Binding StartDateString}" TextColor="White" />
+                                        <Label Text="End:" TextColor="#888888"  />
+                                        <Label Text="{Binding EndDateString}" TextColor="White"  />
+
+                                    </VerticalStackLayout>
+
+                                    <Label Text="{Binding DurationString}" TextColor="White" Grid.Column="3" VerticalOptions="Center"/>
+                                    <Label Text="{Binding QustionsCount}" TextColor="White" Grid.Column="4" VerticalOptions="Center"/>
+                                    <Label Text="{Binding AttemptsCount}" TextColor="White" Grid.Column="5" VerticalOptions="Center"/>
+                                    <Label TextColor="White" Grid.Column="6" VerticalOptions="Center">
+                                        <Label.Text>
+                                            <MultiBinding StringFormat="{}{0}/{1}">
+                                                <Binding Path="SubmittedAttemptsCount" />
+                                                <Binding Path="AttemptsCount" />
+                                            </MultiBinding>
+                                        </Label.Text>
+                                    </Label>
+                                    <Label Text="{Binding AverageAttemptScore}" TextColor="White" Grid.Column="7" VerticalOptions="Center"/>
+                                    <Grid Grid.Column="8">
+                                        <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                                            <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" >
+                                                <Border.GestureRecognizers>
+                                                    <!--<TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:AppointmentsViewModel}}, Path=TestCommand}"/>-->
+                                                    <!--ViewQuizCommand-->
+                                                </Border.GestureRecognizers>
+                                                <Border.Shadow>
+                                                    <Shadow Opacity="0" Radius="0"/>
+                                                </Border.Shadow>
+                                                <Image Source="eye.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                                    <Image.Behaviors>
+                                                        <toolkit:IconTintColorBehavior TintColor="White" />
+                                                    </Image.Behaviors>
+                                                </Image>
+                                            </Border>
+                                            <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" >
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:CreatedQuizzesVM}}, Path=EditQuizCommand}" CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
+                                                <Border.Shadow>
+                                                    <Shadow Opacity="0" Radius="0"/>
+                                                </Border.Shadow>
+                                                <Image Source="pencil.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                                    <Image.Behaviors>
+                                                        <toolkit:IconTintColorBehavior TintColor="White" />
+                                                    </Image.Behaviors>
+                                                </Image>
+                                            </Border>
+                                            <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" HorizontalOptions="End">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:CreatedQuizzesVM}}, Path=DeleteQuizCommand}" CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
+                                                <Border.Shadow>
+                                                    <Shadow Opacity="0" Radius="0"/>
+                                                </Border.Shadow>
+                                                <Image Source="trash.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                                    <Image.Behaviors>
+                                                        <toolkit:IconTintColorBehavior TintColor="White" />
+                                                    </Image.Behaviors>
+                                                </Image>
+                                            </Border>
+                                        </HorizontalStackLayout>
+
+                                    </Grid>
+                                </Grid>
+
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
 
                 </Grid>
             </Border>
