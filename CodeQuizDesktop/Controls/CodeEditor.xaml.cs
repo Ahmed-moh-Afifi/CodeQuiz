@@ -29,7 +29,7 @@ public partial class CodeEditor : ContentView
     public string Language
     {
         get => (string)GetValue(LanguageProperty);
-        set => SetValue(LanguageProperty, value);
+        set => SetValue(LanguageProperty, value.ToLower());
     }
 
     /// <summary>

@@ -34,6 +34,7 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 selectedQuestion = value;
                 HasTestCases = SelectedQuestion!.TestCases.Count != 0;
+                CodeInEditor = Attempt!.Solutions[value!.Order - 1].Code;
 
                 OnPropertyChanged();
             }
@@ -51,7 +52,7 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        private string codeInEditor = "Console.WriteLine(\"Testing...\");";
+        private string codeInEditor = "";
         public string CodeInEditor
         {
             get => codeInEditor;

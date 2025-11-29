@@ -3,8 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              xmlns:models="clr-namespace:CodeQuizDesktop.Models"
+             xmlns:controls="clr-namespace:CodeQuizDesktop.Controls"
+             xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
              x:Class="CodeQuizDesktop.Views.JoinQuiz"
              Title="JoinQuiz"
+             x:DataType="vm:JoinQuizVM"
              BackgroundColor="#1e1e1e">
 
     <!--#171717
@@ -98,7 +101,7 @@
 
 
                         <BindableLayout.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="models:Question">
                                 <Border StrokeShape="RoundRectangle 5" BackgroundColor="#2e2e2e" Padding="14,10" Stroke="White" StrokeThickness="0.8" Margin="2">
                                     <Label Text="{Binding Order}" TextColor="White" FontSize="18" />
                                 </Border>
@@ -197,66 +200,13 @@
 
                         </VerticalStackLayout>
 
-
-                        <Grid ColumnDefinitions="*,*" BackgroundColor="#2e2e2e" Padding="20">
-                            <Label Text="&lt; &gt;  Solution" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
-                            <HorizontalStackLayout Grid.Column="2" HorizontalOptions="End" VerticalOptions="Center" Spacing="10" >
-                                <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#591c21" Padding="14,10">
-                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5">
-                                        <Border  WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
-                                            <Image Source="refresh.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
-                                                <Image.Behaviors>
-                                                    <toolkit:IconTintColorBehavior TintColor="White" />
-                                                </Image.Behaviors>
-                                            </Image>
-                                        </Border>
-                                        <Label Grid.Column="1" Text="Reset" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
-                                    </Grid>
-                                </Border>
-
-                                <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#591c21" Padding="14,10" IsVisible="{Binding SelectedQuestion.QuestionConfiguration.AllowExecution}">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding RunCommand}"/>
-                                    </Border.GestureRecognizers>
-                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5">
-                                        <Border  WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
-                                            <Image Source="player_play.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
-                                                <Image.Behaviors>
-                                                    <toolkit:IconTintColorBehavior TintColor="White" />
-                                                </Image.Behaviors>
-                                            </Image>
-                                        </Border>
-                                        <Label Grid.Column="1" Text="Run" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
-                                    </Grid>
-                                </Border>
-                            </HorizontalStackLayout>
-                        </Grid>
-
-                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" Padding="0,20" HorizontalOptions="FillAndExpand">
-                            <WebView Source="file:///C:/Users/Passant/Downloads/monaco-editor-0.54.0/monaco-editor-0.54.0/package/min/editor.html" MinimumHeightRequest="400" MaximumHeightRequest="1000"/>
-                        </Border>
-                        <VerticalStackLayout IsVisible="{Binding SelectedQuestion.QuestionConfiguration.AllowExecution}">
-                            <Grid ColumnDefinitions="*,*">
-                                <Border BackgroundColor="#2e2e2e" Padding="20" StrokeThickness="0" HeightRequest="80">
-                                    <Label Text="&gt;&gt;- Output" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
-                                </Border>
-                                <BoxView WidthRequest="1" Color="#3b3b3b" Margin="0,0" HorizontalOptions="End" />
-                                <Border Grid.Column="1" BackgroundColor="#2e2e2e" Padding="20" StrokeThickness="0" HeightRequest="80">
-                                    <Label Text="&lt;&lt;- Input" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
-                                </Border>
-                            </Grid>
-
-                            <Grid ColumnDefinitions="*,*">
-                                <Border StrokeThickness="0" MinimumHeightRequest="90" Padding="30,20">
-                                    <Label Text="{Binding Output}" TextColor="White"/>
-                                </Border>
-                                <BoxView WidthRequest="1" Color="#3b3b3b" Margin="0,0" HorizontalOptions="End" />
-                                <Border Grid.Column="1" StrokeThickness="0" MinimumHeightRequest="90" Padding="30,20">
-                                    <Label Text="{Binding Input}" TextColor="White"/>
-                                </Border>
-                            </Grid>
-                        </VerticalStackLayout>
-
+                        <controls:CodeEditor 
+                            ShowError="{Binding SelectedQuestion.QuestionConfiguration.ShowError}"
+                            ShowOutput="{Binding SelectedQuestion.QuestionConfiguration.ShowOutput}"
+                            AllowExecution="{Binding SelectedQuestion.QuestionConfiguration.AllowExecution}" 
+                            Code="{Binding CodeInEditor}"
+                            HeightRequest="800"/>
+                            <!--Language="{Binding SelectedQuestion.QuestionConfiguration.Language}"--> 
                     </VerticalStackLayout>
                 </ScrollView>
             </Grid>
