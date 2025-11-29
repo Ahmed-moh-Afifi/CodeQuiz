@@ -58,11 +58,14 @@ namespace CodeQuizDesktop
             builder.Services.AddRefitClient<IAttemptsAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>();
             builder.Services.AddRefitClient<IQuizzesAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>();
             builder.Services.AddRefitClient<IUsersAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>();
+            builder.Services.AddRefitClient<IExecutionAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>();
+
             builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
             builder.Services.AddSingleton<IAuthenticationRepository, AuthenticationRepository>();
             builder.Services.AddSingleton<IAttemptsRepository, AttemptsRepository>();
             builder.Services.AddSingleton<IQuizzesRepository, QuizzesRepository>();
             builder.Services.AddSingleton<IUsersRepository, UsersRepository>();
+            builder.Services.AddSingleton<IExecutionRepository, ExecutionRepository>();
             builder.Services.AddTransient<AuthHandler>();
 
 
