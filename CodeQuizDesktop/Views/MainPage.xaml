@@ -43,9 +43,29 @@
 
 
                     <Grid Background="#1e1e1e" Padding="20,15" >
-                        <Label  Text="Ahmed" TextColor="White" FontSize="16" HorizontalOptions="Center"/>
+                        <Label TextColor="White" FontSize="16" HorizontalOptions="Center">
+                            <Label.Text>
+                                <MultiBinding StringFormat="{}{0} {1}">
+                                    <Binding Path="User.FirstName" />
+                                    <Binding Path="User.LastName" />
+                                </MultiBinding>
+                            </Label.Text>
+                        </Label>
                     </Grid>
 
+                    <Border StrokeThickness="0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding LogoutCommand}"/>
+                        </Border.GestureRecognizers>
+                        <HorizontalStackLayout HorizontalOptions="Center">
+                            <Image Source="logout.png" WidthRequest="22" HeightRequest="22" InputTransparent="True" Margin="10" VerticalOptions="Center">
+                                <Image.Behaviors>
+                                    <toolkit:IconTintColorBehavior TintColor="White" />
+                                </Image.Behaviors>
+                            </Image>
+                            <Label Text="Logout" HorizontalTextAlignment="Center" TextColor="White" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                    </Border>
                 </VerticalStackLayout>
             </Border>
         </Grid>

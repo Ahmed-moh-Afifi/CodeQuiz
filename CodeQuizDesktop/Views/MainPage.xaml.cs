@@ -1,26 +1,27 @@
-﻿using CodeQuizDesktop.Repositories;
+﻿using CodeQuizDesktop.Models;
+using CodeQuizDesktop.Repositories;
 using CodeQuizDesktop.Viewmodels;
+using System.Windows.Input;
 
 namespace CodeQuizDesktop
 {
     public partial class MainPage : ContentPage
     {
-        private string userFirstName;
-
-        public string UserFirstName
-        {
-            get { return userFirstName; }
-            set 
-            { 
-                userFirstName = value;
-                OnPropertyChanged();
-            }
-        }
-
-
+        private readonly IAuthenticationRepository authenticationRepository;
+        private User user;
         private bool dashboardSelected = true;
         private bool createdSelected = false;
         private bool joinedSelected = false;
+
+        public User User
+        {
+            get { return user; }
+            set 
+            {
+                user = value;
+                OnPropertyChanged();
+            }
+        }
 
         public bool DashboardSelected
         {
@@ -36,6 +37,7 @@ namespace CodeQuizDesktop
                 }
             }
         }
+
         public bool CreatedSelected
         {
             get { return createdSelected; }
@@ -50,6 +52,7 @@ namespace CodeQuizDesktop
                 }
             }
         }
+
         public bool JoinedSelected
         {
             get { return joinedSelected; }
@@ -65,20 +68,23 @@ namespace CodeQuizDesktop
             }
         }
 
+        public ICommand LogoutCommand { get => new Command(Logout); }
 
-
-
-        public MainPage(DashboardVM dashboardVM, CreatedQuizzesVM createdQuizzesVM, JoinedQuizzesVM joinedQuizzesVM, IUsersRepository usersRepository)
+        public MainPage(DashboardVM dashboardVM, CreatedQuizzesVM createdQuizzesVM, JoinedQuizzesVM joinedQuizzesVM, IUsersRepository usersRepository, IAuthenticationRepository authenticationRepository)
         {
             InitializeComponent();
             BindingContext = this;
             Dashboard.BindingContext = dashboardVM;
             CreatedQuizzes.BindingContext = createdQuizzesVM;
             JoinedQuizzes.BindingContext = joinedQuizzesVM;
-
+            this.authenticationRepository = authenticationRepository;
+            User = authenticationRepository.LoggedInUser!;
         }
 
-
+        public async void Logout()
+        {
+            await authenticationRepository.Logout();
+            await Shell.Current.GoToAsync("///LoginPage");
+        }
     }
-
 }
