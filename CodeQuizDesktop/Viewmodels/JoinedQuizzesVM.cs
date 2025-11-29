@@ -1,6 +1,7 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
 using CommunityToolkit.Maui.Core.Extensions;
+using Microsoft.Maui.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,20 +21,26 @@ namespace CodeQuizDesktop.Viewmodels
         public ObservableCollection<ExamineeAttempt> AllExamineeAttempts
         {
             get { return allExamineeAttempts; }
-            set 
-            { 
+            set
+            {
                 allExamineeAttempts = value;
                 OnPropertyChanged();
             }
         }
 
-
         public string QuizCode { get; set; } = "";
         public ICommand JoinQuizCommand { get => new Command(JoinQuiz); }
 
-        private async void OpenJoinQuizPage()
+        public ICommand ContinueAttemptCommand { get => new Command<ExamineeAttempt>(OnContinueAttempt); }
+
+
+        private async void OnContinueAttempt(ExamineeAttempt examineeAttempt)
         {
-            await Shell.Current.GoToAsync("///JoinQuizPage");
+            System.Diagnostics.Debug.WriteLine($"Clicked: {examineeAttempt.Quiz.Code}");
+            var beginAttemptResponse = new BeginAttemptRequest() { QuizCode = examineeAttempt.Quiz.Code };
+            var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
+            await Shell.Current.GoToAsync($"///JoinQuizPage", new Dictionary<string, object> { { "attempt", response! } });
+
         }
 
         private async void JoinQuiz()
@@ -43,7 +50,7 @@ namespace CodeQuizDesktop.Viewmodels
 
             var beginAttemptResponse = new BeginAttemptRequest() { QuizCode = this.QuizCode };
             var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
-            await Shell.Current.GoToAsync($"///JoinQuizPage", new Dictionary<string, object>{{"attempt", response! }});
+            await Shell.Current.GoToAsync($"///JoinQuizPage", new Dictionary<string, object> { { "attempt", response! } });
 
         }
 
@@ -51,7 +58,6 @@ namespace CodeQuizDesktop.Viewmodels
         {
             var response = await _attemptsRepository.GetUserAttempts();
             AllExamineeAttempts = response.ToObservableCollection();
-            System.Diagnostics.Debug.WriteLine(response.Count);
 
         }
 
@@ -59,6 +65,21 @@ namespace CodeQuizDesktop.Viewmodels
         {
             _attemptsRepository = attemptsRepository;
             Intialize();
+            _attemptsRepository.SubscribeCreate(a =>
+            {
+                if (AllExamineeAttempts.FirstOrDefault(at => at.Id == a.Id) == null)
+                    AllExamineeAttempts.Add(a);
+            });
+            _attemptsRepository.SubscribeUpdate(a =>
+            {
+                var element = AllExamineeAttempts.First(at => at.Id == a.Id);
+                var idx = AllExamineeAttempts.IndexOf(element);
+                AllExamineeAttempts.Remove(element);
+                AllExamineeAttempts.Insert(idx, a);
+            });
+
+
+
         }
 
     }

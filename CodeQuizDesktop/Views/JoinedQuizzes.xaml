@@ -62,18 +62,18 @@
                 <Grid RowDefinitions="Auto,*">
 
 
-                    <Grid Grid.Row="0" ColumnDefinitions="1.75*, *, 1.5*, *, *, *, 1.5*, *, *" BackgroundColor="#212121" Padding="20, 10">
+                    <Grid Grid.Row="0" ColumnDefinitions="1.75*, *, *, *, *, 1.5*, *, *" BackgroundColor="#212121" Padding="20, 10">
 
 
                         <Label Text="QUIZ TITLE" Grid.Column="0" TextColor="#888888" VerticalOptions="Center"/>
                         <Label Text="STATUS" Grid.Column="1" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="SCHEDULE" Grid.Column="2" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="DURATION" Grid.Column="3" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="QUESTIONS" Grid.Column="4" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="CREATOR" Grid.Column="5" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="SUBMITTED" Grid.Column="6" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="SCORE" Grid.Column="7" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="ACTIONS" Grid.Column="8" TextColor="#888888" VerticalOptions="Center"/>
+                        
+                        <Label Text="DURATION" Grid.Column="2" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="QUESTIONS" Grid.Column="3" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="CREATOR" Grid.Column="4" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="SUBMITTED" Grid.Column="5" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="SCORE" Grid.Column="6" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="ACTIONS" Grid.Column="7" TextColor="#888888" VerticalOptions="Center"/>
                     </Grid>
 
 
@@ -81,7 +81,7 @@
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:ExamineeAttempt">
 
-                                <Grid ColumnDefinitions="1.75*, *, 1.5*, *, *, *, 1.5*, *, *" Padding="20">
+                                <Grid ColumnDefinitions="1.75*, *, *, *, *, 1.5*, *, *" Padding="20">
                                     <BoxView Grid.ColumnSpan="9" HeightRequest="1" Color="#2a2a2a" Margin="0,0" VerticalOptions="Start"/>
                                     <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="10">
                                         <Label Text="{Binding Quiz.Title}" TextColor="White" VerticalOptions="Center"/>
@@ -90,28 +90,22 @@
                                         </Border>
                                     </VerticalStackLayout>
                                     <Border Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Start" Padding="10,5" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="#888888">
-                                        <Label Text="COMPLETED" TextColor="White" />
+                                        <Label Text="{Binding Status}" TextColor="White" />
                                     </Border>
-                                    <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" Spacing="5">
-                                        <Label Text="Start:" TextColor="#888888" />
-                                        <Label Text="01/11/2025 - 09:00 AM" TextColor="White" />
-                                        <Label Text="End:" TextColor="#888888"  />
-                                        <Label Text="01/11/2025 - 10:00 AM" TextColor="White"  />
 
-                                    </VerticalStackLayout>
 
-                                    <Label Text="{Binding Quiz.Duration.TotalMinutes, StringFormat='{0} min'}" TextColor="White" Grid.Column="3" VerticalOptions="Center"/>
-                                    <Label Text="{Binding Quiz.QustionsCount}" TextColor="White" Grid.Column="4" VerticalOptions="Center"/>
-                                    <Label Text="{Binding Quiz.Examiner.FullName}" TextColor="White" Grid.Column="5" VerticalOptions="Center"/>
-                                    <Label Text="01/11/2025 - 10:00 AM" TextColor="White" Grid.Column="6" VerticalOptions="Center"/>
-                                    <VerticalStackLayout Grid.Column="7" Spacing="10" VerticalOptions="Center" HorizontalOptions="Start">
+                                    <Label Text="{Binding DurationString}" TextColor="White" Grid.Column="2" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Quiz.QustionsCount}" TextColor="White" Grid.Column="3" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Quiz.Examiner.FullName}" TextColor="White" Grid.Column="4" VerticalOptions="Center"/>
+                                    <Label Text="{Binding SubmissionTimeString}" TextColor="White" Grid.Column="5" VerticalOptions="Center"/>
+                                    <VerticalStackLayout Grid.Column="6" Spacing="10" VerticalOptions="Center" HorizontalOptions="Start">
                                         <Label Text="{Binding GradePercentage, StringFormat=Empty'{0}%'}" TextColor="White"/>
-                                        <ProgressBar Progress="0.3" ProgressColor="#591c21"  />
+                                        <ProgressBar Progress="{Binding GradePercentageOverHundred}" ProgressColor="#591c21"  />
                                     </VerticalStackLayout>
 
-                                    <Grid Grid.Column="8">
+                                    <Grid Grid.Column="7">
                                         <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
-                                            <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" >
+                                            <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" IsVisible="{Binding IsCompleted}">
                                                 <Border.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:JoinedQuizzesVM}}, Path=TestCommand}"/>
                                                 </Border.GestureRecognizers>
@@ -124,9 +118,9 @@
                                                     </Image.Behaviors>
                                                 </Image>
                                             </Border>
-                                            <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" >
+                                            <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" IsVisible="{Binding IsRunning}">
                                                 <Border.GestureRecognizers>
-                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:JoinedQuizzesVM}}, Path=TestCommand}"/>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:JoinedQuizzesVM}}, Path=ContinueAttemptCommand}" CommandParameter="{Binding .}"/>
                                                 </Border.GestureRecognizers>
                                                 <Border.Shadow>
                                                     <Shadow Opacity="0" Radius="0"/>
