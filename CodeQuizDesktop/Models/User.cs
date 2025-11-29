@@ -19,5 +19,10 @@ namespace CodeQuizDesktop.Models
         {
             get { return $"{FirstName} {LastName}"; }
         }
+        public char FirstCharInName
+        {
+            get { return FirstName[0]; }
+        }
+
     }
 }

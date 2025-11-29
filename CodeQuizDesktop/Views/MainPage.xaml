@@ -37,19 +37,13 @@
                                 </LinearGradientBrush>
                             </Border.Background>
 
-                            <Label Text="A" FontSize="36" VerticalOptions="Center" HorizontalOptions="Center" TextColor="White" FontAttributes="Bold"/>
+                            <Label Text="{Binding User.FirstCharInName}" FontSize="36" VerticalOptions="Center" HorizontalOptions="Center" TextColor="White" FontAttributes="Bold"/>
                         </Border>
                     </Grid>
 
 
                     <Grid Background="#1e1e1e" Padding="20,15" >
-                        <Label TextColor="White" FontSize="16" HorizontalOptions="Center">
-                            <Label.Text>
-                                <MultiBinding StringFormat="{}{0} {1}">
-                                    <Binding Path="User.FirstName" />
-                                    <Binding Path="User.LastName" />
-                                </MultiBinding>
-                            </Label.Text>
+                        <Label Text="{Binding User.FullName}" TextColor="White" FontSize="16" HorizontalOptions="Center">
                         </Label>
                     </Grid>
 
