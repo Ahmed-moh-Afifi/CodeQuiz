@@ -1,45 +1,43 @@
 ﻿using CommunityToolkit.Maui;
-using CommunityToolkit.Maui.Services;
 using Microsoft.Extensions.Logging;
 using Sharpnado.MaterialFrame;
 using CodeQuizDesktop.Services.Logging;
 using CodeQuizDesktop.Services.Exceptions;
+using CodeQuizDesktop.Services.UI;
 
-namespace CodeQuizDesktop
+namespace CodeQuizDesktop;
+
+public static class MauiProgram
 {
-    public static class MauiProgram
+    public static MauiApp CreateMauiApp()
     {
-        public static MauiApp CreateMauiApp()
-        {
-            var builder = MauiApp.CreateBuilder();
-            builder.UseSharpnadoMaterialFrame(loggerEnable: false);
-            builder
-                .UseMauiApp<App>()
-                .UseMauiCommunityToolkit()
-                .ConfigureFonts(fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                    fonts.AddFont("SFMono-Regular.otf", "SFMonoRegular");
-                    fonts.AddFont("Inter-Regular.otf", "InterRegular");
-                    fonts.AddFont("Inter-ExtraBold.otf", "InterExtraBold");
-                    fonts.AddFont("Inter-Black.otf", "InterBlack");
-                });
+        var builder = MauiApp.CreateBuilder();
 
+        builder
+            .UseMauiApp<App>()
+            .UseMauiCommunityToolkit()
+            .UseSharpnadoMaterialFrame(loggerEnable: false)
+            .ConfigureFonts(fonts =>
+            {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            });
 
-            builder.Services.AddSingleton(typeof(AppLogger<>));
-            builder.Services.AddSingleton<GlobalExceptionHandler>();
-
+        builder.Services.AddSingleton(typeof(AppLogger<>));
+        builder.Services.AddSingleton<GlobalExceptionHandler>();
+        builder.Services.AddSingleton<ISnackBarService, SnackBarService>();
 
 #if DEBUG
-            builder.Logging.AddDebug();
+        builder.Logging.AddDebug();
 #endif
 
-            var app = builder.Build();
+        var app = builder.Build();
 
-            app.Services.GetService<GlobalExceptionHandler>();
+        app.Services.GetService<GlobalExceptionHandler>();
 
-            return app;
-        }
+        var logger = app.Services.GetService<AppLogger<GlobalExceptionHandler>>();
+        logger?.LogInfo("✅ App started with Snackbar support");
+
+        return app;
     }
 }
