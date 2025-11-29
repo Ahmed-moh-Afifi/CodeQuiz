@@ -15,5 +15,9 @@ namespace CodeQuizDesktop.Models
         public required string UserName { get; set; }
         public required DateTime JoinDate { get; set; }
         public string? ProfilePicture { get; set; }
+        public string FullName
+        {
+            get { return $"{FirstName} {LastName}"; }
+        }
     }
 }

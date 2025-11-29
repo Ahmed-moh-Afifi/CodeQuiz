@@ -12,10 +12,9 @@ namespace CodeQuizDesktop.Viewmodels
 {
     public class LoginVM(IAuthenticationRepository authenticationRepository, ITokenService tokenService) : BaseViewModel
     {
-        private string username = "";
-        private string password = "";
-        public string Username { get => username; set => username = value; }
-        public string Password { get => password; set => password = value; }
+
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
         public ICommand LoginCommand { get => new Command(Login); }
 
         private async Task OpenHomePage()
@@ -30,7 +29,7 @@ namespace CodeQuizDesktop.Viewmodels
             await Shell.Current.GoToAsync("///RegisterPage");
         }
 
-        public async void Login()
+        private async void Login()
         {
             if (Username == "" || Password == "")
                 return;

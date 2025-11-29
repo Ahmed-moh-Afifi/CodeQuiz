@@ -1,9 +1,23 @@
-﻿using CodeQuizDesktop.Viewmodels;
+﻿using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Viewmodels;
 
 namespace CodeQuizDesktop
 {
     public partial class MainPage : ContentPage
     {
+        private string userFirstName;
+
+        public string UserFirstName
+        {
+            get { return userFirstName; }
+            set 
+            { 
+                userFirstName = value;
+                OnPropertyChanged();
+            }
+        }
+
+
         private bool dashboardSelected = true;
         private bool createdSelected = false;
         private bool joinedSelected = false;
@@ -54,13 +68,14 @@ namespace CodeQuizDesktop
 
 
 
-        public MainPage(DashboardVM dashboardVM, CreatedQuizzesVM createdQuizzesVM, JoinedQuizzesVM joinedQuizzesVM)
+        public MainPage(DashboardVM dashboardVM, CreatedQuizzesVM createdQuizzesVM, JoinedQuizzesVM joinedQuizzesVM, IUsersRepository usersRepository)
         {
             InitializeComponent();
             BindingContext = this;
             Dashboard.BindingContext = dashboardVM;
             CreatedQuizzes.BindingContext = createdQuizzesVM;
             JoinedQuizzes.BindingContext = joinedQuizzesVM;
+
         }
 
 
