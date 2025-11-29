@@ -33,7 +33,9 @@
                             <Editor MaximumHeightRequest="150" AutoSize="TextChanges" TextColor="White" Text="{Binding Statement}" VerticalTextAlignment="Center"/>
                         </Border>
                         <Label Text="Starter Code in Editor" FontSize="18" TextColor="White"/>
-                        <local:CodeEditor/>
+                        <Border StrokeShape="RoundRectangle 20" Stroke="#3b3b3b">
+                            <local:CodeEditor EditorType="IntellisenseOnly" Code="{Binding EditorCode}" x:Name="code" HeightRequest="500"/>
+                        </Border>
                         <Grid ColumnDefinitions="3*,*">
                             <Label Text="Test Cases" TextColor="White" FontSize="18" VerticalOptions="Center"/>
                         </Grid>

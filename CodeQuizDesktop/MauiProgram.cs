@@ -13,7 +13,10 @@ namespace CodeQuizDesktop
 {
     public static class MauiProgram
     {
+        static IServiceProvider serviceProvider;
 
+        public static TService GetService<TService>()
+            => serviceProvider.GetService<TService>();
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
@@ -69,7 +72,10 @@ namespace CodeQuizDesktop
             builder.Services.AddTransient<AuthHandler>();
 
 
-            return builder.Build();
+            var app = builder.Build();
+            serviceProvider = app.Services;
+
+            return app;
         }
     }
 }

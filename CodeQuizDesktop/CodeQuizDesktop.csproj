@@ -115,4 +115,8 @@
 	  </None>
 	</ItemGroup>
 
+	<ItemGroup>
+		<MauiAsset Include="wwwroot\**" LogicalName="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
 </Project>

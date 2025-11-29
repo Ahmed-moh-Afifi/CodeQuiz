@@ -127,7 +127,7 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
 
     public void AddTestCase()
     {
-        TestCases.Add(new TestCase() { TestCaseNumber = -1, Input = [], ExpectedOutput = ""});
+        TestCases.Add(new TestCase() { TestCaseNumber = -1, Input = [], ExpectedOutput = "" });
     }
 
     public void DeleteTestCase(TestCase tc)
