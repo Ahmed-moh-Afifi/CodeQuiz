@@ -118,6 +118,7 @@ namespace CodeQuizDesktop.Viewmodels
         public ICommand SubmitQuizCommand { get => new Command(SubmitQuiz); }
         public ICommand NextQuestionCommand { get => new Command(NextQuestion); }
         public ICommand PreviousQuestionCommand { get => new Command(PreviousQuestion); }
+        public ICommand SpecificQuestionCommand { get => new Command<Question>(SpecificQuestion); }
         public ICommand RunCommand { get => new Command(Run); }
 
         // Remaining Time Timer
@@ -201,9 +202,10 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        private void OpenSpecificQuestion()
+        private void SpecificQuestion(Question question)
         {
-
+            SaveSolution();
+            SelectedQuestion = question;
         }
 
         private async void Run()

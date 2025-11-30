@@ -103,6 +103,9 @@
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="models:Question">
                                 <Border StrokeShape="RoundRectangle 5" BackgroundColor="#2e2e2e" Padding="14,10" Stroke="White" StrokeThickness="0.8" Margin="2">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:JoinQuizVM}}, Path=SpecificQuestionCommand}" CommandParameter="{Binding .}"/>
+                                    </Border.GestureRecognizers>
                                     <Label Text="{Binding Order}" TextColor="White" FontSize="18" />
                                 </Border>
                             </DataTemplate>
