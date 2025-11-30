@@ -1,9 +1,11 @@
 ﻿using CodeQuizBackend.Core.Data.models;
 using CodeQuizBackend.Core.Exceptions;
+using CodeQuizBackend.Quiz.Hubs;
 using CodeQuizBackend.Quiz.Models.DTOs;
 using CodeQuizBackend.Quiz.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace CodeQuizBackend.Quiz.Controllers
 {

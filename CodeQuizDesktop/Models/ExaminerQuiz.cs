@@ -23,5 +23,38 @@ namespace CodeQuizDesktop.Models
         public required int SubmittedAttemptsCount { get; set; }
         public required float AverageAttemptScore { get; set; }
         public required float TotalPoints { get; set; }
+        public string StartDateString { get => StartDate.ToShortDateString() + " - " + StartDate.ToShortTimeString(); }
+        public string EndDateString { get => EndDate.ToShortDateString() + " - " + EndDate.ToShortTimeString(); }
+        public string DurationString
+        {
+            get
+            {
+                if (Duration.TotalHours >= 1)
+                {
+                    return $"{(int)Duration.TotalHours}h {(int)Duration.Minutes}m {(int)Duration.Seconds}s";
+                }
+                else if (Duration.TotalMinutes >= 1)
+                {
+                    return $"{(int)Duration.TotalMinutes}m {(int)Duration.Seconds}s";
+                }
+                else
+                {
+                    return $"{(int)Duration.Seconds}s";
+                }
+            }
+        }
+        public string Status
+        {
+            get
+            {
+                if (StartDate > DateTime.Now)
+                    return "Not Started";
+                else if (EndDate < DateTime.Now)
+                    return "Ended";
+                else
+                    return "Running";
+            }
+        }
+
     }
 }

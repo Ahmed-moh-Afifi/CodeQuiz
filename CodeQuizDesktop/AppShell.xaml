@@ -4,12 +4,51 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:CodeQuizDesktop"
+    xmlns:views="clr-namespace:CodeQuizDesktop.Views"
     Shell.FlyoutBehavior="Disabled"
-    Title="CodeQuizDesktop">
+    Title="CodeQuizDesktop"
+    Shell.NavBarIsVisible="False">
+
 
     <ShellContent
-        Title="Home"
+        Title="Startup"
+        ContentTemplate="{DataTemplate views:Startup}"
+        Route="StartupPage" />
+
+    <ShellContent
+        Title="Login"
+        ContentTemplate="{DataTemplate views:Login}"
+        Route="LoginPage" />
+    
+    <ShellContent
+        Title="Register"
+        ContentTemplate="{DataTemplate views:Register}"
+        Route="RegisterPage" />
+    
+    <ShellContent
+        Title="Main"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
-
+    
+    <ShellContent
+        Title="Create Quiz"
+        ContentTemplate="{DataTemplate views:CreateQuiz}"
+        Route="CreateQuizPage" />
+    
+    <ShellContent
+        Title="Join Quiz"
+        ContentTemplate="{DataTemplate views:JoinQuiz}"
+        Route="JoinQuizPage" />
+    
+    <ShellContent
+        Title="Examiner View Quiz"
+        ContentTemplate="{DataTemplate views:ExaminerViewQuiz}"
+        Route="ExaminerViewQuizPage" />
+    
+    <ShellContent
+        Title="Add Question"
+        ContentTemplate="{DataTemplate views:AddQuestionDialog}"
+        Route="AddQuestionDialog" />
+    
+    
 </Shell>

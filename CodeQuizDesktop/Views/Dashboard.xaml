@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CodeQuizDesktop.Views.Dashboard">
+    <Grid>
+
+
+        <ScrollView >
+            <VerticalStackLayout Padding="30,20" Spacing="24">
+
+
+                <VerticalStackLayout  Spacing="4">
+                    <Label Text="Dashboard" FontSize="28" FontFamily="InterExtraBold" TextColor="White"/>
+                    <Label Text="Welcome back, Ahmed Afifi!" FontSize="14" FontFamily="InterRegular" TextColor="#6B7280"/>
+                </VerticalStackLayout>
+
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="24">
+
+
+                    <Border Grid.Column="0" BackgroundColor="#2e2e2e" Padding="24" StrokeThickness="0" StrokeShape="RoundRectangle 16">
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Opacity="0.08" Radius="20" Offset="0,4"/>
+                        </Border.Shadow>
+
+                        <VerticalStackLayout Spacing="20">
+
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="Joined Exams" FontSize="20" FontFamily="InterExtraBold" TextColor="White" VerticalOptions="Center"/>
+                                <Label Grid.Column="1" Text="View All →" FontSize="14" FontFamily="InterRegular" TextColor="#888888" VerticalOptions="Center"/>
+                            </Grid>
+
+
+                            <Border BackgroundColor="#1e1e1e" Padding="16" StrokeThickness="1" Stroke="#591c21" StrokeShape="RoundRectangle 12">
+                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+
+                                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="Advanced JavaScript Patterns" FontSize="16" FontFamily="InterRegular" FontAttributes="Bold" TextColor="White"/>
+                                        <Border Grid.Column="1" BackgroundColor="#591c21" Padding="8,4" StrokeThickness="0" StrokeShape="RoundRectangle 6">
+                                            <Label Text="LIVE" FontSize="10" FontFamily="InterExtraBold" TextColor="White"/>
+                                        </Border>
+                                    </Grid>
+
+
+                                    <VerticalStackLayout Grid.Row="1" Spacing="6">
+                                        <Label Text="Created by: Sarah Johnson" FontSize="13" TextColor="#888888"/>
+                                        <Label Text="90 minutes  •  5 Questions" FontSize="13" TextColor="#888888"/>
+                                    </VerticalStackLayout>
+
+
+                                    <HorizontalStackLayout Grid.Row="2" Spacing="8">
+                                        <Label Text="Ends in:" FontSize="13" TextColor="#888888"/>
+                                        <Label Text="2h 30m" FontSize="13" FontFamily="InterExtraBold" TextColor="#EF4444"/>
+                                    </HorizontalStackLayout>
+
+
+                                    <Button Grid.Row="3" Text="Continue ▶" BackgroundColor="#591c21" TextColor="White" FontFamily="InterRegular" FontSize="14" Padding="0,12"/>
+                                </Grid>
+                            </Border>
+
+
+
+
+                            <Border BackgroundColor="#1e1e1e" Padding="16" StrokeThickness="0" Stroke="#E5E7EB" StrokeShape ="RoundRectangle 12">
+                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+
+                                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="React Component Patterns" FontSize="16" FontFamily="InterRegular" FontAttributes="Bold" TextColor="White"/>
+                                        <Border Grid.Column="1" BackgroundColor="#888888" Padding="8,4" StrokeThickness="0" StrokeShape="RoundRectangle 6">
+                                            <Label Text="COMPLETED" FontSize="10" FontFamily="InterExtraBold" TextColor="White"/>
+                                        </Border>
+                                    </Grid>
+
+
+                                    <VerticalStackLayout Grid.Row="1" Spacing="6">
+                                        <Label Text="Created by: Emily Taylor" FontSize="13" TextColor="#888888"/>
+                                        <Label Text="Completed in 75m" FontSize="13" TextColor="#888888"/>
+                                    </VerticalStackLayout>
+
+
+                                    <HorizontalStackLayout Grid.Row="2" Spacing="8">
+                                        <Label Text="Score:" FontSize="13" TextColor="#888888"/>
+                                        <Label Text="92%" FontSize="13" FontFamily="InterExtraBold" TextColor="#10B981"/>
+                                    </HorizontalStackLayout>
+
+
+                                    <Button Grid.Row="3" Text="View Results" BackgroundColor="#888888" TextColor="White" FontFamily="InterRegular" FontSize="14" Padding="0,12"/>
+                                </Grid>
+                            </Border>
+
+                        </VerticalStackLayout>
+
+                    </Border>
+
+
+
+
+
+                    <Border Grid.Column="1" BackgroundColor="#2e2e2e" Padding="24" StrokeThickness="0" StrokeShape="RoundRectangle 16">
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Opacity="0.08" Radius="20" Offset="0,4"/>
+                        </Border.Shadow>
+
+                        <VerticalStackLayout Spacing="20">
+
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="Created Exams" FontSize="20" FontFamily="InterExtraBold" TextColor="White" VerticalOptions="Center"/>
+                                <Label Grid.Column="1" Text="Manage All →" FontSize="14" FontFamily="InterRegular" TextColor="#888888" VerticalOptions="Center"/>
+                            </Grid>
+
+
+                            <Border BackgroundColor="#1e1e1e" Padding="16" StrokeThickness="0" Stroke="#591c21" StrokeShape="RoundRectangle 12">
+                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+
+                                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="Advanced JavaScript Patterns" FontSize="16" FontFamily="InterRegular" FontAttributes="Bold" TextColor="White"/>
+                                        <Border Grid.Column="1" BackgroundColor="#888888" Padding="8,4" StrokeThickness="0" StrokeShape="RoundRectangle 6">
+                                            <Label Text="UPCOMING" FontSize="10" FontFamily="InterExtraBold" TextColor="White"/>
+                                        </Border>
+                                    </Grid>
+
+
+                                    <Label Grid.Row="1" Text="90 minutes  •  5 Questions" FontSize="13" TextColor="#888888"/>
+
+
+
+                                    <Border Grid.Row="2" BackgroundColor="#2e2e2e" Padding="12,8" StrokeThickness="0" StrokeShape="RoundRectangle 8">
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Label Text="Code:" FontSize="13" TextColor="#6B7280"/>
+                                            <Label Text="EXAM-2025-ABC" FontSize="13" FontFamily="SFMonoRegular" FontAttributes="Bold" TextColor="#2563EB"/>
+                                        </HorizontalStackLayout>
+                                    </Border>
+
+
+
+                                    <Button Grid.Row="3" Text="View Details" BackgroundColor="#888888" TextColor="White" FontFamily="InterRegular" FontSize="14" Padding="0,12"/>
+                                </Grid>
+                            </Border>
+
+
+
+
+                            <Border BackgroundColor="#1e1e1e" Padding="16" StrokeThickness="0" Stroke="#E5E7EB" StrokeShape ="RoundRectangle 12">
+                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+
+                                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="React Component Patterns" FontSize="16" FontFamily="InterRegular" FontAttributes="Bold" TextColor="White"/>
+                                        <Border Grid.Column="1" BackgroundColor="#888888" Padding="8,4" StrokeThickness="0" StrokeShape="RoundRectangle 6">
+                                            <Label Text="ENDED" FontSize="10" FontFamily="InterExtraBold" TextColor="White"/>
+                                        </Border>
+                                    </Grid>
+
+
+
+                                    <Label Grid.Row="1" Text="67 Submitted" FontSize="13" TextColor="#888888"/>
+
+
+
+                                    <HorizontalStackLayout Grid.Row="2" Spacing="8">
+                                        <Label Text="Avg Score:" FontSize="13" TextColor="#888888"/>
+                                        <Label Text="92%" FontSize="13" FontFamily="InterExtraBold" TextColor="#10B981"/>
+                                    </HorizontalStackLayout>
+
+                                    <Grid Grid.Row="3" ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                        <Button Text="View" BackgroundColor="#888888" TextColor="White" FontFamily="InterRegular" FontSize="14" Padding="0,12"/>
+                                        <Button Grid.Column="1" Text="Edit" BackgroundColor="#888888" TextColor="White" FontFamily="InterRegular" FontSize="14" Padding="0,12"/>
+                                        <Button Grid.Column="2" Text="Delete" BackgroundColor="#888888" TextColor="White" FontFamily="InterRegular" FontSize="14" Padding="0,12"/>
+                                        
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                        </VerticalStackLayout>
+
+                    </Border>
+
+
+
+
+
+                </Grid>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentView>

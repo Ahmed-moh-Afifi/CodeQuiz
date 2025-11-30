@@ -16,6 +16,7 @@ namespace CodeQuizBackend.Quiz.Services
                 .ThenInclude(q => q.Examiner)
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Questions)
+                .Include(q => q.Solutions)
                 .FirstOrDefaultAsync();
 
             if (attempt == null)
@@ -49,7 +50,7 @@ namespace CodeQuizBackend.Quiz.Services
                         Id = 0,
                         AttemptId = 0,
                         QuestionId = q.Id,
-                        Code = string.Empty,
+                        Code = q.EditorCode,
                     }).ToList()
                 };
                 dbContext.Attempts.Add(attempt);

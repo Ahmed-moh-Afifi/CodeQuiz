@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:CodeQuizDesktop.Models"
+             xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
+             x:Class="CodeQuizDesktop.Views.JoinedQuizzes"
+             xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui">
+    <Grid RowDefinitions="Auto,*" RowSpacing="30">
+
+        <Border StrokeThickness="0">
+            <Grid>
+                <VerticalStackLayout VerticalOptions="Center" Spacing="10">
+                    <Label Text="Joined Quizzes" FontSize="28" FontAttributes="Bold" TextColor="White"/>
+                    <!--<Label Text="Tuesday, November 18, 2025" TextColor="#717e81"/>-->
+                </VerticalStackLayout>
+                <Grid HorizontalOptions="End" VerticalOptions="Center" >
+
+                    <Border StrokeShape="RoundRectangle 20" StrokeThickness="0" Margin="10">
+                        <Grid ColumnDefinitions="Auto, Auto">
+                            <Border StrokeThickness="0" Background="#2e2e2e">
+                                <Entry Placeholder="Enter quiz code" TextColor="White" Text="{Binding QuizCode}"/>
+                            </Border>
+
+                            <Border Padding="10" Grid.Column="1" StrokeThickness="0" HorizontalOptions="Center" Background="#591c21">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding JoinQuizCommand}"/>
+                                </Border.GestureRecognizers>
+                                <Label Text="Join Quiz" TextColor="White" VerticalOptions="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+            </Grid>
+        </Border>
+
+
+        <Grid Grid.Row="1" RowDefinitions="Auto,*">
+
+            <Grid Grid.Row="0" RowDefinitions="*,*" ColumnDefinitions="200,Auto,Auto,*" ColumnSpacing="10" RowSpacing="5" >
+
+                <!--<Label Text="Status" TextColor="White" VerticalOptions="End"/>-->
+                <!--<Label Grid.Column="1" Text="Date" TextColor="White" VerticalOptions="End"/>-->
+                <Border Grid.Row="1" HeightRequest="45" StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e">
+                    <Picker Title="" TextColor="White"/>
+                </Border>
+                <!--<Border Grid.Row="1" Grid.Column="1" HeightRequest="45" Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e">
+            <DatePicker TextColor="White"/>
+        </Border>
+        <Button Grid.Row="1" Grid.Column="2" Text="Clear Filters" BorderWidth="1" BorderColor="White" TextColor="White" BackgroundColor="Transparent" CornerRadius="20" VerticalOptions="Center"/>-->
+                <Border Grid.Row="1" Grid.Column="3" WidthRequest="250" HeightRequest="45" HorizontalOptions="End" VerticalOptions="Center" StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e">
+                    <SearchBar Placeholder="Search quizzes..." TextColor="White"/>
+                </Border>
+            </Grid>
+
+            <!--TABLE-->
+            
+            <Border Grid.Row="1" StrokeShape="RoundRectangle 10" Background="#2e2e2e" StrokeThickness="0" Margin="0,20,0,0" >
+                <Border.Shadow>
+                    <Shadow Radius="2.5" Opacity="0.5" />
+                </Border.Shadow>
+                <Grid RowDefinitions="Auto,*">
+
+
+                    <Grid Grid.Row="0" ColumnDefinitions="1.75*, *, *, *, *, 1.5*, *, *" BackgroundColor="#212121" Padding="20, 10">
+
+
+                        <Label Text="QUIZ TITLE" Grid.Column="0" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="STATUS" Grid.Column="1" TextColor="#888888" VerticalOptions="Center"/>
+                        
+                        <Label Text="DURATION" Grid.Column="2" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="QUESTIONS" Grid.Column="3" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="CREATOR" Grid.Column="4" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="SUBMITTED" Grid.Column="5" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="SCORE" Grid.Column="6" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="ACTIONS" Grid.Column="7" TextColor="#888888" VerticalOptions="Center"/>
+                    </Grid>
+
+
+                    <CollectionView Grid.Row="1" ItemsSource="{Binding AllExamineeAttempts}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:ExamineeAttempt">
+
+                                <Grid ColumnDefinitions="1.75*, *, *, *, *, 1.5*, *, *" Padding="20">
+                                    <BoxView Grid.ColumnSpan="9" HeightRequest="1" Color="#2a2a2a" Margin="0,0" VerticalOptions="Start"/>
+                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="10">
+                                        <Label Text="{Binding Quiz.Title}" TextColor="White" VerticalOptions="Center"/>
+                                        <Border VerticalOptions="Center" HorizontalOptions="Start" Padding="10,5" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="#888888">
+                                            <Label Text="{Binding Quiz.Code}" TextColor="White" />
+                                        </Border>
+                                    </VerticalStackLayout>
+                                    <Border Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Start" Padding="10,5" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="#888888">
+                                        <Label Text="{Binding Status}" TextColor="White" />
+                                    </Border>
+
+
+                                    <Label Text="{Binding DurationString}" TextColor="White" Grid.Column="2" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Quiz.QustionsCount}" TextColor="White" Grid.Column="3" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Quiz.Examiner.FullName}" TextColor="White" Grid.Column="4" VerticalOptions="Center"/>
+                                    <Label Text="{Binding SubmissionTimeString}" TextColor="White" Grid.Column="5" VerticalOptions="Center"/>
+                                    <VerticalStackLayout Grid.Column="6" Spacing="10" VerticalOptions="Center" HorizontalOptions="Start">
+                                        <Label Text="{Binding GradePercentage, StringFormat=Empty'{0}%'}" TextColor="White"/>
+                                        <ProgressBar Progress="{Binding GradePercentageOverHundred}" ProgressColor="#591c21"  />
+                                    </VerticalStackLayout>
+
+                                    <Grid Grid.Column="7">
+                                        <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                                            <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" IsVisible="{Binding IsCompleted}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:JoinedQuizzesVM}}, Path=TestCommand}"/>
+                                                </Border.GestureRecognizers>
+                                                <Border.Shadow>
+                                                    <Shadow Opacity="0" Radius="0"/>
+                                                </Border.Shadow>
+                                                <Image Source="eye.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                                    <Image.Behaviors>
+                                                        <toolkit:IconTintColorBehavior TintColor="White" />
+                                                    </Image.Behaviors>
+                                                </Image>
+                                            </Border>
+                                            <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" IsVisible="{Binding IsRunning}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:JoinedQuizzesVM}}, Path=ContinueAttemptCommand}" CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
+                                                <Border.Shadow>
+                                                    <Shadow Opacity="0" Radius="0"/>
+                                                </Border.Shadow>
+                                                <Image Source="player_play.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                                    <Image.Behaviors>
+                                                        <toolkit:IconTintColorBehavior TintColor="White" />
+                                                    </Image.Behaviors>
+                                                </Image>
+                                            </Border>
+
+                                        </HorizontalStackLayout>
+
+                                    </Grid>
+                                </Grid>
+
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</ContentView>

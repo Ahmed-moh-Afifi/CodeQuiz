@@ -5,6 +5,7 @@ using CodeQuizBackend.Core.Data;
 using CodeQuizBackend.Core.Logging;
 using CodeQuizBackend.Core.Middlewares;
 using CodeQuizBackend.Execution.Services;
+using CodeQuizBackend.Quiz.Hubs;
 using CodeQuizBackend.Quiz.Repositories;
 using CodeQuizBackend.Quiz.Services;
 using DotNetEnv;
@@ -115,6 +116,8 @@ builder.Services.AddScoped<IEvaluator, Evaluator>();
 // Background services
 builder.Services.AddHostedService<AttemptTimerService>();
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 // Apply database migrations automatically
@@ -140,5 +143,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<AttemptsHub>("/hubs/Attempts");
 
 app.Run();

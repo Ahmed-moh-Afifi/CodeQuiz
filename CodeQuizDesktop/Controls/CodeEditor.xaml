@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
+             x:Class="CodeQuizDesktop.Controls.CodeEditor" x:Name="this">
+
+    <Grid RowDefinitions="*, 5*, 3*">
+        <Grid ColumnDefinitions="*,*" BackgroundColor="#2e2e2e" Padding="20, 0">
+            <Label Text="&lt; &gt;  Solution" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
+            <HorizontalStackLayout Grid.Column="2" HorizontalOptions="End" VerticalOptions="Center" Spacing="10" >
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#591c21" Padding="14,10">
+                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5">
+                        <Border  WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Image Source="refresh.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Image.Behaviors>
+                                    <toolkit:IconTintColorBehavior TintColor="White" />
+                                </Image.Behaviors>
+                            </Image>
+                        </Border>
+                        <Label Grid.Column="1" Text="Reset" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 20">
+                    <Grid>
+                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#591c21" Padding="14,10" IsVisible="{Binding AllowExecution, Source={x:Reference this}}" IsEnabled="{Binding IsReadyToRun, Source={x:Reference this}}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding RunCommand, Source={x:Reference this}}"/>
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5">
+                                <Border  WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Image Source="player_play.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                        <Image.Behaviors>
+                                            <toolkit:IconTintColorBehavior TintColor="White" />
+                                        </Image.Behaviors>
+                                    </Image>
+                                </Border>
+                                <Label Grid.Column="1" Text="Run" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+                        <Border Background="#88FFFFFF" StrokeThickness="0" IsVisible="{Binding IsRunning, Source={x:Reference this}}"/>
+                    </Grid>
+                </Border>
+            </HorizontalStackLayout>
+        </Grid>
+        <WebView x:Name="webview" Grid.Row="1"/>
+        <Grid RowDefinitions="*, 2*" IsVisible="{Binding AllowExecution, Source={x:Reference this}}" Grid.Row="2">
+            <Grid ColumnDefinitions="*,*">
+                <Border BackgroundColor="#2e2e2e" StrokeThickness="0" Padding="20, 0">
+                    <Label Text="&gt;&gt;- Output" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
+                </Border>
+                <BoxView WidthRequest="1" Color="#3b3b3b" Margin="0,0" HorizontalOptions="End" />
+                <Border Grid.Column="1" BackgroundColor="#2e2e2e" StrokeThickness="0" Padding="20, 0">
+                    <Label Text="&lt;&lt;- Input" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
+                </Border>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" Grid.Row="1">
+                <Border StrokeThickness="0" Background="#1e1e1e" Padding="20, 0">
+                    <Label Text="{Binding Output, Source={x:Reference this}}" TextColor="White"/>
+                </Border>
+                <BoxView WidthRequest="1" Color="#3b3b3b" Margin="0,0" HorizontalOptions="End" />
+                <Border Grid.Column="1" StrokeThickness="0" Background="#1e1e1e" Padding="20, 0">
+                    <Editor Text="{Binding RawInput, Source={x:Reference this}}" TextColor="White"/>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</ContentView>
