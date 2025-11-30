@@ -21,6 +21,7 @@
         }
         public required ExamineeQuiz Quiz { get; set; }
         public required List<SolutionDTO> Solutions { get; set; }
+        public DateTime MaxEndTime { get => StartTime.AddMinutes(Quiz.Duration.TotalMinutes) <= Quiz.EndDate ? StartTime.AddMinutes(Quiz.Duration.TotalMinutes) : Quiz.EndDate; }
 
         public static ExamineeAttempt FromModel(Attempt attempt)
         {

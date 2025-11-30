@@ -42,7 +42,7 @@
                                 </Image.Behaviors>
                             </Image>
                         </Border>
-                        <Label Grid.Column="1" Text="17:24" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <Label Grid.Column="1" Text="{Binding RemainingTime}" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
                     </Grid>
                 </Border>
                 <Button Text="Submit" BackgroundColor="#591c21" CornerRadius="20" Command="{Binding SubmitQuizCommand}"/>
@@ -211,5 +211,8 @@
                 </ScrollView>
             </Grid>
         </Grid>
+
+        <!--Auto Submission Overlay-->
+        <Border Background="#88FFFFFF" Grid.RowSpan="2" IsVisible="{Binding WaitingForAutoSubmission}"/>
     </Grid>
 </ContentPage>

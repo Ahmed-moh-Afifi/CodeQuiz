@@ -70,7 +70,7 @@ namespace CodeQuizDesktop.Models
 
         public bool IsRunning { get => Status == "Running"; }
         public bool IsCompleted { get => Status == "Completed"; }
-
         public float? GradePercentageOverHundred { get => (GradePercentage/100);  }
+        public required DateTime MaxEndTime { get; set; }
     }
 }

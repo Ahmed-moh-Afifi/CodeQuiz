@@ -1,5 +1,6 @@
 ﻿using CodeQuizDesktop.APIs;
 using CodeQuizDesktop.Models;
+using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +9,21 @@ using System.Threading.Tasks;
 
 namespace CodeQuizDesktop.Repositories
 {
-    public class AttemptsRepository(IAttemptsAPI attemptsAPI) : BaseObservableRepository<ExamineeAttempt>, IAttemptsRepository
+    public class AttemptsRepository : BaseObservableRepository<ExamineeAttempt>, IAttemptsRepository
     {
+        private readonly IAttemptsAPI attemptsAPI;
+        public AttemptsRepository(IAttemptsAPI attemptsAPI)
+        {
+            this.attemptsAPI = attemptsAPI;
+            Initialize();
+        }
+
+        public async void Initialize()
+        {
+            var connection = new HubConnectionBuilder().WithUrl("http://localhost:5062/hubs/Attempts").WithAutomaticReconnect().Build();
+            connection.On<ExamineeAttempt>("AttemptAutoSubmitted", NotifyUpdate);
+            await connection.StartAsync();
+        }
         public async Task<ExamineeAttempt> BeginAttempt(BeginAttemptRequest beginAttemptRequest)
         {
             try

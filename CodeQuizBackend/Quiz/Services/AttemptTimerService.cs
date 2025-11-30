@@ -1,10 +1,13 @@
 using CodeQuizBackend.Core.Data;
 using CodeQuizBackend.Core.Logging;
+using CodeQuizBackend.Quiz.Hubs;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace CodeQuizBackend.Quiz.Services
 {
-    public class AttemptTimerService(IServiceProvider serviceProvider, IAppLogger<AttemptTimerService> logger) : BackgroundService
+    public class AttemptTimerService(IServiceProvider serviceProvider, IAppLogger<AttemptTimerService> logger, IHubContext<AttemptsHub> attemptsHubContext) : BackgroundService
     {
         private readonly TimeSpan checkInterval = TimeSpan.FromSeconds(10);
 
@@ -38,7 +41,10 @@ namespace CodeQuizBackend.Quiz.Services
 
             var expiredAttempts = await dbContext.Attempts
                 .Include(a => a.Quiz)
-                .Include(a => a.Solutions)
+                .ThenInclude(q => q.Examiner)
+                .Include(a => a.Quiz)
+                .ThenInclude(q => q.Questions)
+                .Include(q => q.Solutions)
                 .Where(a => a.EndTime == null && 
                            (now - a.StartTime > a.Quiz.Duration
                             || a.Quiz.EndDate < now))
@@ -54,7 +60,8 @@ namespace CodeQuizBackend.Quiz.Services
                     var quizEndTime = attempt.Quiz.EndDate;
                     
                     attempt.EndTime = durationEndTime < quizEndTime ? durationEndTime : quizEndTime;
-                    
+                    await attemptsHubContext.Clients.All.SendAsync("AttemptAutoSubmitted", attempt.ToExamineeAttempt());
+
                     logger.LogInfo(
                         $"Auto-submitted attempt {attempt.Id} for quiz {attempt.QuizId}. " +
                         $"EndTime set to {attempt.EndTime:yyyy-MM-dd HH:mm:ss}");
