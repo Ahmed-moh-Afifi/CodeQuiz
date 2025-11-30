@@ -171,6 +171,12 @@ namespace CodeQuizDesktop.Viewmodels
             await Shell.Current.GoToAsync("///MainPage");
         }
 
+        private void SaveSolution()
+        {
+            Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.Code = CodeInEditor;
+            _attemptsRepository.UpdateSolution(Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!);
+        }
+
         private async void SubmitQuiz()
         {
             var response = await _attemptsRepository.SubmitAttempt(Attempt!.Id);
@@ -179,6 +185,7 @@ namespace CodeQuizDesktop.Viewmodels
 
         private void NextQuestion()
         {
+            SaveSolution();
             if (SelectedQuestion!.Order + 1 <= Attempt!.Quiz.Questions.Count)
             {
                 SelectedQuestion = Attempt!.Quiz.Questions.Find(q => q.Order == SelectedQuestion!.Order + 1);
@@ -187,6 +194,7 @@ namespace CodeQuizDesktop.Viewmodels
 
         private void PreviousQuestion()
         {
+            SaveSolution();
             if (SelectedQuestion!.Order - 1 > 0)
             {
                 SelectedQuestion = Attempt!.Quiz.Questions.Find(q => q.Order == SelectedQuestion!.Order - 1);
