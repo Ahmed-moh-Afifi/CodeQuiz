@@ -181,7 +181,7 @@ namespace CodeQuizDesktop.Viewmodels
         private async void SubmitQuiz()
         {
             var response = await _attemptsRepository.SubmitAttempt(Attempt!.Id);
-            await Shell.Current.GoToAsync("///MainPage");
+            ReturnToPreviousPage();
         }
 
         private void NextQuestion()

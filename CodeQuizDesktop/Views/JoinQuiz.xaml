@@ -138,13 +138,12 @@
                         </Border>
 
                         <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#591c21" Padding="14,10" >
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding NextQuestionCommand}"/>
+                            </Border.GestureRecognizers>
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="5">
-
                                 <Label Text="Next" TextColor="White" HorizontalOptions="Start" VerticalOptions="Center" />
                                 <Border  Grid.Column="1" WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="End" VerticalOptions="Center">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding NextQuestionCommand}"/>
-                                    </Border.GestureRecognizers>
                                     <Image Source="arrow_forward_ios_rounded.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
                                         <Image.Behaviors>
                                             <toolkit:IconTintColorBehavior TintColor="White" />

@@ -286,7 +286,7 @@ namespace CodeQuizDesktop.Viewmodels
         // Button Commands, mapped to viewmodel methods
         public ICommand AddQuestionCommand { get => new Command(AddQuestion); }
         public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }
-        public ICommand SaveCommand { get => new Command(CreateQuiz); }
+        public ICommand PublishCommand { get => new Command(CreateAndPublishQuiz); }
         public ICommand DeleteQuestionCommand { get => new Command<NewQuestionModel>(DeleteQuestion); }
 
         private readonly IPopupService popupService;
@@ -384,10 +384,15 @@ namespace CodeQuizDesktop.Viewmodels
                 errorMessages.Add("Programming language not selected");
             }
 
+            if (QuestionModels.Count == 0)
+            {
+                errorMessages.Add("Cannot create quiz without questions");
+            }
+
             return errorMessages;
         }
 
-        public async void CreateQuiz()
+        public async void CreateAndPublishQuiz()
         {
             var errors = ValidateUserInput();
             if (errors.Count > 0)
@@ -417,6 +422,8 @@ namespace CodeQuizDesktop.Viewmodels
             };
 
             var quiz = await quizzesRepository.CreateQuiz(newQuizModel);
+            ReturnToPreviousPage();
         }
     }
+    
 }

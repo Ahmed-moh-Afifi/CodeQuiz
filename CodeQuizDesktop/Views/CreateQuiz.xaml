@@ -29,7 +29,7 @@
             </Border>
             <Label Grid.Column="1" Text="New Quiz" FontSize="30" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
             <HorizontalStackLayout Grid.Column="2" HorizontalOptions="End" VerticalOptions="Center" Spacing="10">
-                <Button Text="Save" BackgroundColor="#591c21" Command="{Binding SaveCommand}"/>
+                <Button Text="Save and Publish" BackgroundColor="#591c21" Command="{Binding PublishCommand}"/>
 
             </HorizontalStackLayout>
         </Grid>
