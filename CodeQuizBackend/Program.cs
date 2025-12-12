@@ -4,6 +4,7 @@ using CodeQuizBackend.Authentication.Services;
 using CodeQuizBackend.Core.Data;
 using CodeQuizBackend.Core.Logging;
 using CodeQuizBackend.Core.Middlewares;
+using CodeQuizBackend.Execution.Models;
 using CodeQuizBackend.Execution.Services;
 using CodeQuizBackend.Quiz.Hubs;
 using CodeQuizBackend.Quiz.Repositories;
@@ -113,6 +114,41 @@ builder.Services.AddScoped<ICodeRunner, CSharpCodeRunner>();
 builder.Services.AddScoped<ICodeRunnerFactory, CodeRunnerFactory>();
 builder.Services.AddScoped<IEvaluator, Evaluator>();
 
+// Sandboxed code execution services
+builder.Services.AddSingleton(new SandboxConfiguration
+{
+    TempCodePath = builder.Configuration["CodeFilesPath"] ?? "/tmp/code",
+    TimeoutSeconds = int.Parse(builder.Configuration["Sandbox:TimeoutSeconds"] ?? "10"),
+    MemoryLimitBytes = long.Parse(builder.Configuration["Sandbox:MemoryLimitMb"] ?? "128") * 1024 * 1024,
+    LanguageConfigs = new Dictionary<string, LanguageSandboxConfig>
+    {
+        ["CSharp"] = new()
+        {
+            DockerImage = "mcr.microsoft.com/dotnet/sdk:10.0",
+            Command = "dotnet",
+            FileExtension = ".cs",
+            ArgumentTemplate = ["run", "/sandbox/{filename}"],
+            CodePrefix = "#pragma warning disable\n"
+        },
+        ["Python"] = new()
+        {
+            DockerImage = "python:3.12-slim",
+            Command = "python",
+            FileExtension = ".py",
+            ArgumentTemplate = ["/sandbox/{filename}"]
+        }
+    }
+});
+
+builder.Services.AddSingleton<IDockerSandbox, DockerSandbox>();
+builder.Services.AddSingleton<CSharpCodeRunner>();
+//builder.Services.AddSingleton<ICodeRunner>(sp => new SandboxedCodeRunner(
+//    sp.GetRequiredService<CSharpCodeRunner>(),
+//    sp.GetRequiredService<IDockerSandbox>(),
+//    sp.GetRequiredService<SandboxConfiguration>(),
+//    sp.GetRequiredService<IAppLogger<SandboxedCodeRunner>>()
+//));
+
 // Background services
 builder.Services.AddHostedService<AttemptTimerService>();
 
@@ -145,5 +181,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<AttemptsHub>("/hubs/Attempts");
+app.MapHub<QuizzesHub>("/hubs/Quizzes");
 
 app.Run();
