@@ -9,5 +9,6 @@ namespace CodeQuizBackend.Quiz.Services
         public Task<List<ExaminerQuiz>> GetUserQuizzes(string userId);
         public Task DeleteQuiz(int id);
         public Task<ExamineeQuiz> GetQuizByCode(string code);
+        public Task<List<ExaminerAttempt>> GetQuizAttempts(int quizId);
     }
 }

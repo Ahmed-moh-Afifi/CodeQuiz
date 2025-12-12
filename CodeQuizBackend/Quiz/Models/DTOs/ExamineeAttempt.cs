@@ -7,7 +7,16 @@
         public DateTime? EndTime { get; set; } = null;
         public required int QuizId { get; set; }
         public required string ExamineeId { get; set; }
-        public float? Grade { get; set; }
+        public float? Grade
+        {
+            get
+            {
+                if (Solutions.Any(s => s.ReceivedGrade == null))
+                    return null;
+                else
+                    return Solutions.Sum(s => s.ReceivedGrade);
+            }
+        }
         public float? GradePercentage
         {
             get
@@ -32,7 +41,6 @@
                 EndTime = attempt.EndTime,
                 QuizId = attempt.QuizId,
                 ExamineeId = attempt.ExamineeId,
-                Grade = attempt.Grade,
                 Quiz = attempt.Quiz.ToExamineeQuiz(),
                 Solutions = attempt.Solutions.Select(s => s.ToDTO()).ToList()
             };

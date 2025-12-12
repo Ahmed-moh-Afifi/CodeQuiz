@@ -1,5 +1,6 @@
 ﻿using CodeQuizDesktop.APIs;
 using CodeQuizDesktop.Models;
+using CodeQuizDesktop.Resources;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
@@ -20,10 +21,14 @@ namespace CodeQuizDesktop.Repositories
 
         public async void Initialize()
         {
-            var connection = new HubConnectionBuilder().WithUrl("http://localhost:5062/hubs/Attempts").WithAutomaticReconnect().Build();
+            var connection = new HubConnectionBuilder().WithUrl($"{Config.HUB}/Attempts").WithAutomaticReconnect().Build();
             connection.On<ExamineeAttempt>("AttemptAutoSubmitted", NotifyUpdate);
+            connection.On<ExaminerAttempt, ExamineeAttempt>("AttemptCreated", (era, eea) => NotifyCreate(eea));
+            connection.On<ExaminerAttempt, ExamineeAttempt>("AttemptUpdated", (era, eea) => NotifyUpdate(eea));
+            connection.On<int>("AttemptDeleted", NotifyDelete);
             await connection.StartAsync();
         }
+
         public async Task<ExamineeAttempt> BeginAttempt(BeginAttemptRequest beginAttemptRequest)
         {
             try

@@ -1,15 +1,25 @@
 ﻿using CodeQuizDesktop.APIs;
 using CodeQuizDesktop.Models;
+using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CodeQuizDesktop.Resources;
 
 namespace CodeQuizDesktop.Repositories
 {
     public class QuizzesRepository(IQuizzesAPI quizzesAPI) : BaseTwoTypesObservableRepository<ExaminerQuiz, ExamineeQuiz>, IQuizzesRepository
     {
+        public async void Initialize()
+        {
+            var connection = new HubConnectionBuilder().WithUrl($"{Config.HUB}/Attempts").WithAutomaticReconnect().Build();
+            connection.On<ExaminerQuiz, ExamineeQuiz>("QuizCreated", (erq, eeq) => NotifyCreate(eeq));
+            connection.On<ExaminerQuiz, ExamineeQuiz>("QuizUpdated", (erq, eeq) => NotifyUpdate(eeq));
+            await connection.StartAsync();
+        }
+
         public async Task<ExaminerQuiz> CreateQuiz(NewQuizModel newQuizModel)
         {
             try

@@ -8,5 +8,6 @@ namespace CodeQuizBackend.Quiz.Services
         public Task<ExamineeAttempt> SubmitAttempt(int attemptId);
         public Task<SolutionDTO> UpdateSolution(SolutionDTO solution);
         public Task<List<ExamineeAttempt>> GetExamineeAttempts(string examineeId);
+        public Task EvaluateAttempt(int attemptId);
     }
 }

@@ -1,14 +1,16 @@
 ﻿using CodeQuizBackend.Core.Data;
 using CodeQuizBackend.Core.Exceptions;
 using CodeQuizBackend.Core.Logging;
+using CodeQuizBackend.Quiz.Hubs;
 using CodeQuizBackend.Quiz.Models;
 using CodeQuizBackend.Quiz.Models.DTOs;
 using CodeQuizBackend.Quiz.Repositories;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace CodeQuizBackend.Quiz.Services
 {
-    public class QuizzesService(IQuizzesRepository quizzesRepository, ApplicationDbContext dbContext, QuizCodeGenerator quizCodeGenerator, IAppLogger<QuizzesService> logger) : IQuizzesService
+    public class QuizzesService(IQuizzesRepository quizzesRepository, ApplicationDbContext dbContext, QuizCodeGenerator quizCodeGenerator, IHubContext<QuizzesHub> quizzesHubContext, IAppLogger<QuizzesService> logger) : IQuizzesService
     {
         private static readonly SemaphoreSlim _quizCreationLock = new(1, 1);
 
@@ -40,6 +42,7 @@ namespace CodeQuizBackend.Quiz.Services
         public async Task DeleteQuiz(int id)
         {
             await quizzesRepository.DeleteQuizAsync(id);
+            await quizzesHubContext.Clients.All.SendAsync("QuizDeleted", id);
         }
 
         public async Task<ExamineeQuiz> GetQuizByCode(string code)
@@ -53,12 +56,14 @@ namespace CodeQuizBackend.Quiz.Services
             var quizzesStatistics  = await dbContext.Quizzes
                 .Where(q => q.ExaminerId == userId)
                 .Include(q => q.Questions)
+                .Include(q => q.Attempts)
+                .ThenInclude(a => a.Solutions)
                 .Select(q => new
                 {
                     Quiz = q,
                     AttemptsCount = q.Attempts.Count,
                     SubmittedAttemptsCount = q.Attempts.Count(a => a.EndTime != null),
-                    AverageAttemptScore = q.Attempts.Where(a => a.Grade != null).Select(a => a.Grade).DefaultIfEmpty().Average() ?? 0
+                    AverageAttemptScore = q.Attempts.Where(a => a.Solutions.All(s => s.ReceivedGrade != null)).Select(a => a.Solutions.Sum(s => s.ReceivedGrade)).DefaultIfEmpty().Average() ?? 0
                 })
                 .ToListAsync();
 
@@ -67,7 +72,11 @@ namespace CodeQuizBackend.Quiz.Services
 
         public async Task<ExaminerQuiz> UpdateQuiz(ExaminerQuiz quiz)
         {
-            var quizEntity = await dbContext.Quizzes.Where(q => q.Id == quiz.Id).FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found");
+            var quizEntity = await dbContext.Quizzes
+                .Where(q => q.Id == quiz.Id)
+                .Include(q => q.Attempts)
+                .ThenInclude(a => a.Solutions)
+                .FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found");
             if (quizEntity.EndDate <= DateTime.Now && quiz.EndDate > DateTime.Now)
             {
                 quiz.Code = await quizCodeGenerator.GenerateUniqueQuizCode();
@@ -103,9 +112,23 @@ namespace CodeQuizBackend.Quiz.Services
             {
                 AttemptsCount = q.Attempts.Count,
                 SubmittedAttemptsCount = q.Attempts.Count(a => a.EndTime != null),
-                AverageAttemptScore = q.Attempts.Where(a => a.Grade != null).Select(a => a.Grade).DefaultIfEmpty().Average() ?? 0
+                AverageAttemptScore = q.Attempts.Where(a => a.Solutions.All(s => s.ReceivedGrade != null)).Select(a => a.Solutions.Sum(s => s.ReceivedGrade)).DefaultIfEmpty().Average() ?? 0
             }).FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found"); // This approach is going be changed after the demo :)
-            return updatedQuiz.ToExaminerQuiz(statistics.AttemptsCount, statistics.SubmittedAttemptsCount, statistics.AverageAttemptScore);
+            var updatedExaminerQuiz = updatedQuiz.ToExaminerQuiz(statistics.AttemptsCount, statistics.SubmittedAttemptsCount, statistics.AverageAttemptScore);
+            var updatedExamineeQuiz = updatedQuiz.ToExamineeQuiz();
+            await quizzesHubContext.Clients.All.SendAsync("QuizUpdated", updatedExaminerQuiz, updatedExamineeQuiz);
+            return updatedExaminerQuiz;
+        }
+
+        public async Task<List<ExaminerAttempt>> GetQuizAttempts(int quizId)
+        {
+            var examinerAttempts = await dbContext.Attempts
+                .Where(a => a.QuizId == quizId)
+                .Include(a => a.Solutions)
+                .Include(a => a.Examinee)
+                .Select(a => a.ToExaminerAttempt())
+                .ToListAsync();
+            return examinerAttempts;
         }
     }
 }

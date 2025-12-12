@@ -1,12 +1,16 @@
 ﻿using CodeQuizBackend.Core.Data;
 using CodeQuizBackend.Core.Exceptions;
+using CodeQuizBackend.Execution.Services;
+using CodeQuizBackend.Quiz.Hubs;
 using CodeQuizBackend.Quiz.Models;
 using CodeQuizBackend.Quiz.Models.DTOs;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CodeQuizBackend.Quiz.Services
 {
-    public class AttemptsService(ApplicationDbContext dbContext) : IAttemptsService
+    public class AttemptsService(ApplicationDbContext dbContext, IEvaluator evaluator, IHubContext<AttemptsHub> attemptsHubContext) : IAttemptsService
     {
         public async Task<ExamineeAttempt> BeginAttempt(string quizCode, string examineeId)
         {
@@ -55,6 +59,7 @@ namespace CodeQuizBackend.Quiz.Services
                 };
                 dbContext.Attempts.Add(attempt);
                 await dbContext.SaveChangesAsync();
+                await attemptsHubContext.Clients.All.SendAsync("AttemptCreated", attempt.ToExaminerAttempt(), attempt.ToExamineeAttempt());
             }
 
             return attempt.ToExamineeAttempt();
@@ -88,6 +93,8 @@ namespace CodeQuizBackend.Quiz.Services
 
             attempt.EndTime ??= DateTime.Now;
             await dbContext.SaveChangesAsync();
+            await attemptsHubContext.Clients.All.SendAsync("AttemptUpdated", attempt.ToExaminerAttempt(), attempt.ToExamineeAttempt());
+            await EvaluateAttempt(attempt.Id);
             return attempt.ToExamineeAttempt();
         }
 
@@ -99,6 +106,51 @@ namespace CodeQuizBackend.Quiz.Services
             sol.Code = solution.Code;
             await dbContext.SaveChangesAsync();
             return sol.ToDTO();
+        }
+
+        public async Task EvaluateAttempt(int attemptId)
+        {
+            var attempt = await dbContext.Attempts
+                .Where(a => a.Id == attemptId)
+                .Include(a => a.Quiz)
+                .ThenInclude(q => q.Questions)
+                .Include(a => a.Solutions)
+                .FirstOrDefaultAsync()
+                ?? throw new ResourceNotFoundException("Attempt not found");
+
+            if (attempt.EndTime == null) throw new InvalidOperationException("Attempt is not yet submitted.");
+
+            GradeAttemptSolutions(attempt);
+            await dbContext.SaveChangesAsync();
+            await attemptsHubContext.Clients.All.SendAsync("AttemptUpdated", attempt.ToExaminerAttempt(), attempt.ToExamineeAttempt());
+        }
+
+        private void GradeAttemptSolutions(Attempt attempt)
+        {
+            foreach (var solution in attempt.Solutions)
+            {
+                var question = attempt.Quiz.Questions.First(q => q.Id == solution.QuestionId);
+                if (!question.TestCases.IsNullOrEmpty())
+                {
+                    var correctSolution = TestCasesPassed(attempt.Quiz, question, solution);
+                    solution.ReceivedGrade = correctSolution ? question.Points : 0;
+                    solution.EvaluatedBy = "System";
+                }
+            }
+        }
+
+        private bool TestCasesPassed(Quiz.Models.Quiz quiz, Question question, Solution solution)
+        {
+            var questionConfig = question.QuestionConfiguration ?? quiz.GlobalQuestionConfiguration;
+            foreach (var testCase in question.TestCases)
+            {
+                var result = evaluator.EvaluateAsync(questionConfig.Language, solution.Code, testCase).Result;
+                if (!result.IsSuccessful)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

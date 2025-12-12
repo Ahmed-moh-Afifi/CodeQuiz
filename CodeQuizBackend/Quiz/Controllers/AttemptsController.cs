@@ -84,6 +84,7 @@ namespace CodeQuizBackend.Quiz.Controllers
                 Data = attempts
             });
         }
+
     }
 
     public class BeginAttemptRequest
