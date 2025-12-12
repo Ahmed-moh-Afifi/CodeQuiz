@@ -109,5 +109,18 @@ namespace CodeQuizDesktop.Repositories
                 throw; // Replace with a custom exception
             }
         }
+
+        public async Task<List<ExaminerAttempt>> GetQuizAttempts(int quizId)
+        {
+            try
+            {
+                return (await quizzesAPI.GetQuizAttempts(quizId)).Data!;
+            }
+            catch (Exception)
+            {
+                // Log exception here...
+                throw; // Replace with a custom exception
+            }
+        }
     }
 }

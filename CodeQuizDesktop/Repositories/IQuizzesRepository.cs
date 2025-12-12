@@ -15,5 +15,6 @@ namespace CodeQuizDesktop.Repositories
         public Task<List<ExaminerQuiz>> GetUserQuizzes();
         public Task<List<ExaminerQuiz>> GetUserQuizzes(string userId);
         public Task<ExamineeQuiz> GetQuizByCode(string code);
+        public Task<List<ExaminerAttempt>> GetQuizAttempts(int quizId);
     }
 }
