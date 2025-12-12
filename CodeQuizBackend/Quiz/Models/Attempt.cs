@@ -10,7 +10,6 @@ namespace CodeQuizBackend.Quiz.Models
         public DateTime? EndTime { get; set; } = null;
         public required int QuizId { get; set; }
         public required string ExamineeId { get; set; }
-        public float? Grade { get; set; }
 
         public virtual Quiz Quiz { get; set; } = null!;
         public virtual List<Solution> Solutions { get; set; } = [];
@@ -25,7 +24,6 @@ namespace CodeQuizBackend.Quiz.Models
                 EndTime = EndTime,
                 QuizId = QuizId,
                 ExamineeId = ExamineeId,
-                Grade = Grade,
                 Quiz = Quiz.ToExamineeQuiz(),
                 Solutions = Solutions.Select(s => s.ToDTO()).ToList()
             };
@@ -40,7 +38,6 @@ namespace CodeQuizBackend.Quiz.Models
                 EndTime = EndTime,
                 QuizId = QuizId,
                 ExamineeId = ExamineeId,
-                Grade = Grade,
                 Solutions = Solutions.Select(s => s.ToDTO()).ToList(),
                 Examinee = Examinee.ToDTO()
             };

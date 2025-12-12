@@ -36,6 +36,7 @@ namespace CodeQuizBackend.Quiz.Services
         {
             using var scope = serviceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var attemptsService = scope.ServiceProvider.GetRequiredService<IAttemptsService>();
 
             var now = DateTime.Now;
 
@@ -61,6 +62,7 @@ namespace CodeQuizBackend.Quiz.Services
                     
                     attempt.EndTime = durationEndTime < quizEndTime ? durationEndTime : quizEndTime;
                     await attemptsHubContext.Clients.All.SendAsync("AttemptAutoSubmitted", attempt.ToExamineeAttempt());
+                    await attemptsService.EvaluateAttempt(attempt.Id);
 
                     logger.LogInfo(
                         $"Auto-submitted attempt {attempt.Id} for quiz {attempt.QuizId}. " +
