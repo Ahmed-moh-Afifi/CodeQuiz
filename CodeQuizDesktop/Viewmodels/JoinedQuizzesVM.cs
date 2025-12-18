@@ -1,5 +1,6 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui.Core.Extensions;
 using Microsoft.Maui.Graphics;
 using System;
@@ -30,18 +31,8 @@ namespace CodeQuizDesktop.Viewmodels
 
         public string QuizCode { get; set; } = "";
         public ICommand JoinQuizCommand { get => new Command(JoinQuiz); }
-
         public ICommand ContinueAttemptCommand { get => new Command<ExamineeAttempt>(OnContinueAttempt); }
-
-
-        private async void OnContinueAttempt(ExamineeAttempt examineeAttempt)
-        {
-            System.Diagnostics.Debug.WriteLine($"Clicked: {examineeAttempt.Quiz.Code}");
-            var beginAttemptResponse = new BeginAttemptRequest() { QuizCode = examineeAttempt.Quiz.Code };
-            var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
-            await Shell.Current.GoToAsync($"///JoinQuizPage", new Dictionary<string, object> { { "attempt", response! } });
-
-        }
+        public ICommand ReviewAttemptCommand { get => new Command<ExamineeAttempt>(OnReviewAttempt);  }
 
         private async void JoinQuiz()
         {
@@ -52,6 +43,22 @@ namespace CodeQuizDesktop.Viewmodels
             var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
             await Shell.Current.GoToAsync($"///JoinQuizPage", new Dictionary<string, object> { { "attempt", response! } });
 
+        }
+        private async void OnContinueAttempt(ExamineeAttempt examineeAttempt)
+        {
+            System.Diagnostics.Debug.WriteLine($"Clicked: {examineeAttempt.Quiz.Code}");
+            var beginAttemptResponse = new BeginAttemptRequest() { QuizCode = examineeAttempt.Quiz.Code };
+            var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
+            await Shell.Current.GoToAsync($"///JoinQuizPage", new Dictionary<string, object> { { "attempt", response! } });
+
+        }
+
+        private async void OnReviewAttempt(ExamineeAttempt examineeAttempt)
+        {
+            await Shell.Current.GoToAsync(nameof(ExamineeReviewQuiz), new Dictionary<string, object>
+            {
+                { "attempt", examineeAttempt! }
+            });
         }
 
         private async void Intialize()

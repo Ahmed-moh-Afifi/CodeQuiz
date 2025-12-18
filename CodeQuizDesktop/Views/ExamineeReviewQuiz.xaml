@@ -3,15 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              xmlns:models="clr-namespace:CodeQuizDesktop.Models"
-             xmlns:controls="clr-namespace:CodeQuizDesktop.Controls"
              xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
-             x:Class="CodeQuizDesktop.Views.JoinQuiz"
-             Title="JoinQuiz"
-             x:DataType="vm:JoinQuizVM"
+             xmlns:controls="clr-namespace:CodeQuizDesktop.Controls"
+             x:Class="CodeQuizDesktop.Views.ExamineeReviewQuiz"
+             Title="ExamineeReviewQuiz"
+             x:DataType="vm:ExamineeReviewQuizVM"
              BackgroundColor="#1e1e1e">
 
-    <!--#171717
-    #1e1e1e-->
     <Grid RowDefinitions="Auto,*">
         <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" Padding="20,20" BackgroundColor="#171717">
             <Border  WidthRequest="30" HeightRequest="35" StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
@@ -32,22 +30,7 @@
                 <!--<Label Text="Question 3 of 6" FontSize="16" TextColor="#888888" HorizontalOptions="Start" VerticalOptions="Center"/>-->
             </VerticalStackLayout>
 
-            <HorizontalStackLayout Grid.Column="2" HorizontalOptions="End" VerticalOptions="Center" Spacing="10" >
-                <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e" Padding="14,10">
-                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5">
-                        <Border  WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
-                            <Image Source="clock.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
-                                <Image.Behaviors>
-                                    <toolkit:IconTintColorBehavior TintColor="White" />
-                                </Image.Behaviors>
-                            </Image>
-                        </Border>
-                        <Label Grid.Column="1" Text="{Binding RemainingTime}" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
-                    </Grid>
-                </Border>
-                <Button Text="Submit" BackgroundColor="#591c21" CornerRadius="20" Command="{Binding SubmitQuizCommand}"/>
 
-            </HorizontalStackLayout>
         </Grid>
         <BoxView HeightRequest="1" Color="#3b3b3b" Margin="0,0" VerticalOptions="End"/>
         <Grid Grid.Row="1">
@@ -58,53 +41,12 @@
 
                     <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="Start" AlignItems="Center" AlignContent="Start" BindableLayout.ItemsSource="{Binding Attempt.Quiz.Questions}">
 
-                        <!--<Button Text="Button 1"  FlexLayout.Basis="150" />
-                        <Label Text="Item 2" BackgroundColor="LightGray" FlexLayout.Grow="1" WidthRequest="90"/>
-                        <Border BackgroundColor="LightBlue" Padding="10" FlexLayout.Shrink="0.5">
-                            <Label Text="Item 3 in Frame" />
-                        </Border>
-                        <Button Text="Button 4" />-->
-
-                        <!--<Border StrokeShape="RoundRectangle 5" BackgroundColor="#2e2e2e" Padding="14,10" Stroke="White" StrokeThickness="0.8" Margin="2">
-                            <Label Text="1" TextColor="White" FontSize="18"/>
-                        </Border>
-
-
-                        <Border StrokeShape="RoundRectangle 5" BackgroundColor="#591c21" Padding="14,10" Stroke="White" StrokeThickness="0.8" Margin="2">
-                            <Label Text="2" TextColor="White" FontSize="18"/>
-                        </Border>
-
-
-                        <Border StrokeShape="RoundRectangle 5" BackgroundColor="#2e2e2e" Padding="14,10" Stroke="White" StrokeThickness="0.8" Margin="2">
-                            <Label Text="3" TextColor="White" FontSize="18"/>
-                        </Border>
-
-
-                        <Border StrokeShape="RoundRectangle 5" BackgroundColor="#2e2e2e" Padding="14,10" Stroke="White" StrokeThickness="0.8" Margin="2">
-                            <Label Text="4" TextColor="White" FontSize="18"/>
-                        </Border>
-
-
-                        <Border StrokeShape="RoundRectangle 5" BackgroundColor="#2e2e2e" Padding="14,10" Stroke="White" StrokeThickness="0.8" Margin="2">
-                            <Label Text="5" TextColor="White" FontSize="18"/>
-                        </Border>
-
-
-                        <Border StrokeShape="RoundRectangle 5" BackgroundColor="#2e2e2e" Padding="14,10" Stroke="White" StrokeThickness="0.8" Margin="2">
-                            <Label Text="6" TextColor="White" FontSize="18"/>
-                        </Border>
-
-
-                        <Border StrokeShape="RoundRectangle 5" BackgroundColor="#2e2e2e" Padding="14,10" Stroke="White" StrokeThickness="0.8" Margin="2">
-                            <Label Text="7" TextColor="White" FontSize="18"/>
-                        </Border>-->
-
 
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="models:Question">
                                 <Border StrokeShape="RoundRectangle 5" BackgroundColor="#2e2e2e" Padding="14,10" Stroke="White" StrokeThickness="0.8" Margin="2">
                                     <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:JoinQuizVM}}, Path=SpecificQuestionCommand}" CommandParameter="{Binding .}"/>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:GradeAttemptVM}}, Path=SpecificQuestionCommand}" CommandParameter="{Binding .}"/>
                                     </Border.GestureRecognizers>
                                     <Label Text="{Binding Order}" TextColor="White" FontSize="18" />
                                 </Border>
@@ -160,17 +102,20 @@
                     <VerticalStackLayout>
 
                         <Border BackgroundColor="#2e2e2e" Padding="20" StrokeThickness="0" HorizontalOptions="FillAndExpand" HeightRequest="80">
-                            <Label Text="{Binding SelectedQuestion.Order, StringFormat='Question {0}'}" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
+                            <Grid ColumnDefinitions="Auto,*">
+                                <Label Text="{Binding SelectedQuestion.Order, StringFormat='Question {0}'}" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
+                                <Border Grid.Column="1" HorizontalOptions="End" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,5" BackgroundColor="#171717">
+
+                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5">
+                                        <Label Text="Grade: " HorizontalOptions="Center" VerticalOptions="Center" TextColor="White"/>
+                                        <Label Grid.Column="1" Text="{Binding Grade}" HorizontalOptions="Center" VerticalOptions="Center" TextColor="White" MinimumHeightRequest="0" MinimumWidthRequest="35" HorizontalTextAlignment="Center"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
                         </Border>
 
                         <VerticalStackLayout Spacing="40" Padding="30,20">
-                            <!--<Label Text="Problem...." TextColor="White" FontSize="16"/>-->
-                            <!--<Label Text="You are given a set of integers, each representing a decimal number. Your task is to convert each decimal number into its binary representation.
-                                             &#10;Input
-                                             &#10;The first line of the input contains a single integer, T (1 ≤ T ≤ 104) denoting the number of test cases.
-                                             &#10;Each of the following T lines contains a single integer, N (1 ≤ N ≤ 109) , representing the decimal number to be converted.
-                                             &#10;Output
-                                             &#10;For each test case, print the binary representation of the corresponding decimal number on a new line." TextColor="White" FontSize="16" />-->
+
                             <Label Text="{Binding SelectedQuestion.Statement}" TextColor="White" FontSize="16"/>
                             <VerticalStackLayout Spacing="20">
                                 <Label Text="Examples" TextColor="White" FontSize="16" IsVisible="{Binding HasTestCases}"/>
@@ -206,18 +151,18 @@
                         </VerticalStackLayout>
 
                         <controls:CodeEditor 
-                            ShowError="{Binding SelectedQuestion.QuestionConfiguration.ShowError}"
-                            ShowOutput="{Binding SelectedQuestion.QuestionConfiguration.ShowOutput}"
-                            AllowExecution="{Binding SelectedQuestion.QuestionConfiguration.AllowExecution}" 
-                            Code="{Binding CodeInEditor}"
-                            HeightRequest="800"/>
-                            <!--Language="{Binding SelectedQuestion.QuestionConfiguration.Language}"--> 
+                    ShowError="True"
+                    ShowOutput="True"
+                    AllowExecution="True" 
+                    EditorType="ReadOnly"
+                    Code="{Binding CodeInEditor}"
+                    HeightRequest="800"/>
+                        <!--Language="{Binding SelectedQuestion.QuestionConfiguration.Language}"-->
                     </VerticalStackLayout>
                 </ScrollView>
             </Grid>
         </Grid>
 
-        <!--Auto Submission Overlay-->
-        <Border Background="#88FFFFFF" Grid.RowSpan="2" IsVisible="{Binding WaitingForAutoSubmission}"/>
     </Grid>
+
 </ContentPage>

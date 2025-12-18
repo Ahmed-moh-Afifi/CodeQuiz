@@ -16,5 +16,17 @@ namespace CodeQuizDesktop.Models
         public float? Grade { get; set; }
         public required List<Solution> Solutions { get; set; }
         public required User Examinee { get; set; }
+
+        public string SubmissionTimeString
+        {
+            get
+            {
+                if (EndTime.HasValue)
+                {
+                    return EndTime.Value.ToShortDateString() + " - " + EndTime.Value.ToShortTimeString();
+                }
+                return "-";
+            }
+        }
     }
 }

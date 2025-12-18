@@ -1,5 +1,6 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui.Core.Extensions;
 using System;
 using System.Collections.Generic;
@@ -26,29 +27,31 @@ namespace CodeQuizDesktop.Viewmodels
                 OnPropertyChanged();
             }
         }
-        public ICommand CreateQuizCommand { get => new Command(OpenCreateQuizPage); }
-        //public ICommand EditQuizCommand { get => new Command<ExaminerQuiz>(OnEditQuiz); }
+        public ICommand CreateQuizCommand { get => new Command(OnCreateQuizPage); }
+        public ICommand EditQuizCommand { get => new Command<ExaminerQuiz>(OnEditQuiz); }
         public ICommand DeleteQuizCommand { get => new Command<ExaminerQuiz>(OnDeleteQuiz); }
+        public ICommand ViewQuizCommand { get => new Command<ExaminerQuiz>(OnViewQuiz); }
 
-        private async void OpenCreateQuizPage()
+        private async void OnCreateQuizPage()
         {
             await Shell.Current.GoToAsync("///CreateQuizPage");
         }
 
-        public ICommand ViewQuizCommand { get => new Command(OpenExaminerViewQuizPage); }
-
-        private async void OpenExaminerViewQuizPage()
+        private async void OnEditQuiz(ExaminerQuiz examinerQuiz)
         {
-            await Shell.Current.GoToAsync("///ExaminerViewQuizPage");
+            await Shell.Current.GoToAsync(nameof(EditQuiz), new Dictionary<string, object>
+            {
+                { "quiz", examinerQuiz }
+            });
         }
-        //private async void OnEditQuiz(ExaminerQuiz examinerQuiz)
-        //{
-        //    await _quizzesRepository.UpdateQuiz(examinerQuiz);
-        //}
 
         private async void OnDeleteQuiz(ExaminerQuiz examinerQuiz)
         {
             await _quizzesRepository.DeleteQuiz(examinerQuiz.Id);
+        }
+        private async void OnViewQuiz(ExaminerQuiz examinerQuiz)
+        {
+            await Shell.Current.GoToAsync($"///ExaminerViewQuizPage", new Dictionary<string, object> { { "quiz", examinerQuiz } });
         }
         
         private async void Intialize()
