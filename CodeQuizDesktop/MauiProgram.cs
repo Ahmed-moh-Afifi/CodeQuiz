@@ -38,10 +38,10 @@ namespace CodeQuizDesktop
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
+            //Popups
+            builder.Services.AddTransient<AddQuestionDialog>();
 
-            builder.Services.AddTransient<AddQuestionDialog, AddQuestionDialogVM>();
-            builder.Services.AddScoped<QuizSettingsDialog, QuizSettingsDialogVM>();
-
+            //ViewModels
             builder.Services.AddTransient<LoginVM>();
             builder.Services.AddTransient<RegisterVM>();
             builder.Services.AddTransient<DashboardVM>();
@@ -53,8 +53,8 @@ namespace CodeQuizDesktop
             builder.Services.AddTransient<StartupViewModel>();
             builder.Services.AddTransient<GradeAttemptVM>();
             builder.Services.AddTransient<ExamineeReviewQuizVM>();
-            builder.Services.AddTransient<EditQuizVM>();
 
+            //Services
             builder.Services.AddSingleton<IPopupService, PopupService>();
             builder.Services.AddSingleton<ITokenService, TokenService>();
 

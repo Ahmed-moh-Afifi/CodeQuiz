@@ -52,7 +52,7 @@ namespace CodeQuizDesktop.Viewmodels
         }
         private async void OnViewQuiz(ExaminerQuiz examinerQuiz)
         {
-            await Shell.Current.GoToAsync($"///ExaminerViewQuizPage", new Dictionary<string, object> { { "quiz", examinerQuiz } });
+            await Shell.Current.GoToAsync(nameof(ExaminerViewQuiz), new Dictionary<string, object> { { "quiz", examinerQuiz } });
         }
         
         private async void Intialize()

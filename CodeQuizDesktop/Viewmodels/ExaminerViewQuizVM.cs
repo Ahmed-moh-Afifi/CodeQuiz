@@ -44,7 +44,7 @@ namespace CodeQuizDesktop.Viewmodels
 
         private async void ReturnToPreviousPage()
         {
-            await Shell.Current.GoToAsync("///MainPage");
+            await Shell.Current.GoToAsync("..");
         }
 
         public ICommand GoToGradeAttemptPageCommand { get => new Command<ExaminerAttempt>(OnGoToGradeAttemptPage); }

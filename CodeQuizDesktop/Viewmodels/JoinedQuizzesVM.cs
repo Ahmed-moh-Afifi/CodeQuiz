@@ -41,7 +41,7 @@ namespace CodeQuizDesktop.Viewmodels
 
             var beginAttemptResponse = new BeginAttemptRequest() { QuizCode = this.QuizCode };
             var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
-            await Shell.Current.GoToAsync($"///JoinQuizPage", new Dictionary<string, object> { { "attempt", response! } });
+            await Shell.Current.GoToAsync(nameof(JoinQuiz), new Dictionary<string, object> { { "attempt", response! } });
 
         }
         private async void OnContinueAttempt(ExamineeAttempt examineeAttempt)
@@ -49,7 +49,7 @@ namespace CodeQuizDesktop.Viewmodels
             System.Diagnostics.Debug.WriteLine($"Clicked: {examineeAttempt.Quiz.Code}");
             var beginAttemptResponse = new BeginAttemptRequest() { QuizCode = examineeAttempt.Quiz.Code };
             var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
-            await Shell.Current.GoToAsync($"///JoinQuizPage", new Dictionary<string, object> { { "attempt", response! } });
+            await Shell.Current.GoToAsync(nameof(JoinQuiz), new Dictionary<string, object> { { "attempt", response! } });
 
         }
 
