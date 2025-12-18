@@ -1,37 +1,40 @@
-﻿using CodeQuizBackend.Authentication.Models;
+﻿using CodeQuizBackend.Authentication.Exceptions;
+using CodeQuizBackend.Authentication.Models;
 using CodeQuizBackend.Authentication.Models.DTOs;
 using CodeQuizBackend.Core.Data;
+using CodeQuizBackend.Core.Exceptions;
+using CodeQuizBackend.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Mail;
 using System.Security.Claims;
 
 namespace CodeQuizBackend.Authentication.Services
 {
-    public class JWTAuthenticationService(UserManager<User> userManager, TokenService tokenService, ApplicationDbContext dbContext, IConfiguration configuration) : IAuthenticationService
+    public class JWTAuthenticationService(UserManager<User> userManager, TokenService tokenService, ApplicationDbContext dbContext, IConfiguration configuration, IMailService mailService) : IAuthenticationService
     {
         public async Task ForgetPassword(ForgetPasswordModel forgetPasswordModel)
         {
-            var user = await userManager.FindByEmailAsync(forgetPasswordModel.Email) ?? throw new Exception("Failed to serve your request");
-
-            var resetPassToken = await userManager.GeneratePasswordResetTokenAsync(user)
-                ?? throw new Exception("Failed to serve your request");
-
-            MailMessage mailMessage = new(new MailAddress(configuration["SMTPUsername"]!), new MailAddress(forgetPasswordModel.Email))
+            var user = await userManager.FindByEmailAsync(forgetPasswordModel.Email);
+            
+            // Always return success message to prevent email enumeration attacks
+            if (user == null)
             {
-                Subject = "Forgotten Password",
-                Body = "If this is you who requested to reset your password, please go to the following link to continue the process.\n\n\n" + configuration["ForgetPasswordWebsiteUrl"] + resetPassToken
-            };
+                return;
+            }
 
-            SmtpClient smtpClient = new("smtp.gmail.com", 587)
+            var resetPassToken = await userManager.GeneratePasswordResetTokenAsync(user);
+            if (resetPassToken == null)
             {
-                Credentials = new System.Net.NetworkCredential(configuration["SMTPUsername"], configuration["SMTPPassword"]),
-                EnableSsl = true,
-            };
+                // Log internally but don't expose to user
+                return;
+            }
 
-            await smtpClient.SendMailAsync(mailMessage);
+            var resetLink = configuration["ForgetPasswordWebsiteUrl"] + resetPassToken;
+            var firstName = user.FirstName ?? user.UserName ?? "User";
+
+            await mailService.SendPasswordResetEmailAsync(forgetPasswordModel.Email, firstName, resetLink);
         }
 
         public async Task<LoginResult> Login(LoginModel loginModel)
@@ -39,8 +42,7 @@ namespace CodeQuizBackend.Authentication.Services
             var user = await userManager.FindByNameAsync(loginModel.Username);
             if (user == null || !await userManager.CheckPasswordAsync(user, loginModel.Password))
             {
-                // TODO: Create custom exception types
-                throw new Exception("Invalid username or password");
+                throw new InvalidCredentialsException();
             }
 
             var claims = new[]
@@ -85,8 +87,7 @@ namespace CodeQuizBackend.Authentication.Services
 
             if (savedRefreshToken == null || savedRefreshToken.IsRevoked || savedRefreshToken.ExpiryDate <= DateTime.UtcNow)
             {
-                // TODO: Create custom exception types
-                throw new SecurityTokenException("Invalid refresh token");
+                throw new InvalidTokenException();
             }
 
             var newAccessToken = tokenService.GenerateAccessToken(claims);
@@ -105,13 +106,34 @@ namespace CodeQuizBackend.Authentication.Services
 
         public async Task<UserDTO> Register(RegisterModel registerModel)
         {
+            // Check if username is already taken
+            var existingUserByUsername = await userManager.FindByNameAsync(registerModel.Username);
+            if (existingUserByUsername != null)
+            {
+                throw new UsernameNotAvailableException();
+            }
+
+            // Check if email is already registered
+            var existingUserByEmail = await userManager.FindByEmailAsync(registerModel.Email);
+            if (existingUserByEmail != null)
+            {
+                throw new EmailAlreadyRegisteredException();
+            }
+
             var user = User.FromRegisterModel(registerModel);
             var result = await userManager.CreateAsync(user, registerModel.Password);
             if (!result.Succeeded)
             {
-                // TODO: Create custom exception types
-                throw new Exception("User registration failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+                // Check for password-related errors
+                if (result.Errors.Any(e => e.Code.Contains("Password")))
+                {
+                    throw new WeakPasswordException();
+                }
+                
+                // Generic registration failure without exposing internal details
+                throw new AuthenticationException("Registration failed. Please check your information and try again.");
             }
+            await mailService.SendWelcomeEmailAsync(registerModel.Email, user.FirstName);
             return user.ToDTO();
         }
 
@@ -120,31 +142,40 @@ namespace CodeQuizBackend.Authentication.Services
             var user = await userManager.FindByNameAsync(resetPasswordModel.Username);
             if (user == null || !await userManager.CheckPasswordAsync(user, resetPasswordModel.Password))
             {
-                // TODO: Create custom exception types
-                throw new Exception("Invalid username or password");
+                throw new InvalidCredentialsException();
             }
 
             var resetPassToken = await userManager.GeneratePasswordResetTokenAsync(user)
-                ?? throw new Exception("Failed to reset password");
+                ?? throw new AuthenticationException("Unable to reset password. Please try again later.");
 
             var result = await userManager.ResetPasswordAsync(user, resetPassToken, resetPasswordModel.NewPassword);
             if (!result.Succeeded)
             {
-                // TODO: Create custom exception types
-                throw new Exception("Failed to reset password: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+                if (result.Errors.Any(e => e.Code.Contains("Password")))
+                {
+                    throw new WeakPasswordException();
+                }
+                throw new AuthenticationException("Unable to reset password. Please try again later.");
             }
         }
 
         public async Task ResetPasswordWithToken(ResetPasswordTnModel resetPasswordTnModel)
         {
             var user = await userManager.FindByEmailAsync(resetPasswordTnModel.Email)
-                ?? throw new Exception("Failed to reset password");
+                ?? throw new AuthenticationException("Unable to reset password. The reset link may have expired.");
 
             var result = await userManager.ResetPasswordAsync(user, resetPasswordTnModel.Token, resetPasswordTnModel.NewPassword);
             if (!result.Succeeded)
             {
-                // TODO: Create custom exception types
-                throw new Exception("Failed to reset password: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+                if (result.Errors.Any(e => e.Code.Contains("Password")))
+                {
+                    throw new WeakPasswordException();
+                }
+                if (result.Errors.Any(e => e.Code.Contains("Token")))
+                {
+                    throw new AuthenticationException("The password reset link has expired or is invalid. Please request a new one.");
+                }
+                throw new AuthenticationException("Unable to reset password. Please try again later.");
             }
         }
     }

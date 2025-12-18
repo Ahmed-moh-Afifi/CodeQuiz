@@ -1,8 +1,8 @@
 ﻿using CodeQuizBackend.Core.Data;
 using CodeQuizBackend.Core.Exceptions;
 using CodeQuizBackend.Core.Logging;
+using CodeQuizBackend.Quiz.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace CodeQuizBackend.Quiz.Repositories
 {
@@ -11,29 +11,23 @@ namespace CodeQuizBackend.Quiz.Repositories
         public async Task<Models.Quiz> CreateQuizAsync(Models.Quiz quiz)
         {
             logger.LogInfo("Creating Quiz...");
-            try
-            {
-                await dbContext.Quizzes.AddAsync(quiz);
-                await dbContext.SaveChangesAsync();
-                return quiz;
-            }
-            catch (Exception e)
-            {
-                logger.LogError($"Error creating quiz {e.Message}");
-                throw;
-            }
+            await dbContext.Quizzes.AddAsync(quiz);
+            await dbContext.SaveChangesAsync();
+            return quiz;
         }
 
         public async Task DeleteQuizAsync(int id)
         {
-            var quiz = await dbContext.Quizzes.FindAsync(id) ?? throw new ResourceNotFoundException("Quiz not found");
+            var quiz = await dbContext.Quizzes.FindAsync(id) 
+                ?? throw new ResourceNotFoundException("Quiz not found. It may have already been deleted.");
             dbContext.Quizzes.Remove(quiz);
             await dbContext.SaveChangesAsync();
         }
 
         public async Task<Models.Quiz> GetQuizByIdAsync(int id)
         {
-            var quiz = await dbContext.Quizzes.FindAsync(id) ?? throw new ResourceNotFoundException("Quiz not found");
+            var quiz = await dbContext.Quizzes.FindAsync(id) 
+                ?? throw new ResourceNotFoundException("Quiz not found.");
             return quiz;
         }
 
@@ -47,7 +41,8 @@ namespace CodeQuizBackend.Quiz.Repositories
 
         public async Task<Models.Quiz> UpdateQuizAsync(Models.Quiz quiz)
         {
-            var q = await dbContext.Quizzes.Include(q => q.Questions).Where(q => q.Id == quiz.Id).FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found");
+            var q = await dbContext.Quizzes.Include(q => q.Questions).Where(q => q.Id == quiz.Id).FirstOrDefaultAsync() 
+                ?? throw new ResourceNotFoundException("Quiz not found. It may have been deleted.");
             q.Title = quiz.Title;
             q.StartDate = quiz.StartDate;
             q.EndDate = quiz.EndDate;
@@ -64,7 +59,18 @@ namespace CodeQuizBackend.Quiz.Repositories
             var quiz = await dbContext.Quizzes
                 .Include(q => q.Questions)
                 .Include(q => q.Examiner)
-                .FirstOrDefaultAsync(q => q.Code == code && q.EndDate > DateTime.Now) ?? throw new ResourceNotFoundException("Quiz not found");
+                .FirstOrDefaultAsync(q => q.Code == code);
+
+            if (quiz == null)
+            {
+                throw new ResourceNotFoundException("Quiz not found. Please check the code and try again.");
+            }
+
+            if (quiz.EndDate <= DateTime.Now)
+            {
+                throw new QuizNotActiveException("This quiz has ended and is no longer available.");
+            }
+
             return quiz;
         }
     }

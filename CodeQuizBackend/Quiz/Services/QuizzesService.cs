@@ -28,11 +28,6 @@ namespace CodeQuizBackend.Quiz.Services
 
                 return createdQuiz.ToExaminerQuiz(0, 0, 0);
             }
-            catch (Exception e)
-            {
-                logger.LogError($"Error creating quiz {e.Message}");
-                throw;
-            }
             finally
             {
                 _quizCreationLock.Release();
@@ -70,41 +65,33 @@ namespace CodeQuizBackend.Quiz.Services
             return quizzesStatistics.Select(qs => qs.Quiz.ToExaminerQuiz(qs.AttemptsCount, qs.SubmittedAttemptsCount, qs.AverageAttemptScore)).ToList();
         }
 
-        public async Task<ExaminerQuiz> UpdateQuiz(ExaminerQuiz quiz)
+        public async Task<ExaminerQuiz> UpdateQuiz(int id, NewQuizModel newQuizModel)
         {
             var quizEntity = await dbContext.Quizzes
-                .Where(q => q.Id == quiz.Id)
+                .Where(q => q.Id == id)
                 .Include(q => q.Attempts)
                 .ThenInclude(a => a.Solutions)
-                .FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found");
-            if (quizEntity.EndDate <= DateTime.Now && quiz.EndDate > DateTime.Now)
+                .FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found. It may have been deleted.");
+            
+            var newCode = quizEntity.Code;
+            if (quizEntity.EndDate <= DateTime.Now && newQuizModel.EndDate > DateTime.Now)
             {
-                quiz.Code = await quizCodeGenerator.GenerateUniqueQuizCode();
+                newCode = await quizCodeGenerator.GenerateUniqueQuizCode();
             }
 
             quizEntity = new Models.Quiz
             {
-                Id = quiz.Id,
-                Title = quiz.Title,
-                StartDate = quiz.StartDate,
-                EndDate = quiz.EndDate,
-                Duration = quiz.Duration,
-                Code = quiz.Code,
-                ExaminerId = quiz.ExaminerId,
-                GlobalQuestionConfiguration = quiz.GlobalQuestionConfiguration,
-                AllowMultipleAttempts = quiz.AllowMultipleAttempts,
-                TotalPoints = quiz.TotalPoints,
-                Questions = quiz.Questions.Select(q => new Question
-                {
-                    Id = q.Id,
-                    Statement = q.Statement,
-                    EditorCode = q.EditorCode,
-                    QuestionConfiguration = q.QuestionConfiguration,
-                    TestCases = q.TestCases,
-                    QuizId = q.QuizId,
-                    Order = q.Order,
-                    Points = q.Points
-                }).ToList()
+                Id = id,
+                Title = newQuizModel.Title,
+                StartDate = newQuizModel.StartDate,
+                EndDate = newQuizModel.EndDate,
+                Duration = newQuizModel.Duration,
+                Code = newCode,
+                ExaminerId = newQuizModel.ExaminerId,
+                GlobalQuestionConfiguration = newQuizModel.GlobalQuestionConfiguration,
+                AllowMultipleAttempts = newQuizModel.AllowMultipleAttempts,
+                TotalPoints = newQuizModel.Questions.Sum(q => q.Points),
+                Questions = newQuizModel.Questions.Select(q => q.ToQuestion()).ToList()
             };
 
             var updatedQuiz = await quizzesRepository.UpdateQuizAsync(quizEntity);
@@ -113,7 +100,7 @@ namespace CodeQuizBackend.Quiz.Services
                 AttemptsCount = q.Attempts.Count,
                 SubmittedAttemptsCount = q.Attempts.Count(a => a.EndTime != null),
                 AverageAttemptScore = q.Attempts.Where(a => a.Solutions.All(s => s.ReceivedGrade != null)).Select(a => a.Solutions.Sum(s => s.ReceivedGrade)).DefaultIfEmpty().Average() ?? 0
-            }).FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found"); // This approach is going be changed after the demo :)
+            }).FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found."); // This approach is going be changed after the demo :)
             var updatedExaminerQuiz = updatedQuiz.ToExaminerQuiz(statistics.AttemptsCount, statistics.SubmittedAttemptsCount, statistics.AverageAttemptScore);
             var updatedExamineeQuiz = updatedQuiz.ToExamineeQuiz();
             await quizzesHubContext.Clients.All.SendAsync("QuizUpdated", updatedExaminerQuiz, updatedExamineeQuiz);

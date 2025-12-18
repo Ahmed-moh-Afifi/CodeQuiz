@@ -1,21 +1,23 @@
-﻿namespace CodeQuizBackend.Execution.Services
+﻿using CodeQuizBackend.Execution.Exceptions;
+
+namespace CodeQuizBackend.Execution.Services
 {
-    public class CodeRunnerFactory : ICodeRunnerFactory
+    public class CodeRunnerFactory(IEnumerable<ICodeRunner> codeRunners, SandboxedCodeRunnerFactory sandboxFactory) : ICodeRunnerFactory
     {
-        private readonly Dictionary<string, ICodeRunner> codeRunners;
+        private readonly Dictionary<string, ICodeRunner> codeRunners = codeRunners.ToDictionary(r => r.Language.ToLower(), r => r);
 
-        public CodeRunnerFactory(IEnumerable<ICodeRunner> codeRunners)
-        {
-            this.codeRunners = codeRunners.ToDictionary(r => r.Language.ToLower(), r => r);
-        }
-
-        public ICodeRunner Create(string language)
+        public ICodeRunner Create(string language, bool sandbox = true)
         {
             if (codeRunners.TryGetValue(language.ToLower(), out var codeRunner))
             {
-                return codeRunner;
+                return sandbox ? sandboxFactory(codeRunner) : codeRunner;
             }
-            throw new NotSupportedException($"Language '{language}' is not supported.");
+            throw new UnsupportedLanguageException(language);
+        }
+
+        public IEnumerable<string> GetSupportedLanguages()
+        {
+            return codeRunners.Values.Select(r => r.Language);
         }
     }
 }

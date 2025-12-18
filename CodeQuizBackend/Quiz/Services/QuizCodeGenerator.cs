@@ -1,4 +1,5 @@
 ﻿using CodeQuizBackend.Core.Data;
+using CodeQuizBackend.Core.Exceptions;
 using CodeQuizBackend.Core.Logging;
 using CodeQuizBackend.Core.Utils;
 
@@ -27,7 +28,9 @@ namespace CodeQuizBackend.Quiz.Services
                 length++;
                 logger.LogWarning($"Failed to generate unique quiz code with length {length - 1}. Increasing length to {length}.");
             }
-            throw new InvalidOperationException($"Unable to generate unique quiz code with {maxLength} characters!");
+            
+            logger.LogError($"Unable to generate unique quiz code with {maxLength} characters!");
+            throw new ServiceUnavailableException("Unable to create quiz at this time. Please try again later.");
         }
 
         private bool IsCodeUnique(string code)

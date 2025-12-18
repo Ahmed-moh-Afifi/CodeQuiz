@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using CodeQuizBackend.Authentication.Exceptions;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -47,13 +48,20 @@ namespace CodeQuizBackend.Authentication.Services
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTKey"]!))
             };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            _ = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                _ = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
 
-            if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-                throw new SecurityTokenException("Invalid token");
+                if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                    throw new InvalidTokenException();
 
-            return jwtSecurityToken.Claims;
+                return jwtSecurityToken.Claims;
+            }
+            catch (SecurityTokenException)
+            {
+                throw new InvalidTokenException();
+            }
         }
     }
 }

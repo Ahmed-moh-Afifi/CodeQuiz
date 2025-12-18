@@ -1,6 +1,7 @@
 ﻿using CodeQuizBackend.Core.Data;
 using CodeQuizBackend.Core.Exceptions;
 using CodeQuizBackend.Execution.Services;
+using CodeQuizBackend.Quiz.Exceptions;
 using CodeQuizBackend.Quiz.Hubs;
 using CodeQuizBackend.Quiz.Models;
 using CodeQuizBackend.Quiz.Models.DTOs;
@@ -29,17 +30,29 @@ namespace CodeQuizBackend.Quiz.Services
                     .AnyAsync(a => a.Quiz.Code == quizCode && a.ExamineeId == examineeId && a.EndTime != null);
 
                 var quiz = await dbContext.Quizzes
-                .Where(q => q.Code == quizCode &&
-                            DateTime.Now > q.StartDate &&
-                            DateTime.Now < q.EndDate)
+                .Where(q => q.Code == quizCode)
                 .Include(q => q.Examiner)
                 .Include(q => q.Questions)
-                .FirstOrDefaultAsync()
-                ?? throw new ResourceNotFoundException("Quiz not found");
+                .FirstOrDefaultAsync();
+
+                if (quiz == null)
+                {
+                    throw new ResourceNotFoundException("Quiz not found. Please check the code and try again.");
+                }
+
+                if (DateTime.Now < quiz.StartDate)
+                {
+                    throw new QuizNotActiveException("This quiz has not started yet. Please wait until the scheduled start time.");
+                }
+
+                if (DateTime.Now > quiz.EndDate)
+                {
+                    throw new QuizNotActiveException("This quiz has ended and is no longer accepting new attempts.");
+                }
 
                 if (hasExpiredAttempt && !quiz.AllowMultipleAttempts)
                 {
-                    throw new InvalidOperationException("Multiple attempts are not allowed for this quiz.");
+                    throw new MultipleAttemptsNotAllowedException();
                 }
 
                 attempt = new()
@@ -89,7 +102,7 @@ namespace CodeQuizBackend.Quiz.Services
                 .ThenInclude(q => q.Questions)
                 .Include(a => a.Solutions)
                 .FirstOrDefaultAsync()
-                ?? throw new ResourceNotFoundException("Attempt not found");
+                ?? throw new ResourceNotFoundException("Attempt not found.");
 
             attempt.EndTime ??= DateTime.Now;
             await dbContext.SaveChangesAsync();
@@ -101,9 +114,10 @@ namespace CodeQuizBackend.Quiz.Services
         public async Task<SolutionDTO> UpdateSolution(SolutionDTO solution)
         {
             var sol = await dbContext.Solutions.FindAsync(solution.Id)
-                ?? throw new ResourceNotFoundException("Solution not found");
+                ?? throw new ResourceNotFoundException("Solution not found.");
 
             sol.Code = solution.Code;
+            sol.ReceivedGrade = solution.ReceivedGrade;
             await dbContext.SaveChangesAsync();
             return sol.ToDTO();
         }
@@ -116,9 +130,12 @@ namespace CodeQuizBackend.Quiz.Services
                 .ThenInclude(q => q.Questions)
                 .Include(a => a.Solutions)
                 .FirstOrDefaultAsync()
-                ?? throw new ResourceNotFoundException("Attempt not found");
+                ?? throw new ResourceNotFoundException("Attempt not found.");
 
-            if (attempt.EndTime == null) throw new InvalidOperationException("Attempt is not yet submitted.");
+            if (attempt.EndTime == null)
+            {
+                throw new AttemptNotSubmittedException();
+            }
 
             GradeAttemptSolutions(attempt);
             await dbContext.SaveChangesAsync();

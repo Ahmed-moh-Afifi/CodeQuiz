@@ -9,6 +9,7 @@ using CodeQuizBackend.Execution.Services;
 using CodeQuizBackend.Quiz.Hubs;
 using CodeQuizBackend.Quiz.Repositories;
 using CodeQuizBackend.Quiz.Services;
+using CodeQuizBackend.Services;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -135,11 +136,13 @@ builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddScoped<IQuizzesRepository, QuizzesRepository>();
 builder.Services.AddScoped<IQuizzesService, QuizzesService>();
 builder.Services.AddScoped<IAttemptsService, AttemptsService>();
+builder.Services.AddScoped<IMailService, SmtpMailService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<QuizCodeGenerator>();
 
 // Running code services
 builder.Services.AddScoped<ICodeRunner, CSharpCodeRunner>();
+builder.Services.AddScoped<ICodeRunner, PythonCodeRunner>();
 builder.Services.AddScoped<ICodeRunnerFactory, CodeRunnerFactory>();
 builder.Services.AddScoped<IEvaluator, Evaluator>();
 
@@ -171,12 +174,12 @@ builder.Services.AddSingleton(new SandboxConfiguration
 
 builder.Services.AddSingleton<IDockerSandbox, DockerSandbox>();
 builder.Services.AddSingleton<CSharpCodeRunner>();
-//builder.Services.AddSingleton<ICodeRunner>(sp => new SandboxedCodeRunner(
-//    sp.GetRequiredService<CSharpCodeRunner>(),
-//    sp.GetRequiredService<IDockerSandbox>(),
-//    sp.GetRequiredService<SandboxConfiguration>(),
-//    sp.GetRequiredService<IAppLogger<SandboxedCodeRunner>>()
-//));
+builder.Services.AddSingleton<SandboxedCodeRunnerFactory>(sp => innerRunner => new SandboxedCodeRunner(
+    innerRunner,
+    sp.GetRequiredService<IDockerSandbox>(),
+    sp.GetRequiredService<SandboxConfiguration>(),
+    sp.GetRequiredService<IAppLogger<SandboxedCodeRunner>>()
+));
 
 // Background services
 builder.Services.AddHostedService<AttemptTimerService>();
