@@ -3,9 +3,11 @@ using CodeQuizBackend.Authentication.Models.DTOs;
 using CodeQuizBackend.Authentication.Services;
 using CodeQuizBackend.Core.Data.models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace CodeQuizBackend.Authentication.Controllers
 {
+    [EnableRateLimiting("StrictPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthenticationController(IAuthenticationService authenticationService) : ControllerBase
