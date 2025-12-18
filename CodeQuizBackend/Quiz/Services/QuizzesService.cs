@@ -69,6 +69,7 @@ namespace CodeQuizBackend.Quiz.Services
         {
             var quizEntity = await dbContext.Quizzes
                 .Where(q => q.Id == id)
+                .Include(q => q.Questions)
                 .Include(q => q.Examiner)
                 .Include(q => q.Attempts)
                 .ThenInclude(a => a.Solutions)
@@ -80,7 +81,7 @@ namespace CodeQuizBackend.Quiz.Services
                 newCode = await quizCodeGenerator.GenerateUniqueQuizCode();
             }
 
-            quizEntity = new Models.Quiz
+            var quizEntity2 = new Models.Quiz
             {
                 Id = id,
                 Title = newQuizModel.Title,
@@ -95,13 +96,13 @@ namespace CodeQuizBackend.Quiz.Services
                 Questions = newQuizModel.Questions.Select(q => q.ToQuestion()).ToList()
             };
 
-            var updatedQuiz = await quizzesRepository.UpdateQuizAsync(quizEntity);
+            var updatedQuiz = await quizzesRepository.UpdateQuizAsync(quizEntity2);
             var statistics = await dbContext.Quizzes.Where(q => q.Id == updatedQuiz.Id).Select(q => new 
             {
                 AttemptsCount = q.Attempts.Count,
                 SubmittedAttemptsCount = q.Attempts.Count(a => a.EndTime != null),
                 AverageAttemptScore = q.Attempts.Where(a => a.Solutions.All(s => s.ReceivedGrade != null)).Select(a => a.Solutions.Sum(s => s.ReceivedGrade)).DefaultIfEmpty().Average() ?? 0
-            }).FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found."); // This approach is going be changed after the demo :)
+            }).FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found.");
             var updatedExaminerQuiz = updatedQuiz.ToExaminerQuiz(statistics.AttemptsCount, statistics.SubmittedAttemptsCount, statistics.AverageAttemptScore);
             var updatedExamineeQuiz = updatedQuiz.ToExamineeQuiz();
             await quizzesHubContext.Clients.All.SendAsync("QuizUpdated", updatedExaminerQuiz, updatedExamineeQuiz);

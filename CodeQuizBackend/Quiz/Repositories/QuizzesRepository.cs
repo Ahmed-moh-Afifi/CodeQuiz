@@ -41,7 +41,12 @@ namespace CodeQuizBackend.Quiz.Repositories
 
         public async Task<Models.Quiz> UpdateQuizAsync(Models.Quiz quiz)
         {
-            var q = await dbContext.Quizzes.Include(q => q.Questions).Where(q => q.Id == quiz.Id).FirstOrDefaultAsync() 
+            var q = await dbContext.Quizzes
+                .Include(q => q.Questions)
+                .Include(q => q.Examiner)
+                .Include(q => q.Attempts)
+                .ThenInclude(a => a.Solutions)
+                .Where(q => q.Id == quiz.Id).FirstOrDefaultAsync() 
                 ?? throw new ResourceNotFoundException("Quiz not found. It may have been deleted.");
             q.Title = quiz.Title;
             q.StartDate = quiz.StartDate;
@@ -53,7 +58,6 @@ namespace CodeQuizBackend.Quiz.Repositories
             q.ExaminerId = quiz.ExaminerId;
             q.AllowMultipleAttempts = quiz.AllowMultipleAttempts;
             q.TotalPoints = quiz.TotalPoints;
-            q.Examiner = quiz.Examiner;
             
             await dbContext.SaveChangesAsync();
             return q;
