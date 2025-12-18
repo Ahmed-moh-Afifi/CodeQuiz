@@ -69,6 +69,7 @@ namespace CodeQuizBackend.Quiz.Services
         {
             var quizEntity = await dbContext.Quizzes
                 .Where(q => q.Id == id)
+                .Include(q => q.Examiner)
                 .Include(q => q.Attempts)
                 .ThenInclude(a => a.Solutions)
                 .FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found. It may have been deleted.");

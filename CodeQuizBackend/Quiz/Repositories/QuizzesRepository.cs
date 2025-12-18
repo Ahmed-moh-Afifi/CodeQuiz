@@ -50,6 +50,11 @@ namespace CodeQuizBackend.Quiz.Repositories
             q.Code = quiz.Code;
             q.GlobalQuestionConfiguration = quiz.GlobalQuestionConfiguration;
             q.Questions = quiz.Questions;
+            q.ExaminerId = quiz.ExaminerId;
+            q.AllowMultipleAttempts = quiz.AllowMultipleAttempts;
+            q.TotalPoints = quiz.TotalPoints;
+            q.Examiner = quiz.Examiner;
+            
             await dbContext.SaveChangesAsync();
             return q;
         }
