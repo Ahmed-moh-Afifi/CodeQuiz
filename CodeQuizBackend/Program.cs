@@ -9,6 +9,7 @@ using CodeQuizBackend.Execution.Services;
 using CodeQuizBackend.Quiz.Hubs;
 using CodeQuizBackend.Quiz.Repositories;
 using CodeQuizBackend.Quiz.Services;
+using CodeQuizBackend.Services;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -135,6 +136,7 @@ builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddScoped<IQuizzesRepository, QuizzesRepository>();
 builder.Services.AddScoped<IQuizzesService, QuizzesService>();
 builder.Services.AddScoped<IAttemptsService, AttemptsService>();
+builder.Services.AddScoped<IMailService, SmtpMailService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<QuizCodeGenerator>();
 

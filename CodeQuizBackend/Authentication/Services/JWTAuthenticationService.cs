@@ -1,16 +1,16 @@
 ﻿using CodeQuizBackend.Authentication.Models;
 using CodeQuizBackend.Authentication.Models.DTOs;
 using CodeQuizBackend.Core.Data;
+using CodeQuizBackend.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Mail;
 using System.Security.Claims;
 
 namespace CodeQuizBackend.Authentication.Services
 {
-    public class JWTAuthenticationService(UserManager<User> userManager, TokenService tokenService, ApplicationDbContext dbContext, IConfiguration configuration) : IAuthenticationService
+    public class JWTAuthenticationService(UserManager<User> userManager, TokenService tokenService, ApplicationDbContext dbContext, IConfiguration configuration, IMailService mailService) : IAuthenticationService
     {
         public async Task ForgetPassword(ForgetPasswordModel forgetPasswordModel)
         {
@@ -19,19 +19,10 @@ namespace CodeQuizBackend.Authentication.Services
             var resetPassToken = await userManager.GeneratePasswordResetTokenAsync(user)
                 ?? throw new Exception("Failed to serve your request");
 
-            MailMessage mailMessage = new(new MailAddress(configuration["SMTPUsername"]!), new MailAddress(forgetPasswordModel.Email))
-            {
-                Subject = "Forgotten Password",
-                Body = "If this is you who requested to reset your password, please go to the following link to continue the process.\n\n\n" + configuration["ForgetPasswordWebsiteUrl"] + resetPassToken
-            };
+            var resetLink = configuration["ForgetPasswordWebsiteUrl"] + resetPassToken;
+            var firstName = user.FirstName ?? user.UserName ?? "User";
 
-            SmtpClient smtpClient = new("smtp.gmail.com", 587)
-            {
-                Credentials = new System.Net.NetworkCredential(configuration["SMTPUsername"], configuration["SMTPPassword"]),
-                EnableSsl = true,
-            };
-
-            await smtpClient.SendMailAsync(mailMessage);
+            await mailService.SendPasswordResetEmailAsync(forgetPasswordModel.Email, firstName, resetLink);
         }
 
         public async Task<LoginResult> Login(LoginModel loginModel)
@@ -112,6 +103,7 @@ namespace CodeQuizBackend.Authentication.Services
                 // TODO: Create custom exception types
                 throw new Exception("User registration failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
             }
+            await mailService.SendWelcomeEmailAsync(registerModel.Email, user.FirstName);
             return user.ToDTO();
         }
 
