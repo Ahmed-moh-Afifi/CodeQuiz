@@ -28,11 +28,6 @@ namespace CodeQuizBackend.Quiz.Services
 
                 return createdQuiz.ToExaminerQuiz(0, 0, 0);
             }
-            catch (Exception e)
-            {
-                logger.LogError($"Error creating quiz {e.Message}");
-                throw;
-            }
             finally
             {
                 _quizCreationLock.Release();
@@ -76,7 +71,7 @@ namespace CodeQuizBackend.Quiz.Services
                 .Where(q => q.Id == quiz.Id)
                 .Include(q => q.Attempts)
                 .ThenInclude(a => a.Solutions)
-                .FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found");
+                .FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found. It may have been deleted.");
             if (quizEntity.EndDate <= DateTime.Now && quiz.EndDate > DateTime.Now)
             {
                 quiz.Code = await quizCodeGenerator.GenerateUniqueQuizCode();
@@ -113,7 +108,7 @@ namespace CodeQuizBackend.Quiz.Services
                 AttemptsCount = q.Attempts.Count,
                 SubmittedAttemptsCount = q.Attempts.Count(a => a.EndTime != null),
                 AverageAttemptScore = q.Attempts.Where(a => a.Solutions.All(s => s.ReceivedGrade != null)).Select(a => a.Solutions.Sum(s => s.ReceivedGrade)).DefaultIfEmpty().Average() ?? 0
-            }).FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found"); // This approach is going be changed after the demo :)
+            }).FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found."); // This approach is going be changed after the demo :)
             var updatedExaminerQuiz = updatedQuiz.ToExaminerQuiz(statistics.AttemptsCount, statistics.SubmittedAttemptsCount, statistics.AverageAttemptScore);
             var updatedExamineeQuiz = updatedQuiz.ToExamineeQuiz();
             await quizzesHubContext.Clients.All.SendAsync("QuizUpdated", updatedExaminerQuiz, updatedExamineeQuiz);

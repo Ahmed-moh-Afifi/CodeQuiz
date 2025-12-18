@@ -4,11 +4,9 @@ using CodeQuizBackend.Execution.Models;
 
 namespace CodeQuizBackend.Execution.Services
 {
-    public class SandboxedCodeRunner(ICodeRunner innerRunner, IDockerSandbox sandbox, SandboxConfiguration config, IAppLogger<SandboxedCodeRunner> logger) : ICodeRunner
+    public class SandboxedCodeRunner(ICodeRunner innerRunner, IDockerSandbox sandbox, SandboxConfiguration config, IAppLogger<SandboxedCodeRunner> logger) : CodeRunnerDecorator(innerRunner)
     {
-        public string Language => innerRunner.Language;
-
-        public async Task<CodeRunnerResult> RunCodeAsync(string code, CodeRunnerOptions? options = null)
+        public override async Task<CodeRunnerResult> RunCodeAsync(string code, CodeRunnerOptions? options = null)
         {
             options ??= new CodeRunnerOptions();
 

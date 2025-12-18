@@ -1,3 +1,4 @@
+using CodeQuizBackend.Core.Exceptions;
 using CodeQuizBackend.Core.Logging;
 using System.Net;
 using System.Net.Mail;
@@ -19,10 +20,14 @@ namespace CodeQuizBackend.Services
         {
             var smtpHost = configuration["SMTPHost"] ?? "smtp.gmail.com";
             var smtpPort = int.Parse(configuration["SMTPPort"] ?? "587");
-            var smtpUsername = configuration["SMTPUsername"] 
-                ?? throw new InvalidOperationException("SMTPUsername is not configured");
-            var smtpPassword = configuration["SMTPPassword"] 
-                ?? throw new InvalidOperationException("SMTPPassword is not configured");
+            var smtpUsername = configuration["SMTPUsername"];
+            var smtpPassword = configuration["SMTPPassword"];
+
+            if (string.IsNullOrEmpty(smtpUsername) || string.IsNullOrEmpty(smtpPassword))
+            {
+                logger.LogError("SMTP credentials are not configured");
+                throw new ServiceUnavailableException("Email service is temporarily unavailable. Please try again later.");
+            }
 
             try
             {
@@ -47,7 +52,7 @@ namespace CodeQuizBackend.Services
             catch (Exception ex)
             {
                 logger.LogError($"Failed to send email to {toEmail}", ex);
-                throw;
+                throw new ServiceUnavailableException("Unable to send email at this time. Please try again later.");
             }
         }
 
