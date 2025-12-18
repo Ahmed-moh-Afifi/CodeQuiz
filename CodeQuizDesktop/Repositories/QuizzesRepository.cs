@@ -89,11 +89,11 @@ namespace CodeQuizDesktop.Repositories
             }
         }
 
-        public async Task<ExaminerQuiz> UpdateQuiz(ExaminerQuiz quiz)
+        public async Task<ExaminerQuiz> UpdateQuiz(int quizId, NewQuizModel newQuizModel)
         {
             try
             {
-                var qz = (await quizzesAPI.UpdateQuiz(quiz.Id, quiz)).Data!;
+                var qz = (await quizzesAPI.UpdateQuiz(quizId, newQuizModel)).Data!;
                 // Get ExamineeQuiz counterpart and notify update
                 var examineeQuiz = (await quizzesAPI.GetQuizByCode(qz.Code)).Data!;
                 if (examineeQuiz.Id == qz.Id)

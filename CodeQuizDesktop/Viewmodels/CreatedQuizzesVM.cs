@@ -34,14 +34,15 @@ namespace CodeQuizDesktop.Viewmodels
 
         private async void OnCreateQuizPage()
         {
-            await Shell.Current.GoToAsync("///CreateQuizPage");
+            await Shell.Current.GoToAsync(nameof(CreateQuiz));
         }
 
         private async void OnEditQuiz(ExaminerQuiz examinerQuiz)
         {
-            await Shell.Current.GoToAsync(nameof(EditQuiz), new Dictionary<string, object>
+            await Shell.Current.GoToAsync(nameof(CreateQuiz), new Dictionary<string, object>
             {
-                { "quiz", examinerQuiz }
+                { "quizModel", examinerQuiz.QuizToModel },
+                { "id", examinerQuiz.Id }
             });
         }
 

@@ -18,12 +18,7 @@
             <Grid RowDefinitions="Auto, *, Auto">
                 <Grid ColumnDefinitions="*, Auto">
                     <Label Text="Add Question" FontSize="20" Margin="20" TextColor="White" VerticalOptions="Center" />
-                    <Border Grid.Column="1" WidthRequest="30" HeightRequest="30" HorizontalOptions="End" Margin="20" StrokeThickness="0" BackgroundColor="#f7fafc" StrokeShape="RoundRectangle 15">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer/>
-                        </Border.GestureRecognizers>
-                        <Label Text="✕" FontSize="18" TextColor="#222222" VerticalOptions="Center" HorizontalOptions="Center" />
-                    </Border>
+                    <Button Grid.Column="1" HorizontalOptions="End" WidthRequest="38" HeightRequest="38" BackgroundColor="#f7fafc" Text="✕" FontSize="18" TextColor="#222222" CornerRadius="30" Padding="0" Margin="20,0" MinimumHeightRequest="0" MinimumWidthRequest="0" Clicked="OnCloseButtonClicked"/>
                 </Grid>
                 <BoxView HeightRequest="1" Color="#e2e8f0" VerticalOptions="End" />
                 <ScrollView Grid.Row="1">
@@ -31,6 +26,10 @@
                         <Label Text="Question Statement" FontSize="18" TextColor="White"/>
                         <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e">
                             <Editor MaximumHeightRequest="150" AutoSize="TextChanges" TextColor="White" Text="{Binding Statement}" VerticalTextAlignment="Center"/>
+                        </Border>
+                        <Label Text="Points" FontSize="18" TextColor="White"/>
+                        <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e">
+                            <Editor MaximumHeightRequest="150" AutoSize="TextChanges" TextColor="White" Text="{Binding Points}" VerticalTextAlignment="Center"/>
                         </Border>
                         <Label Text="Starter Code in Editor" FontSize="18" TextColor="White"/>
                         <Border StrokeShape="RoundRectangle 20" Stroke="#3b3b3b">
@@ -107,26 +106,31 @@
                             <!--<Switch Grid.Column="1" OnColor="#591c21" ThumbColor="White" Background="red"/>-->
                         </Grid>
                         <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e" Padding="25,25" IsVisible="{Binding IndependentlyConfigured}">
-                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,*" RowSpacing="15" >
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,*" RowSpacing="15" >
                                 <Label Grid.ColumnSpan="2" Text="Programming Language" TextColor="White" FontSize="16"/>
                                 <Border Grid.ColumnSpan="2" Grid.Row="1" Stroke="#3b3b3b" StrokeThickness="0.8" HeightRequest="45" StrokeShape="RoundRectangle 20" BackgroundColor="#222222">
-                                    <Picker TextColor="White" TitleColor="White" />
+                                    <Picker TextColor="White" TitleColor="White" ItemsSource="{Binding ProgrammingLanguages}" SelectedItem="{Binding ProgrammingLanguage}"/>
                                 </Border>
                                 <HorizontalStackLayout Grid.Column="0" Grid.Row="2">
-                                    <CheckBox VerticalOptions="Center" Color="#591c21"/>
-                                    <Label Text="Show Output" FontSize="16" TextColor="White" VerticalOptions="Center"/>
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout Grid.Column="1" Grid.Row="2">
-                                    <CheckBox VerticalOptions="Center" Color="#591c21"/>
-                                    <Label Text="Show Errors" FontSize="16" TextColor="White" VerticalOptions="Center"/>
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout Grid.Column="0" Grid.Row="3">
-                                    <CheckBox VerticalOptions="Center" Color="#591c21"/>
+                                    <CheckBox VerticalOptions="Center" Color="#591c21" IsChecked="{Binding AllowIntellisense}"/>
                                     <Label Text="Allow IntelliSense" FontSize="16" TextColor="White" VerticalOptions="Center"/>
                                 </HorizontalStackLayout>
-                                <HorizontalStackLayout Grid.Column="1" Grid.Row="3">
-                                    <CheckBox VerticalOptions="Center" Color="#591c21"/>
+                                <HorizontalStackLayout Grid.Column="1" Grid.Row="2">
+                                    <CheckBox VerticalOptions="Center" Color="#591c21" IsChecked="{Binding AllowSignatureHelp}"/>
                                     <Label Text="Allow Signature Help" FontSize="16" TextColor="White" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Grid.Column="0" Grid.Row="3">
+                                    <CheckBox VerticalOptions="Center" Color="#591c21" IsChecked="{Binding AllowExecution}"/>
+                                    <Label Text="Allow Code Execution" FontSize="16" TextColor="White" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Grid.Column="1" Grid.Row="3" IsVisible="{Binding AllowExecution}">
+                                    <CheckBox VerticalOptions="Center" Color="#591c21" IsChecked="{Binding ShowOutput}"/>
+                                    <Label Text="Show Output" FontSize="16" TextColor="White" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Column="0" Grid.Row="4" IsVisible="{Binding AllowExecution}">
+                                    <CheckBox VerticalOptions="Center" Color="#591c21" IsChecked="{Binding ShowError}"/>
+                                    <Label Text="Show Errors" FontSize="16" TextColor="White" VerticalOptions="Center"/>
                                 </HorizontalStackLayout>
                             </Grid>
                         </Border>

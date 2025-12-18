@@ -56,5 +56,23 @@ namespace CodeQuizDesktop.Models
             }
         }
 
+        public NewQuizModel QuizToModel
+        {
+            get
+            {
+                return new NewQuizModel
+                {
+                    Title = this.Title,
+                    StartDate = this.StartDate,
+                    EndDate = this.EndDate,
+                    Duration = this.Duration,
+                    ExaminerId = this.ExaminerId,
+                    GlobalQuestionConfiguration = this.GlobalQuestionConfiguration,
+                    AllowMultipleAttempts = this.AllowMultipleAttempts,
+                    Questions = this.Questions.Select(q => q.QuestionToModel).ToList() 
+                };
+            }
+        }
+
     }
 }

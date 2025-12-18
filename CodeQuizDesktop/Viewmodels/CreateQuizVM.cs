@@ -2,6 +2,7 @@
 using CodeQuizDesktop.Repositories;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Core.Extensions;
 using Microsoft.Maui.Controls.Shapes;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,44 @@ using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
 {
-    public class CreateQuizVM : BaseViewModel
+    public class CreateQuizVM : BaseViewModel, IQueryAttributable
     {
         // UI properties
+        private NewQuizModel? quizModel;
+        public NewQuizModel? QuizModel
+        {
+            get => quizModel;
+            set
+            {
+                quizModel = value;
+                OnPropertyChanged();
+            }
+        }
+        private int? editedQuizId;
+        public int? EditedQuizId
+        {
+            get => editedQuizId;
+            set
+            {
+                editedQuizId = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string header = "New Quiz";
+        public string Header
+        {
+            get
+            {
+                return header;
+            }
+            set
+            {
+                header = value;
+                OnPropertyChanged();
+            }
+        }
+
         private string? quizTitle;
         public string? QuizTitle
         {
@@ -109,8 +145,8 @@ namespace CodeQuizDesktop.Viewmodels
             }
             set
             {
-                OnPropertyChanged();
                 programmingLanguage = value;
+                OnPropertyChanged();
             }
         }
 
@@ -293,24 +329,9 @@ namespace CodeQuizDesktop.Viewmodels
         private readonly IAuthenticationRepository authenticationRepository;
         private readonly IQuizzesRepository quizzesRepository;
 
-        public CreateQuizVM(IPopupService popupService, IAuthenticationRepository authenticationRepository, IQuizzesRepository quizzesRepository)
-        {
-            this.popupService = popupService;
-            this.authenticationRepository = authenticationRepository;
-            this.quizzesRepository = quizzesRepository;
-
-            QuestionModels.CollectionChanged += (item, e) =>
-            {
-                for(int i = 0; i < QuestionModels.Count; i++)
-                {
-                    QuestionModels[i].Order = i + 1;
-                }
-            };
-        }
-
         private async void ReturnToPreviousPage()
         {
-            await Shell.Current.GoToAsync("///MainPage");
+            await Shell.Current.GoToAsync("..");
         }
 
         public async void AddQuestion()
@@ -420,9 +441,54 @@ namespace CodeQuizDesktop.Viewmodels
                 },
                 Questions = QuestionModels.ToList()
             };
+            if (QuizModel == null && EditedQuizId == null)
+            {
+                var quiz = await quizzesRepository.CreateQuiz(newQuizModel);
+            }
+            else if (QuizModel != null && EditedQuizId != null)
+            {
+                var quiz = await quizzesRepository.UpdateQuiz((int)EditedQuizId, newQuizModel);
+            }
 
-            var quiz = await quizzesRepository.CreateQuiz(newQuizModel);
             ReturnToPreviousPage();
+        }
+
+        public void ApplyQueryAttributes(IDictionary<string, object> query)
+        {
+
+            if (query.ContainsKey("quizModel") && query["quizModel"] is NewQuizModel receivedQuizModel && query.ContainsKey("id") && query["id"] is int id)
+            {
+                EditedQuizId = id;
+                QuizModel = receivedQuizModel;
+                Header = "Edit Quiz";
+                QuizTitle = receivedQuizModel.Title;
+                AllowMultipleAttempts = receivedQuizModel.AllowMultipleAttempts;
+                QuizDurationInMinutes = ((int)receivedQuizModel.Duration.TotalMinutes).ToString();
+                AvailableFromDate = receivedQuizModel.StartDate;
+                AvailableFromTime = new TimeSpan(receivedQuizModel.StartDate.Hour, receivedQuizModel.StartDate.Minute, receivedQuizModel.StartDate.Second);
+                AvailableToDate = receivedQuizModel.EndDate;
+                AvailableToTime = new TimeSpan(receivedQuizModel.EndDate.Hour, receivedQuizModel.EndDate.Minute, receivedQuizModel.EndDate.Second);
+                ProgrammingLanguage = receivedQuizModel.GlobalQuestionConfiguration.Language;
+                AllowExecution = receivedQuizModel.GlobalQuestionConfiguration.AllowExecution;
+                ShowOutput = receivedQuizModel.GlobalQuestionConfiguration.ShowOutput;
+                ShowErrors = receivedQuizModel.GlobalQuestionConfiguration.ShowError;
+                QuestionModels = new ObservableCollection<NewQuestionModel>(receivedQuizModel.Questions);
+            }
+        }
+        
+        public CreateQuizVM(IPopupService popupService, IAuthenticationRepository authenticationRepository, IQuizzesRepository quizzesRepository)
+        {
+            this.popupService = popupService;
+            this.authenticationRepository = authenticationRepository;
+            this.quizzesRepository = quizzesRepository;
+
+            QuestionModels.CollectionChanged += (item, e) =>
+            {
+                for (int i = 0; i < QuestionModels.Count; i++)
+                {
+                    QuestionModels[i].Order = i + 1;
+                }
+            };
         }
     }
     

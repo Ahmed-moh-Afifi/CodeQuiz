@@ -39,21 +39,21 @@ namespace CodeQuizDesktop
             builder.Logging.AddDebug();
 #endif
 
-            builder.Services.AddScoped<AddQuestionDialog, AddQuestionDialogVM>();
+            builder.Services.AddTransient<AddQuestionDialog, AddQuestionDialogVM>();
             builder.Services.AddScoped<QuizSettingsDialog, QuizSettingsDialogVM>();
 
-            builder.Services.AddScoped<LoginVM>();
-            builder.Services.AddScoped<RegisterVM>();
-            builder.Services.AddScoped<DashboardVM>();
-            builder.Services.AddScoped<CreatedQuizzesVM>();
-            builder.Services.AddScoped<JoinedQuizzesVM>();
-            builder.Services.AddScoped<CreateQuizVM>();
-            builder.Services.AddScoped<JoinQuizVM>();
-            builder.Services.AddScoped<ExaminerViewQuizVM>();
-            builder.Services.AddScoped<StartupViewModel>();
-            builder.Services.AddScoped<GradeAttemptVM>();
-            builder.Services.AddScoped<ExamineeReviewQuizVM>();
-            builder.Services.AddScoped<EditQuizVM>();
+            builder.Services.AddTransient<LoginVM>();
+            builder.Services.AddTransient<RegisterVM>();
+            builder.Services.AddTransient<DashboardVM>();
+            builder.Services.AddTransient<CreatedQuizzesVM>();
+            builder.Services.AddTransient<JoinedQuizzesVM>();
+            builder.Services.AddTransient<CreateQuizVM>();
+            builder.Services.AddTransient<JoinQuizVM>();
+            builder.Services.AddTransient<ExaminerViewQuizVM>();
+            builder.Services.AddTransient<StartupViewModel>();
+            builder.Services.AddTransient<GradeAttemptVM>();
+            builder.Services.AddTransient<ExamineeReviewQuizVM>();
+            builder.Services.AddTransient<EditQuizVM>();
 
             builder.Services.AddSingleton<IPopupService, PopupService>();
             builder.Services.AddSingleton<ITokenService, TokenService>();

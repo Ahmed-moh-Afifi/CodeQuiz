@@ -10,7 +10,7 @@ namespace CodeQuizDesktop.Repositories
     public interface IQuizzesRepository : ITwoTypesObservableRepository<ExaminerQuiz, ExamineeQuiz>
     {
         public Task<ExaminerQuiz> CreateQuiz(NewQuizModel newQuizModel);
-        public Task<ExaminerQuiz> UpdateQuiz(ExaminerQuiz quiz);
+        public Task<ExaminerQuiz> UpdateQuiz(int QuizId, NewQuizModel newQuizModel);
         public Task DeleteQuiz(int quizId);
         public Task<List<ExaminerQuiz>> GetUserQuizzes();
         public Task<List<ExaminerQuiz>> GetUserQuizzes(string userId);

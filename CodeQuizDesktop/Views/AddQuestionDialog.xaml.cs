@@ -8,16 +8,30 @@ namespace CodeQuizDesktop.Views;
 
 public partial class AddQuestionDialog : Popup<NewQuestionModel?>
 {
+    private NewQuestionModel? questionModel;
     private string? statement;
     private string editorCode = "";
-    private string? language;
+    private string? programmingLanguage;
     private bool allowExecution = false;
     private bool showOutput = false;
     private bool showError = false;
+    private bool allowIntellisense = false;
+    private bool allowSignatureHelp = false;
     private ObservableCollection<TestCase> testCases = [];
     private float points = 0;
     private bool independentlyConfigured = false;
 
+
+
+    public NewQuestionModel? QuestionModel
+    {
+        get => questionModel;
+        set
+        {
+            questionModel = value;
+            OnPropertyChanged();
+        }
+    }
     public string? Statement
     {
         get => statement;
@@ -57,13 +71,16 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
     }
 
     // Configuration
-    public string? Language
+    public string? ProgrammingLanguage
     {
-        get => language;
+        get
+        {
+            return programmingLanguage;
+        }
         set
         {
-            language = value;
             OnPropertyChanged();
+            programmingLanguage = value;
         }
     }
     public bool AllowExecution
@@ -93,6 +110,24 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
             OnPropertyChanged();
         }
     }
+    public bool AllowIntellisense
+    {
+        get => allowIntellisense;
+        set
+        {
+            allowIntellisense = value;
+            OnPropertyChanged();
+        }
+    }
+    public bool AllowSignatureHelp
+    {
+        get => allowSignatureHelp;
+        set
+        {
+            allowSignatureHelp = value;
+            OnPropertyChanged();
+        }
+    }
 
     public bool IndependentlyConfigured
     {
@@ -107,6 +142,21 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
         }
     }
 
+    // Data Sources
+    private List<string> programmingLanguages = ["CSharp"];
+    public List<string> ProgrammingLanguages
+    {
+        get
+        {
+            return programmingLanguages;
+        }
+        set
+        {
+            OnPropertyChanged();
+            programmingLanguages = value;
+        }
+    }
+
     //Commands
     public ICommand AddTestCaseCommand { get => new Command(AddTestCase); }
     public ICommand DeleteTestCaseCommand { get => new Command<TestCase>(DeleteTestCase); }
@@ -115,7 +165,7 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
     {
         InitializeComponent();
         BindingContext = this;
-
+        //QuestionModel = newQuestionModel;
         TestCases.CollectionChanged += (item, e) =>
         {
             for (int i = 0; i < TestCases.Count; i++)
@@ -152,7 +202,7 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
             errorMessages.Add("Question statement cannot be empty");
         }
 
-        if (IndependentlyConfigured && string.IsNullOrEmpty(Language?.Trim()))
+        if (IndependentlyConfigured && string.IsNullOrEmpty(ProgrammingLanguage?.Trim()))
         {
             // Programming language not selected error
             errorMessages.Add("Programming language not selected");
@@ -210,7 +260,7 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
             Order = Order,
             QuestionConfiguration = IndependentlyConfigured ? new QuestionConfiguration
             {
-                Language = Language!,
+                Language = ProgrammingLanguage!,
                 AllowExecution = AllowExecution,
                 ShowOutput = ShowOutput,
                 ShowError = ShowError
