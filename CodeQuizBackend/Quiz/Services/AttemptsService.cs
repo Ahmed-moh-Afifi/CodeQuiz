@@ -117,6 +117,7 @@ namespace CodeQuizBackend.Quiz.Services
                 ?? throw new ResourceNotFoundException("Solution not found.");
 
             sol.Code = solution.Code;
+            sol.ReceivedGrade = solution.ReceivedGrade;
             await dbContext.SaveChangesAsync();
             return sol.ToDTO();
         }

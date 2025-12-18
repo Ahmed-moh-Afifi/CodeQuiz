@@ -65,41 +65,33 @@ namespace CodeQuizBackend.Quiz.Services
             return quizzesStatistics.Select(qs => qs.Quiz.ToExaminerQuiz(qs.AttemptsCount, qs.SubmittedAttemptsCount, qs.AverageAttemptScore)).ToList();
         }
 
-        public async Task<ExaminerQuiz> UpdateQuiz(ExaminerQuiz quiz)
+        public async Task<ExaminerQuiz> UpdateQuiz(int id, NewQuizModel newQuizModel)
         {
             var quizEntity = await dbContext.Quizzes
-                .Where(q => q.Id == quiz.Id)
+                .Where(q => q.Id == id)
                 .Include(q => q.Attempts)
                 .ThenInclude(a => a.Solutions)
                 .FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found. It may have been deleted.");
-            if (quizEntity.EndDate <= DateTime.Now && quiz.EndDate > DateTime.Now)
+            
+            var newCode = quizEntity.Code;
+            if (quizEntity.EndDate <= DateTime.Now && newQuizModel.EndDate > DateTime.Now)
             {
-                quiz.Code = await quizCodeGenerator.GenerateUniqueQuizCode();
+                newCode = await quizCodeGenerator.GenerateUniqueQuizCode();
             }
 
             quizEntity = new Models.Quiz
             {
-                Id = quiz.Id,
-                Title = quiz.Title,
-                StartDate = quiz.StartDate,
-                EndDate = quiz.EndDate,
-                Duration = quiz.Duration,
-                Code = quiz.Code,
-                ExaminerId = quiz.ExaminerId,
-                GlobalQuestionConfiguration = quiz.GlobalQuestionConfiguration,
-                AllowMultipleAttempts = quiz.AllowMultipleAttempts,
-                TotalPoints = quiz.TotalPoints,
-                Questions = quiz.Questions.Select(q => new Question
-                {
-                    Id = q.Id,
-                    Statement = q.Statement,
-                    EditorCode = q.EditorCode,
-                    QuestionConfiguration = q.QuestionConfiguration,
-                    TestCases = q.TestCases,
-                    QuizId = q.QuizId,
-                    Order = q.Order,
-                    Points = q.Points
-                }).ToList()
+                Id = id,
+                Title = newQuizModel.Title,
+                StartDate = newQuizModel.StartDate,
+                EndDate = newQuizModel.EndDate,
+                Duration = newQuizModel.Duration,
+                Code = newCode,
+                ExaminerId = newQuizModel.ExaminerId,
+                GlobalQuestionConfiguration = newQuizModel.GlobalQuestionConfiguration,
+                AllowMultipleAttempts = newQuizModel.AllowMultipleAttempts,
+                TotalPoints = newQuizModel.Questions.Sum(q => q.Points),
+                Questions = newQuizModel.Questions.Select(q => q.ToQuestion()).ToList()
             };
 
             var updatedQuiz = await quizzesRepository.UpdateQuizAsync(quizEntity);

@@ -38,14 +38,15 @@ namespace CodeQuizBackend.Quiz.Controllers
         /// </summary>
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<ActionResult<ApiResponse<ExaminerQuiz>>> UpdateQuiz(int id, [FromBody] ExaminerQuiz quiz)
+        public async Task<ActionResult<ApiResponse<ExaminerQuiz>>> UpdateQuiz(int id, [FromBody] NewQuizModel newQuizModel)
         {
-            if (id != quiz.Id)
+            var validationErrors = newQuizModel.Validate();
+            if (validationErrors.Count > 0)
             {
-                throw new BadRequestException("Quiz ID mismatch");
+                throw new BadRequestException(string.Join('\n', validationErrors));
             }
 
-            var updatedQuiz = await quizzesService.UpdateQuiz(quiz);
+            var updatedQuiz = await quizzesService.UpdateQuiz(id, newQuizModel);
             return Ok(new ApiResponse<ExaminerQuiz>
             {
                 Success = true,
