@@ -27,5 +27,8 @@ namespace CodeQuizDesktop.APIs
 
         [Get("/Quizzes/code/{code}")]
         public Task<Models.ApiResponse<ExamineeQuiz>> GetQuizByCode(string code);
+
+        [Get("/Quizzes/{quizId}/attempts")]
+        public Task<Models.ApiResponse<List<ExaminerAttempt>>> GetQuizAttempts(int quizId);
     }
 }

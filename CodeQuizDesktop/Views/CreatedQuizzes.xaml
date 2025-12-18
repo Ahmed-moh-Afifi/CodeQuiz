@@ -106,8 +106,7 @@
                                         <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
                                             <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" >
                                                 <Border.GestureRecognizers>
-                                                    <!--<TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:AppointmentsViewModel}}, Path=TestCommand}"/>-->
-                                                    <!--ViewQuizCommand-->
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:CreatedQuizzesVM}}, Path=ViewQuizCommand}" CommandParameter="{Binding .}" />
                                                 </Border.GestureRecognizers>
                                                 <Border.Shadow>
                                                     <Shadow Opacity="0" Radius="0"/>

@@ -6,10 +6,10 @@
              xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
              xmlns:models="clr-namespace:CodeQuizDesktop.Models"
              xmlns:views="clr-namespace:CodeQuizDesktop.Views"
-             x:Class="CodeQuizDesktop.Views.CreateQuiz"
-             Title="CreateQuiz"
+             x:Class="CodeQuizDesktop.Views.EditQuiz"
+             Title="EditQuiz"
              BackgroundColor="#1e1e1e"
-             x:DataType="vm:CreateQuizVM">
+             x:DataType="vm:EditQuizVM">
 
     <Grid RowDefinitions="Auto, *">
         <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" Padding="20,20,20,20" BackgroundColor="#171717">
@@ -27,7 +27,7 @@
 
                 </Image>
             </Border>
-            <Label Grid.Column="1" Text="New Quiz" FontSize="30" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="Edit Quiz" FontSize="30" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
             <HorizontalStackLayout Grid.Column="2" HorizontalOptions="End" VerticalOptions="Center" Spacing="10">
                 <Button Text="Save and Publish" BackgroundColor="#591c21" Command="{Binding PublishCommand}"/>
 
@@ -191,8 +191,8 @@
                             <CollectionView ItemsSource="{Binding QuestionModels}" SelectionMode="None">
                                 <CollectionView.ItemsLayout>
                                     <LinearItemsLayout 
-                                        Orientation="Vertical"
-                                        ItemSpacing="10"/>
+                                    Orientation="Vertical"
+                                    ItemSpacing="10"/>
                                 </CollectionView.ItemsLayout>
                                 <CollectionView.EmptyView>
                                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e" Padding="40">
@@ -254,4 +254,5 @@
             </Grid>
         </Grid>
     </Grid>
+
 </ContentPage>

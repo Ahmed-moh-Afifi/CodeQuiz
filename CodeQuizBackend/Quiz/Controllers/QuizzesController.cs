@@ -18,6 +18,12 @@ namespace CodeQuizBackend.Quiz.Controllers
         [Authorize]
         public async Task<ActionResult<ApiResponse<ExaminerQuiz>>> CreateQuiz([FromBody] NewQuizModel newQuizModel)
         {
+            var validationErrors = newQuizModel.Validate();
+            if (validationErrors.Count > 0)
+            {
+                throw new BadRequestException(string.Join('\n', validationErrors));
+            }
+
             var quiz = await quizzesService.CreateQuiz(newQuizModel);
             return Created($"/api/Quizzes/code/{quiz.Code}", new ApiResponse<ExaminerQuiz>
             {
@@ -103,6 +109,7 @@ namespace CodeQuizBackend.Quiz.Controllers
         /// Gets a quiz by its unique code (for examinees to join)
         /// </summary>
         [HttpGet("code/{code}")]
+        [Authorize]
         public async Task<ActionResult<ApiResponse<ExamineeQuiz>>> GetQuizByCode(string code)
         {
             var quiz = await quizzesService.GetQuizByCode(code);
@@ -110,6 +117,19 @@ namespace CodeQuizBackend.Quiz.Controllers
             {
                 Success = true,
                 Data = quiz
+            });
+        }
+
+
+        [HttpGet("{quizId}/attempts")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<List<ExaminerAttempt>>>> GetQuizAttempts(int quizId)
+        {
+            var attempts = await quizzesService.GetQuizAttempts(quizId);
+            return Ok(new ApiResponse<List<ExaminerAttempt>>
+            {
+                Success = true,
+                Data = attempts
             });
         }
     }

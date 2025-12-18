@@ -51,6 +51,9 @@ namespace CodeQuizDesktop
             builder.Services.AddScoped<JoinQuizVM>();
             builder.Services.AddScoped<ExaminerViewQuizVM>();
             builder.Services.AddScoped<StartupViewModel>();
+            builder.Services.AddScoped<GradeAttemptVM>();
+            builder.Services.AddScoped<ExamineeReviewQuizVM>();
+            builder.Services.AddScoped<EditQuizVM>();
 
             builder.Services.AddSingleton<IPopupService, PopupService>();
             builder.Services.AddSingleton<ITokenService, TokenService>();

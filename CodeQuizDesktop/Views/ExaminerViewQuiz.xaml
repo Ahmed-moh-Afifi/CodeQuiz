@@ -1,12 +1,78 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
+             xmlns:models="clr-namespace:CodeQuizDesktop.Models"
+             xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
              x:Class="CodeQuizDesktop.Views.ExaminerViewQuiz"
-             Title="ExaminerViewQuiz">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             Title="ExaminerViewQuiz"
+             x:DataType="vm:ExaminerViewQuizVM"
+             BackgroundColor="#1e1e1e">
+
+    <Grid RowDefinitions="Auto, *">
+        <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" Padding="20,20,20,20" BackgroundColor="#171717">
+            <Border  WidthRequest="30" HeightRequest="35" StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="White">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ReturnCommand}"/>
+                </Border.GestureRecognizers>
+                <Border.Shadow>
+                    <Shadow Opacity="0" Radius="0"/>
+                </Border.Shadow>
+                <Image Source="arrow_back_ios_new_rounded.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Image.Behaviors>
+                        <toolkit:IconTintColorBehavior TintColor="White" />
+                    </Image.Behaviors>
+
+                </Image>
+            </Border>
+            <Label Grid.Column="1" Text="{Binding Quiz.Title}" FontSize="30" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Grid>
+        <BoxView HeightRequest="1" Color="#3b3b3b" Margin="0,0" VerticalOptions="End"/>
+        <Grid Grid.Row="1" ColumnDefinitions="*,2*,*">
+            <Border  Grid.Column="1" StrokeShape="RoundRectangle 10" Background="#2e2e2e" StrokeThickness="0" Margin="0,20,0,0" >
+                <Border.Shadow>
+                    <Shadow Radius="2.5" Opacity="0.5" />
+                </Border.Shadow>
+                <Grid RowDefinitions="Auto,*">
+
+
+                    <Grid Grid.Row="0" ColumnDefinitions="*,*,*,*" BackgroundColor="#212121" Padding="20, 10">
+
+
+                        <Label Text="PARTICIPANT" Grid.Column="0" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="SUBMITTED" Grid.Column="1" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="SCORE" Grid.Column="2" TextColor="#888888" VerticalOptions="Center"/>
+                        <Label Text="ACTIONS" Grid.Column="3" TextColor="#888888" VerticalOptions="Center"/>
+                    </Grid>
+
+
+                    <CollectionView Grid.Row="1" ItemsSource="{Binding Attempts}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:ExaminerAttempt">
+
+                                <Grid ColumnDefinitions="*,*,*,*" Padding="20">
+                                    <BoxView Grid.ColumnSpan="9" HeightRequest="1" Color="#2a2a2a" Margin="0,0" VerticalOptions="Start"/>
+
+                                    <Label Text="{Binding Examinee.FullName}" TextColor="White" Grid.Column="0" VerticalOptions="Center"/>
+                                    <Label Text="{Binding SubmissionTimeString}" TextColor="White" Grid.Column="1" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Grade}" TextColor="White" Grid.Column="2" VerticalOptions="Center"/>
+                                    <Border Grid.Column="3" VerticalOptions="Center" HorizontalOptions="Start" Padding="10,5" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="#888888">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:ExaminerViewQuizVM}}, Path=GoToGradeAttemptPageCommand}" CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+                                        <Label Text="Grade" TextColor="White" />
+                                    </Border>
+                                    
+                                </Grid>
+
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+
 </ContentPage>

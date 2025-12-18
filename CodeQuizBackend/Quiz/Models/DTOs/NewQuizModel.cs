@@ -35,5 +35,16 @@
             quiz.Code = generatedCode;
             return quiz;
         }
+
+        public List<string> Validate()
+        {
+            List<string> errors = [];
+            if (Questions.Count == 0)
+            {
+                errors.Add("Cannot create quiz without questions");
+            }
+
+            return errors;
+        }
     }
 }

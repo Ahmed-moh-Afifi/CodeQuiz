@@ -9,45 +9,15 @@ using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
 {
-    public class JoinQuizVM : BaseViewModel, IQueryAttributable
+    public class ExamineeReviewQuizVM : BaseViewModel, IQueryAttributable
     {
-        private ExamineeAttempt? attempt;
-        public ExamineeAttempt? Attempt
+        private ExamineeAttempt attempt;
+        public ExamineeAttempt Attempt
         {
-            get => attempt;
+            get { return attempt; }
             set
             {
                 attempt = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private TimeSpan remainingTime;
-        public TimeSpan RemainingTime
-        {
-            get { return remainingTime; }
-            set
-            {
-                remainingTime = new TimeSpan(value.Hours, value.Minutes, value.Seconds);
-                if (value.Hours == 0 && value.Minutes == 0 && value.Seconds == 0)
-                {
-                    WaitingForAutoSubmission = true;
-                }
-                OnPropertyChanged();
-            }
-        }
-
-        private bool waitingForAutoSubmission = false;
-        public bool WaitingForAutoSubmission
-        {
-            get { return waitingForAutoSubmission; }
-            set
-            {
-                waitingForAutoSubmission = value;
-                if (value)
-                {
-                    System.Diagnostics.Debug.WriteLine("WaitingForAutoSubmission Set to TRUE");
-                }
                 OnPropertyChanged();
             }
         }
@@ -113,100 +83,60 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        // Commands
+        private float? grade;
+
+        public float? Grade
+        {
+            get { return grade; }
+            set
+            {
+                grade = value;
+                OnPropertyChanged();
+            }
+        }
+
+        //Commands
         public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }
-        public ICommand SubmitQuizCommand { get => new Command(SubmitQuiz); }
         public ICommand NextQuestionCommand { get => new Command(NextQuestion); }
         public ICommand PreviousQuestionCommand { get => new Command(PreviousQuestion); }
         public ICommand SpecificQuestionCommand { get => new Command<Question>(SpecificQuestion); }
         public ICommand RunCommand { get => new Command(Run); }
-
-        // Remaining Time Timer
-        IDispatcherTimer? dispatcherTimer;
-
-        public void ApplyQueryAttributes(IDictionary<string, object> query)
+        public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.ContainsKey("attempt") && query["attempt"] is ExamineeAttempt receivedAttempt)
             {
                 Attempt = receivedAttempt;
-                _attemptsRepository.SubscribeUpdate(CheckAndUpdate);
-                CalculateRemainingTime();
-                SelectedQuestion = Attempt.Quiz.Questions.Find(q => q.Order == 1);
+                SelectedQuestion = Attempt!.Quiz.Questions.Find(q => q.Order == 1);
+                System.Diagnostics.Debug.WriteLine($"Clicked: {Attempt.Quiz.Title}");
             }
         }
-
-        public void CheckAndUpdate(ExamineeAttempt attempt)
-        {
-            if (attempt.Id == Attempt!.Id)
-            {
-                Attempt = attempt;
-                if (Attempt.EndTime != null)
-                {
-                    MainThread.BeginInvokeOnMainThread(async () =>
-                    {
-                        dispatcherTimer?.Stop();
-                        dispatcherTimer = null;
-                        WaitingForAutoSubmission = false;
-                        ReturnToPreviousPage();
-                    });
-                }
-            }
-        }
-
-        public void CalculateRemainingTime()
-        {
-            if (dispatcherTimer == null)
-            {
-                dispatcherTimer = Application.Current!.Dispatcher.CreateTimer();
-                dispatcherTimer.Interval = TimeSpan.FromSeconds(1);
-                dispatcherTimer.Tick += (s, e) => CalculateRemainingTime();
-                dispatcherTimer.Start();
-            }
-
-            var tmpRemainingTime = Attempt!.MaxEndTime.Subtract(DateTime.Now);
-            RemainingTime = tmpRemainingTime.TotalSeconds > 0 ? tmpRemainingTime : TimeSpan.Zero;
-        }
-
         private async void ReturnToPreviousPage()
         {
-            await Shell.Current.GoToAsync("///MainPage");
-        }
-
-        private void SaveSolution()
-        {
-            Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.Code = CodeInEditor;
-            _attemptsRepository.UpdateSolution(Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!);
-        }
-
-        private async void SubmitQuiz()
-        {
-            SaveSolution();
-            var response = await _attemptsRepository.SubmitAttempt(Attempt!.Id);
-            ReturnToPreviousPage();
+            await Shell.Current.GoToAsync("..");
         }
 
         private void NextQuestion()
         {
-            SaveSolution();
             if (SelectedQuestion!.Order + 1 <= Attempt!.Quiz.Questions.Count)
             {
                 SelectedQuestion = Attempt!.Quiz.Questions.Find(q => q.Order == SelectedQuestion!.Order + 1);
+                Grade = Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.ReceivedGrade;
             }
         }
 
         private void PreviousQuestion()
         {
-            SaveSolution();
             if (SelectedQuestion!.Order - 1 > 0)
             {
                 SelectedQuestion = Attempt!.Quiz.Questions.Find(q => q.Order == SelectedQuestion!.Order - 1);
+                Grade = Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.ReceivedGrade;
             }
         }
 
         private void SpecificQuestion(Question question)
         {
-            SaveSolution();
             SelectedQuestion = question;
+            Grade = Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.ReceivedGrade;
         }
 
         private async void Run()
@@ -252,14 +182,11 @@ namespace CodeQuizDesktop.Viewmodels
 
         }
 
-        private IAttemptsRepository _attemptsRepository;
         private IExecutionRepository _executionRepository;
 
-        public JoinQuizVM(IAttemptsRepository attemptsRepository, IExecutionRepository executionRepository)
+        public ExamineeReviewQuizVM(IExecutionRepository executionRepository)
         {
-            _attemptsRepository = attemptsRepository;
             _executionRepository = executionRepository;
-            _attemptsRepository.SubscribeUpdate(a => Attempt = a);
         }
     }
 }

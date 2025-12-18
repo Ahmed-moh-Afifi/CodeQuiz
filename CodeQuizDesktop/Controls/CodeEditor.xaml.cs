@@ -13,6 +13,7 @@ public partial class CodeEditor : ContentView
     private bool _isEditorReady = false;
     private string? _pendingCode;
     private string? _pendingLanguage;
+    private bool _isSettingCodeFromWebView = false;
 
     #region Bindable Properties
 
@@ -33,14 +34,13 @@ public partial class CodeEditor : ContentView
     }
 
     /// <summary>
-    /// Whether code execution is allowed (affects which editor is loaded)
+    /// Whether code execution is allowed
     /// </summary>
     public static readonly BindableProperty AllowExecutionProperty = BindableProperty.Create(
         nameof(AllowExecution),
         typeof(bool),
         typeof(CodeEditor),
-        true,
-        propertyChanged: OnEditorConfigChanged);
+        true);
 
     public bool AllowExecution
     {
@@ -49,14 +49,13 @@ public partial class CodeEditor : ContentView
     }
 
     /// <summary>
-    /// Whether to show output (affects editor type selection)
+    /// Whether to show output
     /// </summary>
     public static readonly BindableProperty ShowOutputProperty = BindableProperty.Create(
         nameof(ShowOutput),
         typeof(bool),
         typeof(CodeEditor),
-        true,
-        propertyChanged: OnEditorConfigChanged);
+        true);
 
     public bool ShowOutput
     {
@@ -65,14 +64,13 @@ public partial class CodeEditor : ContentView
     }
 
     /// <summary>
-    /// Whether to show errors (affects editor type selection)
+    /// Whether to show errors
     /// </summary>
     public static readonly BindableProperty ShowErrorProperty = BindableProperty.Create(
         nameof(ShowError),
         typeof(bool),
         typeof(CodeEditor),
-        true,
-        propertyChanged: OnEditorConfigChanged);
+        true);
 
     public bool ShowError
     {
@@ -87,8 +85,7 @@ public partial class CodeEditor : ContentView
         nameof(IsReadOnly),
         typeof(bool),
         typeof(CodeEditor),
-        false,
-        propertyChanged: OnEditorConfigChanged);
+        false);
 
     public bool IsReadOnly
     {
@@ -97,14 +94,14 @@ public partial class CodeEditor : ContentView
     }
 
     /// <summary>
-    /// The type of editor to use (overrides automatic selection)
+    /// The type of editor to use
     /// </summary>
     public static readonly BindableProperty EditorTypeProperty = BindableProperty.Create(
         nameof(EditorType),
         typeof(EditorType),
         typeof(CodeEditor),
-        EditorType.Auto,
-        propertyChanged: OnEditorConfigChanged);
+        EditorType.AllHelpers,
+        propertyChanged: OnEditorTypeChanged);
 
     public EditorType EditorType
     {
@@ -272,8 +269,13 @@ public partial class CodeEditor : ContentView
                 {
                     var code = contentElement.GetString() ?? string.Empty;
                     _getCodeTcs?.TrySetResult(code);
-					Code = code;
-					System.Diagnostics.Debug.WriteLine(code);
+                    
+                    // Update Code property without triggering SetCodeAsync again
+                    _isSettingCodeFromWebView = true;
+                    Code = code;
+                    _isSettingCodeFromWebView = false;
+                    
+                    System.Diagnostics.Debug.WriteLine(code);
                 }
             }
             else if (root.TryGetProperty("type", out var readyType) && readyType.GetString() == "ready")
@@ -300,11 +302,15 @@ public partial class CodeEditor : ContentView
     {
         if (bindable is CodeEditor editor && newValue is string code)
         {
-            _ = editor.SetCodeInternalAsync(code);
+            // Skip if the change came from the WebView itself
+            if (editor._isSettingCodeFromWebView)
+                return;
+                
+            _ = editor.SetCodeAsync(code);
         }
     }
 
-    private static void OnEditorConfigChanged(BindableObject bindable, object oldValue, object newValue)
+    private static void OnEditorTypeChanged(BindableObject bindable, object oldValue, object newValue)
     {
         if (bindable is CodeEditor editor)
         {
@@ -321,14 +327,7 @@ public partial class CodeEditor : ContentView
 
     private string GetEditorPath()
     {
-        var selectedType = EditorType;
-
-        if (selectedType == EditorType.Auto)
-        {
-            selectedType = DetermineEditorType();
-        }
-
-        return selectedType switch
+        return EditorType switch
         {
             EditorType.AllHelpers => "wwwroot/monaco/AllHelpersEditor/editor.html",
             EditorType.IntellisenseOnly => "wwwroot/monaco/IntellisenseOnlyEditor/editor.html",
@@ -337,42 +336,6 @@ public partial class CodeEditor : ContentView
             EditorType.SignatureOnly => "wwwroot/monaco/SignatureOnlyEditor/editor.html",
             _ => "wwwroot/monaco/AllHelpersEditor/editor.html"
         };
-    }
-
-    private EditorType DetermineEditorType()
-    {
-        // If read-only is explicitly set, use ReadOnly editor
-        if (IsReadOnly)
-        {
-            return EditorType.ReadOnly;
-        }
-
-        // If execution is not allowed, use a limited editor
-        if (!AllowExecution)
-        {
-            return EditorType.NoHelpers;
-        }
-
-        // If output/error is hidden, use intellisense only
-        if (!ShowOutput || !ShowError)
-        {
-            return EditorType.IntellisenseOnly;
-        }
-
-        // Default to full-featured editor
-        return EditorType.AllHelpers;
-    }
-
-    private async Task SetCodeInternalAsync(string code)
-    {
-        if (!_isEditorReady)
-        {
-            _pendingCode = code;
-            return;
-        }
-
-        if (await GetCodeAsync() != code)
-            await SetCodeAsync(code);
     }
 
     private async Task SetLanguageInternalAsync(string language)
@@ -475,11 +438,6 @@ public partial class CodeEditor : ContentView
 public enum EditorType
 {
     /// <summary>
-    /// Automatically determine based on configuration
-    /// </summary>
-    Auto,
-
-    /// <summary>
     /// Full-featured editor with all helpers (intellisense, parameter hints, etc.)
     /// </summary>
     AllHelpers,
@@ -490,7 +448,7 @@ public enum EditorType
     IntellisenseOnly,
 
     /// <summary>
-    /// Read-only editor with no helpers
+    /// Editor with no helpers
     /// </summary>
     NoHelpers,
 
@@ -500,7 +458,7 @@ public enum EditorType
     ReadOnly,
 
     /// <summary>
-    /// Read-only with signature help only
+    /// Editor with signature help only
     /// </summary>
     SignatureOnly
 }
