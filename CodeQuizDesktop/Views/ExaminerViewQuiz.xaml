@@ -71,6 +71,22 @@
 
                 </Grid>
             </Border>
+
+
+            <Border Grid.Column="2" WidthRequest="70" HeightRequest="70" StrokeShape="RoundRectangle 70" Background="#591c21" StrokeThickness="0" HorizontalOptions="End" VerticalOptions="End" Margin="30">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SaveGradesReportCommand}"/>
+                </Border.GestureRecognizers>
+                <Border.Shadow>
+                    <Shadow Opacity="0" Radius="0"/>
+                </Border.Shadow>
+                <Image Source="download.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Image.Behaviors>
+                        <toolkit:IconTintColorBehavior TintColor="White" />
+                    </Image.Behaviors>
+                </Image>
+            </Border>
+
         </Grid>
     </Grid>
 
