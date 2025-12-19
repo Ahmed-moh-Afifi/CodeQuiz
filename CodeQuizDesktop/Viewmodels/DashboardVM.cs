@@ -6,6 +6,9 @@ namespace CodeQuizDesktop.Viewmodels
 {
     public class DashboardVM : BaseViewModel
     {
+        private IAttemptsRepository _attemptsRepository;
+        private IQuizzesRepository _quizzesRepository;
+
         private ObservableCollection<ExamineeAttempt> joinedAttempts;
         public ObservableCollection<ExamineeAttempt> JoinedAttempts
         {
@@ -34,10 +37,18 @@ namespace CodeQuizDesktop.Viewmodels
             set { endedQuizzes = value; OnPropertyChanged(); }
         }
 
-        public DashboardVM()
+        protected ObservableCollection<ExamineeAttempt> initializedJoinedAttempts = new();
+        protected ObservableCollection<ExaminerQuiz> initializedCreatedQuizzes = new();
+
+        public DashboardVM(
+            IAttemptsRepository attemptsRepository,
+            IQuizzesRepository quizzesRepository)
         {
-            JoinedAttempts = new ObservableCollection<ExamineeAttempt>();
-            CreatedQuizzes = new ObservableCollection<ExaminerQuiz>();
+            _attemptsRepository = attemptsRepository;
+            _quizzesRepository = quizzesRepository;
+
+            JoinedAttempts = initializedJoinedAttempts;
+            CreatedQuizzes = initializedCreatedQuizzes;
         }
     }
 }
