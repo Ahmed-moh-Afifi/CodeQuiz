@@ -20,6 +20,20 @@ namespace CodeQuizDesktop.Viewmodels
             set { createdQuizzes = value; OnPropertyChanged(); }
         }
 
+        private ObservableCollection<ExaminerQuiz> upcomingQuizzes = new();
+        public ObservableCollection<ExaminerQuiz> UpcomingQuizzes
+        {
+            get => upcomingQuizzes;
+            set { upcomingQuizzes = value; OnPropertyChanged(); }
+        }
+
+        private ObservableCollection<ExaminerQuiz> endedQuizzes = new();
+        public ObservableCollection<ExaminerQuiz> EndedQuizzes
+        {
+            get => endedQuizzes;
+            set { endedQuizzes = value; OnPropertyChanged(); }
+        }
+
         public DashboardVM()
         {
             JoinedAttempts = new ObservableCollection<ExamineeAttempt>();
