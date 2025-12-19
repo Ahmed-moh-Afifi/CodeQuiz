@@ -5,13 +5,14 @@ using CodeQuizBackend.Quiz.Exceptions;
 using CodeQuizBackend.Quiz.Hubs;
 using CodeQuizBackend.Quiz.Models;
 using CodeQuizBackend.Quiz.Models.DTOs;
+using CodeQuizBackend.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CodeQuizBackend.Quiz.Services
 {
-    public class AttemptsService(ApplicationDbContext dbContext, IEvaluator evaluator, IHubContext<AttemptsHub> attemptsHubContext) : IAttemptsService
+    public class AttemptsService(ApplicationDbContext dbContext, IEvaluator evaluator, IHubContext<AttemptsHub> attemptsHubContext, IMailService mailService) : IAttemptsService
     {
         public async Task<ExamineeAttempt> BeginAttempt(string quizCode, string examineeId)
         {
@@ -126,6 +127,7 @@ namespace CodeQuizBackend.Quiz.Services
         {
             var attempt = await dbContext.Attempts
                 .Where(a => a.Id == attemptId)
+                .Include(a => a.Examinee)
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Questions)
                 .Include(a => a.Solutions)
@@ -137,13 +139,17 @@ namespace CodeQuizBackend.Quiz.Services
                 throw new AttemptNotSubmittedException();
             }
 
-            GradeAttemptSolutions(attempt);
+            var evaluated = GradeAttemptSolutions(attempt);
             await dbContext.SaveChangesAsync();
-            await attemptsHubContext.Clients.All.SendAsync("AttemptUpdated", attempt.ToExaminerAttempt(), attempt.ToExamineeAttempt());
+            var examineeAttempt = attempt.ToExamineeAttempt();
+            var examinerAttempt = attempt.ToExaminerAttempt();
+            if (evaluated) await mailService.SendAttemptFeedbackAsync(attempt.Examinee.Email!, attempt.Examinee.FirstName, attempt.Quiz.Title, (float)examineeAttempt.Grade!, attempt.Quiz.ToExamineeQuiz().TotalPoints, attempt.StartTime, DateTime.Now);
+            await attemptsHubContext.Clients.All.SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
         }
 
-        private void GradeAttemptSolutions(Attempt attempt)
+        private bool GradeAttemptSolutions(Attempt attempt)
         {
+            var evaluatedCount = 0;
             foreach (var solution in attempt.Solutions)
             {
                 var question = attempt.Quiz.Questions.First(q => q.Id == solution.QuestionId);
@@ -152,8 +158,11 @@ namespace CodeQuizBackend.Quiz.Services
                     var correctSolution = TestCasesPassed(attempt.Quiz, question, solution);
                     solution.ReceivedGrade = correctSolution ? question.Points : 0;
                     solution.EvaluatedBy = "System";
+                    evaluatedCount++;
                 }
             }
+
+            return evaluatedCount == attempt.Solutions.Count;
         }
 
         private bool TestCasesPassed(Quiz.Models.Quiz quiz, Question question, Solution solution)
