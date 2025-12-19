@@ -133,5 +133,54 @@ namespace CodeQuizBackend.Services
 
             await SendEmailAsync(toEmail, subject, body, isHtml: true);
         }
+
+        public async Task SendAttemptFeedbackAsync(string toEmail, string firstName, string quizTitle, float examineeGrade, float totalGrade, DateTime startTime, DateTime finishTime)
+        {
+            var subject = $"Quiz Results: {quizTitle}";
+            var percentage = totalGrade > 0 ? (examineeGrade / totalGrade) * 100 : 0;
+            var gradeColor = percentage >= 70 ? "#4CAF50" : (percentage >= 40 ? "#FFC107" : "#F44336"); // Green, Amber, Red
+
+            var body = $"""
+                <html>
+                <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: {TextColor}; margin: 0; padding: 0; background-color: {BackgroundDarker};">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <div style="background: linear-gradient(135deg, {PrimaryLightColor}, {PrimaryColor}); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+                            <h1 style="color: white; margin: 0; font-size: 28px;">CodeQuiz</h1>
+                            <p style="color: {TextColor}; margin: 10px 0 0 0; font-size: 14px;">Quiz Attempt Results</p>
+                        </div>
+                        <div style="background-color: {BackgroundDark}; padding: 30px; border-radius: 0 0 12px 12px; border: 1px solid {BorderColor}; border-top: none;">
+                            <h2 style="color: {TextColor}; margin-top: 0;">Hello {firstName},</h2>
+                            <p style="color: {TextColor};">Here are the results for your attempt on <strong>{quizTitle}</strong>.</p>
+                            
+                            <div style="background-color: {BackgroundDarker}; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid {BorderColor}; text-align: center;">
+                                <p style="margin: 0; font-size: 14px; color: {MutedTextColor};">Your Score</p>
+                                <h1 style="margin: 10px 0; font-size: 48px; color: {gradeColor};">{examineeGrade:0.##} <span style="font-size: 24px; color: {MutedTextColor};">/ {totalGrade:0.##}</span></h1>
+                                <p style="margin: 0; font-size: 16px; color: {TextColor}; font-weight: bold;">{percentage:0.##}%</p>
+                            </div>
+
+                            <div style="margin: 20px 0;">
+                                <p style="color: {TextColor}; margin-bottom: 5px;"><strong>Attempt Details:</strong></p>
+                                <ul style="color: {TextColor}; padding-left: 20px; margin-top: 5px;">
+                                    <li style="margin-bottom: 5px;">Started: {startTime:g}</li>
+                                    <li style="margin-bottom: 5px;">Finished: {finishTime:g}</li>
+                                    <li style="margin-bottom: 5px;">Duration: {(finishTime - startTime).ToString(@"hh\:mm\:ss")}</li>
+                                </ul>
+                            </div>
+
+                            <div style="text-align: center; margin: 30px 0;">
+                                <p style="color: {MutedTextColor};">Keep practicing to improve your skills!</p>
+                            </div>
+                            <hr style="border: none; border-top: 1px solid {BorderColor}; margin: 20px 0;">
+                            <p style="font-size: 12px; color: {MutedTextColor}; text-align: center;">
+                                This is an automated message from CodeQuiz. Please do not reply to this email.
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """;
+
+            await SendEmailAsync(toEmail, subject, body, isHtml: true);
+        }
     }
 }
