@@ -14,7 +14,6 @@ namespace CodeQuizBackend.Quiz.Models
         public required string ExaminerId { get; set; }
         public required QuestionConfiguration GlobalQuestionConfiguration { get; set; }
         public required bool AllowMultipleAttempts { get; set; }
-        public required float TotalPoints { get; set; }
 
         public virtual User Examiner { get; set; } = null!;
         public virtual List<Question> Questions { get; set; } = [];
@@ -37,7 +36,6 @@ namespace CodeQuizBackend.Quiz.Models
                 AttemptsCount = attemptsCount,
                 SubmittedAttemptsCount = submittedAttemptsCount,
                 AverageAttemptScore = averageAttemptScore,
-                TotalPoints = TotalPoints,
             };
         }
 
@@ -56,7 +54,6 @@ namespace CodeQuizBackend.Quiz.Models
                 AllowMultipleAttempts = AllowMultipleAttempts,
                 Questions = Questions.Select(q => q.ToDTO(q.QuestionConfiguration ?? GlobalQuestionConfiguration)).ToList(),
                 Examiner = Examiner.ToDTO(),
-                TotalPoints = TotalPoints,
             };
         }
     }
