@@ -1,126 +1,114 @@
 ﻿using CodeQuizDesktop.APIs;
+using CodeQuizDesktop.Exceptions;
 using CodeQuizDesktop.Models;
-using Microsoft.AspNetCore.SignalR.Client;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CodeQuizDesktop.Resources;
+using Microsoft.AspNetCore.SignalR.Client;
 
-namespace CodeQuizDesktop.Repositories
+namespace CodeQuizDesktop.Repositories;
+
+public class QuizzesRepository(IQuizzesAPI quizzesAPI) : BaseTwoTypesObservableRepository<ExaminerQuiz, ExamineeQuiz>, IQuizzesRepository
 {
-    public class QuizzesRepository(IQuizzesAPI quizzesAPI) : BaseTwoTypesObservableRepository<ExaminerQuiz, ExamineeQuiz>, IQuizzesRepository
+    public async void Initialize()
     {
-        public async void Initialize()
-        {
-            var connection = new HubConnectionBuilder().WithUrl($"{Config.HUB}/Attempts").WithAutomaticReconnect().Build();
-            connection.On<ExaminerQuiz, ExamineeQuiz>("QuizCreated", (erq, eeq) => NotifyCreate(eeq));
-            connection.On<ExaminerQuiz, ExamineeQuiz>("QuizUpdated", (erq, eeq) => NotifyUpdate(eeq));
-            await connection.StartAsync();
-        }
+        var connection = new HubConnectionBuilder().WithUrl($"{Config.HUB}/Attempts").WithAutomaticReconnect().Build();
+        connection.On<ExaminerQuiz, ExamineeQuiz>("QuizCreated", (erq, eeq) => NotifyCreate(eeq));
+        connection.On<ExaminerQuiz, ExamineeQuiz>("QuizUpdated", (erq, eeq) => NotifyUpdate(eeq));
+        await connection.StartAsync();
+    }
 
-        public async Task<ExaminerQuiz> CreateQuiz(NewQuizModel newQuizModel)
+    public async Task<ExaminerQuiz> CreateQuiz(NewQuizModel newQuizModel)
+    {
+        try
         {
-            try
-            {
-                var quiz = (await quizzesAPI.CreateQuiz(newQuizModel)).Data!;
-                NotifyCreate(quiz!);
-                return quiz;
-            }
-            catch (Exception)
-            {
-                // Log exception here...
-                throw; // Replace with a custom exception
-            }
+            var quiz = (await quizzesAPI.CreateQuiz(newQuizModel)).Data!;
+            NotifyCreate(quiz!);
+            return quiz;
         }
-
-        public async Task DeleteQuiz(int quizId)
+        catch (Exception ex)
         {
-            try
-            {
-                await quizzesAPI.DeleteQuiz(quizId);
-                NotifyDelete<ExaminerQuiz>(quizId);
-                NotifyDelete<ExamineeQuiz>(quizId);
-            }
-            catch (Exception)
-            {
-                // Log exception here...
-                throw; // Replace with a custom exception
-            }
+            throw ApiServiceException.FromException(ex, "Failed to create quiz.");
         }
+    }
 
-        public async Task<ExamineeQuiz> GetQuizByCode(string code)
+    public async Task DeleteQuiz(int quizId)
+    {
+        try
         {
-            try
-            {
-                return (await quizzesAPI.GetQuizByCode(code)).Data!;
-            }
-            catch (Exception)
-            {
-                // Log exception here...
-                throw; // Replace with a custom exception
-            }
+            await quizzesAPI.DeleteQuiz(quizId);
+            NotifyDelete<ExaminerQuiz>(quizId);
+            NotifyDelete<ExamineeQuiz>(quizId);
         }
-
-        public async Task<List<ExaminerQuiz>> GetUserQuizzes()
+        catch (Exception ex)
         {
-            try
-            {
-                return (await quizzesAPI.GetUserQuizzes()).Data!;
-            }
-            catch (Exception)
-            {
-                // Log exception here...
-                throw; // Replace with a custom exception
-            }
+            throw ApiServiceException.FromException(ex, "Failed to delete quiz.");
         }
+    }
 
-        public async Task<List<ExaminerQuiz>> GetUserQuizzes(string userId)
+    public async Task<ExamineeQuiz> GetQuizByCode(string code)
+    {
+        try
         {
-            try
-            {
-                return (await quizzesAPI.GetUserQuizzes(userId)).Data!;
-            }
-            catch (Exception)
-            {
-                // Log exception here...
-                throw; // Replace with a custom exception
-            }
+            return (await quizzesAPI.GetQuizByCode(code)).Data!;
         }
-
-        public async Task<ExaminerQuiz> UpdateQuiz(int quizId, NewQuizModel newQuizModel)
+        catch (Exception ex)
         {
-            try
-            {
-                var qz = (await quizzesAPI.UpdateQuiz(quizId, newQuizModel)).Data!;
-                // Get ExamineeQuiz counterpart and notify update
-                var examineeQuiz = (await quizzesAPI.GetQuizByCode(qz.Code)).Data!;
-                if (examineeQuiz.Id == qz.Id)
-                {
-                    NotifyUpdate(examineeQuiz!);
-                }
-                NotifyUpdate(qz!);
-                return qz;
-            }
-            catch (Exception)
-            {
-                // Log exception here...
-                throw; // Replace with a custom exception
-            }
+            throw ApiServiceException.FromException(ex, "Failed to find quiz.");
         }
+    }
 
-        public async Task<List<ExaminerAttempt>> GetQuizAttempts(int quizId)
+    public async Task<List<ExaminerQuiz>> GetUserQuizzes()
+    {
+        try
         {
-            try
+            return (await quizzesAPI.GetUserQuizzes()).Data!;
+        }
+        catch (Exception ex)
+        {
+            throw ApiServiceException.FromException(ex, "Failed to load quizzes.");
+        }
+    }
+
+    public async Task<List<ExaminerQuiz>> GetUserQuizzes(string userId)
+    {
+        try
+        {
+            return (await quizzesAPI.GetUserQuizzes(userId)).Data!;
+        }
+        catch (Exception ex)
+        {
+            throw ApiServiceException.FromException(ex, "Failed to load quizzes.");
+        }
+    }
+
+    public async Task<ExaminerQuiz> UpdateQuiz(int quizId, NewQuizModel newQuizModel)
+    {
+        try
+        {
+            var qz = (await quizzesAPI.UpdateQuiz(quizId, newQuizModel)).Data!;
+            // Get ExamineeQuiz counterpart and notify update
+            var examineeQuiz = (await quizzesAPI.GetQuizByCode(qz.Code)).Data!;
+            if (examineeQuiz.Id == qz.Id)
             {
-                return (await quizzesAPI.GetQuizAttempts(quizId)).Data!;
+                NotifyUpdate(examineeQuiz!);
             }
-            catch (Exception)
-            {
-                // Log exception here...
-                throw; // Replace with a custom exception
-            }
+            NotifyUpdate(qz!);
+            return qz;
+        }
+        catch (Exception ex)
+        {
+            throw ApiServiceException.FromException(ex, "Failed to update quiz.");
+        }
+    }
+
+    public async Task<List<ExaminerAttempt>> GetQuizAttempts(int quizId)
+    {
+        try
+        {
+            return (await quizzesAPI.GetQuizAttempts(quizId)).Data!;
+        }
+        catch (Exception ex)
+        {
+            throw ApiServiceException.FromException(ex, "Failed to load quiz attempts.");
         }
     }
 }

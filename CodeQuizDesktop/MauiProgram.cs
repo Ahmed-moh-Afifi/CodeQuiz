@@ -1,4 +1,5 @@
 ﻿using CodeQuizDesktop.APIs;
+using CodeQuizDesktop.Logging;
 using CodeQuizDesktop.Repositories;
 using CodeQuizDesktop.Services;
 using CodeQuizDesktop.Viewmodels;
@@ -41,6 +42,15 @@ namespace CodeQuizDesktop
             //Popups
             builder.Services.AddTransient<AddQuestionDialog>();
 
+            // Views
+            builder.Services.AddTransient<Startup>();
+            builder.Services.AddTransient<Login>();
+            builder.Services.AddTransient<Register>();
+            builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<CreateQuiz>();
+            builder.Services.AddTransient<JoinQuiz>();
+            builder.Services.AddTransient<ExaminerViewQuiz>();
+
             //ViewModels
             builder.Services.AddTransient<LoginVM>();
             builder.Services.AddTransient<RegisterVM>();
@@ -55,25 +65,27 @@ namespace CodeQuizDesktop
             builder.Services.AddTransient<ExamineeReviewQuizVM>();
 
             //Services
+            builder.Services.AddSingleton(SecureStorage.Default);
             builder.Services.AddSingleton<IPopupService, PopupService>();
             builder.Services.AddSingleton<ITokenService, TokenService>();
-
-            var uri = "http://localhost:5062/api";
-
-            builder.Services.AddRefitClient<IAuthAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri));
-            builder.Services.AddRefitClient<IAttemptsAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>();
-            builder.Services.AddRefitClient<IQuizzesAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>();
-            builder.Services.AddRefitClient<IUsersAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>();
-            builder.Services.AddRefitClient<IExecutionAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>();
-
-            builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
             builder.Services.AddSingleton<IAuthenticationRepository, AuthenticationRepository>();
             builder.Services.AddSingleton<IAttemptsRepository, AttemptsRepository>();
             builder.Services.AddSingleton<IQuizzesRepository, QuizzesRepository>();
             builder.Services.AddSingleton<IUsersRepository, UsersRepository>();
             builder.Services.AddSingleton<IExecutionRepository, ExecutionRepository>();
             builder.Services.AddTransient<AuthHandler>();
+            builder.Services.AddTransient<LoggingHandler>();
+            builder.Services.AddSingleton(typeof(IAppLogger<>), typeof(AppLogger<>));
+            builder.Services.AddSingleton<IAlertService, AlertService>();
+            builder.Services.AddSingleton<GlobalExceptionHandler>();
 
+            // APIs
+            var uri = "http://localhost:5062/api";
+            builder.Services.AddRefitClient<IAuthAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<LoggingHandler>();
+            builder.Services.AddRefitClient<IAttemptsAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<LoggingHandler>();
+            builder.Services.AddRefitClient<IQuizzesAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<LoggingHandler>();
+            builder.Services.AddRefitClient<IUsersAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<LoggingHandler>();
+            builder.Services.AddRefitClient<IExecutionAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<LoggingHandler>();
 
             var app = builder.Build();
             serviceProvider = app.Services;

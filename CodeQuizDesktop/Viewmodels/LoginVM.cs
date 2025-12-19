@@ -36,7 +36,6 @@ namespace CodeQuizDesktop.Viewmodels
 
             var loginModel = new LoginModel() { Username = this.Username, Password = this.Password };
             var response = await authenticationRepository.Login(loginModel);
-            await tokenService.SaveTokens(response.TokenModel);
             System.Diagnostics.Debug.WriteLine($"Username: {response.User.UserName}");
             await OpenHomePage();
         }

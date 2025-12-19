@@ -1,26 +1,20 @@
 ﻿using CodeQuizDesktop.APIs;
+using CodeQuizDesktop.Exceptions;
 using CodeQuizDesktop.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CodeQuizDesktop.Repositories
+namespace CodeQuizDesktop.Repositories;
+
+public class ExecutionRepository(IExecutionAPI executionAPI) : IExecutionRepository
 {
-    public class ExecutionRepository(IExecutionAPI executionAPI) : IExecutionRepository
+    public async Task<CodeRunnerResult> RunCode(RunCodeRequest runCodeRequest)
     {
-        public async Task<CodeRunnerResult> RunCode(RunCodeRequest runCodeRequest)
+        try
         {
-            try
-            {
-                return (await executionAPI.RunCode(runCodeRequest)).Data!;
-            }
-            catch (Exception)
-            {
-                // Log exception here...
-                throw; // Replace with a custom exception
-            }
+            return (await executionAPI.RunCode(runCodeRequest)).Data!;
+        }
+        catch (Exception ex)
+        {
+            throw ApiServiceException.FromException(ex, "Failed to execute code.");
         }
     }
 }

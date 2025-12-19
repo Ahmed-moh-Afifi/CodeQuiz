@@ -1,4 +1,5 @@
-﻿using CodeQuizDesktop.Models;
+﻿using CodeQuizDesktop.Logging;
+using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
 using CodeQuizDesktop.Viewmodels;
 using System.Windows.Input;
@@ -70,9 +71,10 @@ namespace CodeQuizDesktop
 
         public ICommand LogoutCommand { get => new Command(Logout); }
 
-        public MainPage(DashboardVM dashboardVM, CreatedQuizzesVM createdQuizzesVM, JoinedQuizzesVM joinedQuizzesVM, IUsersRepository usersRepository, IAuthenticationRepository authenticationRepository)
+        public MainPage(DashboardVM dashboardVM, CreatedQuizzesVM createdQuizzesVM, JoinedQuizzesVM joinedQuizzesVM, IUsersRepository usersRepository, IAuthenticationRepository authenticationRepository, IAppLogger<MainPage> logger)
         {
             InitializeComponent();
+            logger.LogInfo("Executing Constructor (creating viewmodels...)");
             BindingContext = this;
             Dashboard.BindingContext = dashboardVM;
             CreatedQuizzes.BindingContext = createdQuizzesVM;
@@ -84,6 +86,7 @@ namespace CodeQuizDesktop
         public async void Logout()
         {
             await authenticationRepository.Logout();
+            
             await Shell.Current.GoToAsync("///LoginPage");
         }
     }

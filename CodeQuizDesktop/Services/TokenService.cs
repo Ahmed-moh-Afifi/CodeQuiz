@@ -12,11 +12,12 @@ namespace CodeQuizDesktop.Services
     class TokenService(IAuthAPI authAPI, ISecureStorage secureStorage) : ITokenService
     {
         private TokenModel? savedTokens = null;
-        private Task<TokenModel?>? refreshTask = null; // I changed this line... It was "private Task<ApiResponse<TokenModel?>>? refreshTask = null;".
+        private Task<TokenModel?>? refreshTask = null;
 
         public async Task DeleteSavedTokens()
         {
             await Task.FromResult(secureStorage.Remove("token-model"));
+            savedTokens = null;
         }
 
         public async Task<TokenModel?> GetValidTokens()
