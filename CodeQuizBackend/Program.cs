@@ -111,7 +111,7 @@ builder.Services.AddRateLimiter(options =>
             factory: partition => new FixedWindowRateLimiterOptions
             {
                 AutoReplenishment = true,
-                PermitLimit = 10,
+                PermitLimit = 25,
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0,
             }));
@@ -165,7 +165,7 @@ builder.Services.AddSingleton(new SandboxConfiguration
         ["Python"] = new()
         {
             DockerImage = "python:3.12-slim",
-            Command = "python",
+            Command = "python -u",
             FileExtension = ".py",
             ArgumentTemplate = ["/sandbox/{filename}"]
         }
