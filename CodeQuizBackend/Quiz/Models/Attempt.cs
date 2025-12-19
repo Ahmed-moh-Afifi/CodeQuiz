@@ -38,6 +38,7 @@ namespace CodeQuizBackend.Quiz.Models
                 EndTime = EndTime,
                 QuizId = QuizId,
                 ExamineeId = ExamineeId,
+                TotalPoints = Quiz.Questions.Sum(q => q.Points),
                 Solutions = Solutions.Select(s => s.ToDTO()).ToList(),
                 Examinee = Examinee.ToDTO()
             };

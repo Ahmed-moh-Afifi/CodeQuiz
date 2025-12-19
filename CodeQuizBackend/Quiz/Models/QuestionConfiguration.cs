@@ -6,5 +6,7 @@
         public required bool AllowExecution { get; set; }
         public required bool ShowOutput { get; set; }
         public required bool ShowError { get; set; }
+        public bool AllowIntellisense { get; set; }
+        public bool AllowSignatureHelp { get; set; }
     }
 }
