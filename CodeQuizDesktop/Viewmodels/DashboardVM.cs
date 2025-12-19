@@ -1,6 +1,8 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
@@ -40,6 +42,25 @@ namespace CodeQuizDesktop.Viewmodels
 
         protected ObservableCollection<ExamineeAttempt> initializedJoinedAttempts = new();
         protected ObservableCollection<ExaminerQuiz> initializedCreatedQuizzes = new();
+
+        private void UpdateFilteredQuizzes()
+        {
+            upcomingQuizzes.Clear();
+            endedQuizzes.Clear();
+
+            foreach (var quiz in CreatedQuizzes)
+            {
+                if (quiz.StartDate > DateTime.Now ||
+                    (quiz.StartDate <= DateTime.Now && quiz.EndDate > DateTime.Now))
+                {
+                    upcomingQuizzes.Add(quiz);
+                }
+                else
+                {
+                    endedQuizzes.Add(quiz);
+                }
+            }
+        }
 
         public ICommand ContinueAttemptCommand => new Command<ExamineeAttempt>(OnContinueAttempt);
         public ICommand ViewResultsCommand => new Command<ExamineeAttempt>(OnViewResults);
