@@ -172,7 +172,22 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
             Statement = QuestionModel.Statement;
             Points = QuestionModel.Points;
             EditorCode = QuestionModel.EditorCode;
-            TestCases = new ObservableCollection<TestCase>(QuestionModel.TestCases);
+            //TestCases = new ObservableCollection<TestCase>(QuestionModel.TestCases);
+            TestCases = new ObservableCollection<TestCase>();
+            this.Opened += async (s, e) =>
+            {
+                // Optional: A tiny delay to let the animation finish completely
+                await Task.Delay(100);
+
+                if (QuestionModel.TestCases != null)
+                {
+                    foreach (var tc in QuestionModel.TestCases)
+                    {
+                        // Add them one by one, just like clicking the button
+                        TestCases.Add(tc);
+                    }
+                }
+            };
             if (QuestionModel.QuestionConfiguration != null)
             {
                 IndependentlyConfigured = true;
