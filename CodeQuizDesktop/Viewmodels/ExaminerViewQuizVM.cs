@@ -2,23 +2,18 @@
 using CodeQuizDesktop.Repositories;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui.Core.Extensions;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
 {
     public class ExaminerViewQuizVM : BaseViewModel, IQueryAttributable
     {
-        private IQuizzesRepository _quizzesRepository;
+        private readonly IQuizzesRepository _quizzesRepository;
 
-        private ExaminerQuiz quiz;
+        private ExaminerQuiz? quiz;
 
-        public ExaminerQuiz Quiz
+        public ExaminerQuiz? Quiz
         {
             get { return quiz; }
             set
@@ -28,7 +23,7 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        private ObservableCollection<ExaminerAttempt> attempts;
+        private ObservableCollection<ExaminerAttempt> attempts = [];
 
         public ObservableCollection<ExaminerAttempt> Attempts
         {
@@ -48,32 +43,37 @@ namespace CodeQuizDesktop.Viewmodels
         }
 
         public ICommand GoToGradeAttemptPageCommand { get => new Command<ExaminerAttempt>(OnGoToGradeAttemptPage); }
+        
         private async void OnGoToGradeAttemptPage(ExaminerAttempt examinerAttempt)
         {
-            await Shell.Current.GoToAsync(nameof(GradeAttempt), new Dictionary<string, object> 
-            { 
+            await Shell.Current.GoToAsync(nameof(GradeAttempt), new Dictionary<string, object>
+            {
                 { "attempt", examinerAttempt! },
-                { "quiz", Quiz!  }
+                { "quiz", Quiz! }
             });
-
         }
-        
 
         public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.ContainsKey("quiz") && query["quiz"] is ExaminerQuiz receivedQuiz)
             {
                 Quiz = receivedQuiz;
-                var response = await _quizzesRepository.GetQuizAttempts(Quiz.Id);
-                Attempts = response.ToObservableCollection();
+                await LoadAttemptsAsync();
             }
+        }
+
+        private async Task LoadAttemptsAsync()
+        {
+            await ExecuteAsync(async () =>
+            {
+                var response = await _quizzesRepository.GetQuizAttempts(Quiz!.Id);
+                Attempts = response.ToObservableCollection();
+            }, "Loading attempts...");
         }
 
         public ExaminerViewQuizVM(IQuizzesRepository quizzesRepository)
         {
             _quizzesRepository = quizzesRepository;
-            //subscribe update
-
         }
     }
 }

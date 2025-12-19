@@ -155,9 +155,9 @@
                     ShowOutput="True"
                     AllowExecution="True" 
                     EditorType="ReadOnly"
+                    Language="{Binding SelectedQuestion.QuestionConfiguration.Language}"
                     Code="{Binding CodeInEditor}"
                     HeightRequest="800"/>
-                        <!--Language="{Binding SelectedQuestion.QuestionConfiguration.Language}"-->
                     </VerticalStackLayout>
                 </ScrollView>
             </Grid>

@@ -10,29 +10,73 @@ namespace CodeQuizDesktop.Viewmodels
 {
     public class StartupViewModel : BaseViewModel
     {
-        private readonly ITokenService tokenService;
-        private readonly IAuthenticationRepository authenticationRepository;
-        private readonly IUsersRepository usersRepository;
-        public StartupViewModel(ITokenService tokenService, IAuthenticationRepository authenticationRepository, IUsersRepository usersRepository)
+        private readonly ITokenService _tokenService;
+        private readonly IAuthenticationRepository _authenticationRepository;
+        private readonly IUsersRepository _usersRepository;
+
+        private bool _isLoading = true;
+        public bool IsLoading
         {
-            this.tokenService = tokenService;
-            this.authenticationRepository = authenticationRepository;
-            this.usersRepository = usersRepository;
-            Initialize();
+            get => _isLoading;
+            set
+            {
+                _isLoading = value;
+                OnPropertyChanged();
+            }
         }
 
-        public async void Initialize()
+        private string _loadingMessage = "Checking authentication...";
+        public string LoadingMessage
         {
-            await Task.Delay(2000);
-            var token = await tokenService.GetValidTokens();
-            if (token != null)
+            get => _loadingMessage;
+            set
             {
-                authenticationRepository.LoggedInUser = await usersRepository.GetUser();
-                await Shell.Current.GoToAsync("///MainPage");
+                _loadingMessage = value;
+                OnPropertyChanged();
             }
-            else
+        }
+
+        public StartupViewModel(ITokenService tokenService, IAuthenticationRepository authenticationRepository, IUsersRepository usersRepository)
+        {
+            _tokenService = tokenService;
+            _authenticationRepository = authenticationRepository;
+            _usersRepository = usersRepository;
+            InitializeAsync();
+        }
+
+        private async void InitializeAsync()
+        {
+            try
             {
+                IsLoading = true;
+                LoadingMessage = "Starting up...";
+
+                await Task.Delay(1000); // Brief delay for splash visibility
+
+                LoadingMessage = "Checking authentication...";
+                var token = await _tokenService.GetValidTokens();
+
+                if (token != null)
+                {
+                    LoadingMessage = "Loading user profile...";
+                    _authenticationRepository.LoggedInUser = await _usersRepository.GetUser();
+                    await Shell.Current.GoToAsync("///MainPage");
+                }
+                else
+                {
+                    await Shell.Current.GoToAsync("///LoginPage");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Startup error: {ex.Message}");
+                LoadingMessage = "Connection failed. Redirecting...";
+                await Task.Delay(1000);
                 await Shell.Current.GoToAsync("///LoginPage");
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
     }

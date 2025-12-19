@@ -209,16 +209,33 @@
                             ShowError="{Binding SelectedQuestion.QuestionConfiguration.ShowError}"
                             ShowOutput="{Binding SelectedQuestion.QuestionConfiguration.ShowOutput}"
                             AllowExecution="{Binding SelectedQuestion.QuestionConfiguration.AllowExecution}"
+                            Language="{Binding SelectedQuestion.QuestionConfiguration.Language}"
                             Code="{Binding CodeInEditor}"
                             EditorType="{Binding EditorTypeValue}"
                             HeightRequest="800"/>
-                            <!--Language="{Binding SelectedQuestion.QuestionConfiguration.Language}"--> 
                     </VerticalStackLayout>
                 </ScrollView>
             </Grid>
         </Grid>
 
-        <!--Auto Submission Overlay-->
-        <Border Background="#88FFFFFF" Grid.RowSpan="2" IsVisible="{Binding WaitingForAutoSubmission}" />
+        <!--Auto Submission Overlay - Loading style -->
+        <Grid Grid.RowSpan="2" BackgroundColor="#CC1e1e1e" IsVisible="{Binding WaitingForAutoSubmission}">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="25">
+                <ActivityIndicator IsRunning="{Binding WaitingForAutoSubmission}" 
+                                   Color="#591c21" 
+                                   WidthRequest="60" 
+                                   HeightRequest="60"/>
+                <Label Text="Time's up!" 
+                       FontFamily="InterExtraBold" 
+                       FontSize="28" 
+                       TextColor="#D4D4D4" 
+                       HorizontalOptions="Center"/>
+                <Label Text="Auto-submitting your answers..." 
+                       FontFamily="InterRegular" 
+                       FontSize="16" 
+                       TextColor="#888888" 
+                       HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </Grid>
     </Grid>
 </ContentPage>

@@ -14,22 +14,24 @@ public partial class CodeEditor : ContentView
     private string? _pendingCode;
     private string? _pendingLanguage;
     private bool _isSettingCodeFromWebView = false;
+    private string? _initialCode;
+    private bool _isInitialCodeSet = false;
 
     #region Bindable Properties
 
     /// <summary>
-    /// The programming language for the editor (e.g., "javascript", "csharp", "python")
+    /// The programming language for the editor
     /// </summary>
     public static readonly BindableProperty LanguageProperty = BindableProperty.Create(
         nameof(Language),
         typeof(string),
         typeof(CodeEditor),
-        "csharp",
+        "python",
         propertyChanged: OnLanguageChanged);
 
     public string Language
     {
-        get => (string)GetValue(LanguageProperty);
+        get => ((string)GetValue(LanguageProperty)).ToLower();
         set => SetValue(LanguageProperty, value.ToLower());
     }
 
@@ -148,6 +150,7 @@ public partial class CodeEditor : ContentView
             isReadyToRun = !value;
             isRunning = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(IsReadyToRun));
         }
     }
     private bool isReadyToRun = true;
@@ -163,6 +166,7 @@ public partial class CodeEditor : ContentView
 
     // Commands
     public ICommand RunCommand { get => new Command(RunCode); }
+    public ICommand ResetCommand { get => new Command(ResetCode); }
 
     #endregion
 
@@ -174,6 +178,8 @@ public partial class CodeEditor : ContentView
 
     public async void RunCode()
     {
+        if (IsRunning) return;
+
         IsRunning = true;
         var response = await executionRepository.RunCode(new()
         {
@@ -209,6 +215,14 @@ public partial class CodeEditor : ContentView
         IsRunning = false;
     }
 
+    public void ResetCode()
+    {
+        if (_initialCode != null)
+        {
+            Code = _initialCode;
+        }
+    }
+
     private void SetupWebView()
     {
         webview.Navigated += OnWebViewNavigated;
@@ -228,66 +242,66 @@ public partial class CodeEditor : ContentView
 
     private void OnWebViewNavigated(object? sender, WebNavigatedEventArgs e)
     {
-        if (e.Result == WebNavigationResult.Success)
+        if (e.Result != WebNavigationResult.Success)
         {
-            // Give the editor a moment to initialize
-            MainThread.BeginInvokeOnMainThread(async () =>
-            {
-                await Task.Delay(500);
-                _isEditorReady = true;
-
-                // Apply any pending language change
-                if (!string.IsNullOrEmpty(_pendingLanguage))
-                {
-                    await SetLanguageAsync(_pendingLanguage);
-                    _pendingLanguage = null;
-                }
-
-                // Apply any pending code
-                if (!string.IsNullOrEmpty(_pendingCode))
-                {
-                    await SetCodeAsync(_pendingCode);
-                    _pendingCode = null;
-                }
-            });
+            // Handle load error (optional)
+            System.Diagnostics.Debug.WriteLine($"WebView failed to load: {e.Result}");
         }
+        // Do NOT set _isEditorReady = true here. 
+        // Wait for the "ready" message from JS.
     }
 
 #if WINDOWS
-    private void OnWebMessageReceived(Microsoft.UI.Xaml.Controls.WebView2 sender, Microsoft.Web.WebView2.Core.CoreWebView2WebMessageReceivedEventArgs args)
+private async void OnWebMessageReceived(Microsoft.UI.Xaml.Controls.WebView2 sender, Microsoft.Web.WebView2.Core.CoreWebView2WebMessageReceivedEventArgs args)
+{
+    try
     {
-		System.Diagnostics.Debug.WriteLine("WebView message received.");
-        try
-        {
-            var message = args.WebMessageAsJson;
-            var jsonDoc = JsonDocument.Parse(message);
-            var root = jsonDoc.RootElement;
+        var message = args.WebMessageAsJson;
+        var jsonDoc = JsonDocument.Parse(message);
+        var root = jsonDoc.RootElement;
 
-            if (root.TryGetProperty("type", out var typeElement) && typeElement.GetString() == "code")
+        // 1. Handle "code" updates (User typing)
+        if (root.TryGetProperty("type", out var typeElement) && typeElement.GetString() == "code")
+        {
+            if (root.TryGetProperty("content", out var contentElement))
             {
-                if (root.TryGetProperty("content", out var contentElement))
-                {
-                    var code = contentElement.GetString() ?? string.Empty;
-                    _getCodeTcs?.TrySetResult(code);
-                    
-                    // Update Code property without triggering SetCodeAsync again
-                    _isSettingCodeFromWebView = true;
-                    Code = code;
-                    _isSettingCodeFromWebView = false;
-                    
-                    System.Diagnostics.Debug.WriteLine(code);
-                }
-            }
-            else if (root.TryGetProperty("type", out var readyType) && readyType.GetString() == "ready")
-            {
-                _isEditorReady = true;
+                var code = contentElement.GetString() ?? string.Empty;
+                
+                // Complete the GetCodeAsync task if one is waiting
+                _getCodeTcs?.TrySetResult(code);
+                
+                // Update properties without triggering the loop
+                _isSettingCodeFromWebView = true;
+                Code = code;
+                _isSettingCodeFromWebView = false;
             }
         }
-        catch (Exception ex)
+        // 2. Handle "ready" signal (Monaco loaded)
+        else if (root.TryGetProperty("type", out var readyType) && readyType.GetString() == "ready")
         {
-            System.Diagnostics.Debug.WriteLine($"Error parsing WebView message: {ex.Message}");
+            _isEditorReady = true;
+            System.Diagnostics.Debug.WriteLine("Monaco Editor is Ready.");
+
+            // Process Pending Language
+            if (!string.IsNullOrEmpty(_pendingLanguage))
+            {
+                await SetLanguageAsync(_pendingLanguage);
+                _pendingLanguage = null;
+            }
+
+            // Process Pending Code
+            if (!string.IsNullOrEmpty(_pendingCode))
+            {
+                await SetCodeAsync(_pendingCode);
+                _pendingCode = null;
+            }
         }
     }
+    catch (Exception ex)
+    {
+        System.Diagnostics.Debug.WriteLine($"Error parsing WebView message: {ex.Message}");
+    }
+}
 #endif
 
     private static void OnLanguageChanged(BindableObject bindable, object oldValue, object newValue)
@@ -302,6 +316,12 @@ public partial class CodeEditor : ContentView
     {
         if (bindable is CodeEditor editor && newValue is string code)
         {
+            if (!editor._isInitialCodeSet)
+            {
+                editor._initialCode = code;
+                editor._isInitialCodeSet = true;
+            }
+
             // Skip if the change came from the WebView itself
             if (editor._isSettingCodeFromWebView)
                 return;
@@ -395,17 +415,56 @@ public partial class CodeEditor : ContentView
     /// <summary>
     /// Sets the programming language of the editor
     /// </summary>
+    //public async Task SetLanguageAsync(string language)
+    //{
+    //    if (!_isEditorReady)
+    //    {
+    //        _pendingLanguage = language;
+    //        return;
+    //    }
+
+    //    var escapedLanguage = JsonSerializer.Serialize(language);
+    //    var script = $"window.postMessage({{ command: 'setLanguage', language: {escapedLanguage} }}, '*');";
+    //    await ExecuteJavaScriptAsync(script);
+    //}
+
     public async Task SetLanguageAsync(string language)
     {
+        // 1. Normalize the language ID for Monaco
+        string monacoId = MapToMonacoId(language);
+
         if (!_isEditorReady)
         {
-            _pendingLanguage = language;
+            _pendingLanguage = monacoId;
             return;
         }
 
-        var escapedLanguage = JsonSerializer.Serialize(language);
-        var script = $"window.postMessage({{ command: 'setLanguage', language: {escapedLanguage} }}, '*');";
+        // 2. Serialize to ensure safety
+        var escapedId = JsonSerializer.Serialize(monacoId);
+
+        // 3. Call the JS function directly (No event listener latency)
+        var script = $"if (window.setLanguage) {{ window.setLanguage({escapedId}); }}";
+
         await ExecuteJavaScriptAsync(script);
+    }
+
+    // Helper to fix common ID mismatches
+    private string MapToMonacoId(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return "plaintext";
+
+        var lower = input.ToLower().Trim();
+
+        return lower switch
+        {
+            "c#" => "csharp",
+            "cs" => "csharp",
+            "c++" => "cpp",
+            "js" => "javascript",
+            "ts" => "typescript",
+            "py" => "python",
+            _ => lower // Fallback to whatever was passed (e.g., "html", "css", "java")
+        };
     }
 
     /// <summary>

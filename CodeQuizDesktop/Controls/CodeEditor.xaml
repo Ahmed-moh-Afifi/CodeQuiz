@@ -9,6 +9,9 @@
             <Label Text="&lt; &gt;  Solution" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
             <HorizontalStackLayout Grid.Column="2" HorizontalOptions="End" VerticalOptions="Center" Spacing="10" >
                 <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#591c21" Padding="14,10">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ResetCommand, Source={x:Reference this}}"/>
+                    </Border.GestureRecognizers>
                     <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5">
                         <Border  WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
                             <Image Source="refresh.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
@@ -21,24 +24,34 @@
                     </Grid>
                 </Border>
 
-                <Border StrokeThickness="0" StrokeShape="RoundRectangle 20">
-                    <Grid>
-                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#591c21" Padding="14,10" IsVisible="{Binding AllowExecution, Source={x:Reference this}}" IsEnabled="{Binding IsReadyToRun, Source={x:Reference this}}">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding RunCommand, Source={x:Reference this}}"/>
-                            </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5">
-                                <Border  WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
-                                    <Image Source="player_play.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
-                                        <Image.Behaviors>
-                                            <toolkit:IconTintColorBehavior TintColor="White" />
-                                        </Image.Behaviors>
-                                    </Image>
-                                </Border>
-                                <Label Grid.Column="1" Text="Run" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
-                            </Grid>
-                        </Border>
-                        <Border Background="#88FFFFFF" StrokeThickness="0" IsVisible="{Binding IsRunning, Source={x:Reference this}}"/>
+                <!-- Run Button with Loading Indicator -->
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#591c21" IsVisible="{Binding AllowExecution, Source={x:Reference this}}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding RunCommand, Source={x:Reference this}}"/>
+                    </Border.GestureRecognizers>
+                    <Grid Padding="14,10">
+                        <!-- Normal state - Play icon and Run text -->
+                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5" IsVisible="{Binding IsReadyToRun, Source={x:Reference this}}">
+                            <Border WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Image Source="player_play.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Image.Behaviors>
+                                        <toolkit:IconTintColorBehavior TintColor="White" />
+                                    </Image.Behaviors>
+                                </Image>
+                            </Border>
+                            <Label Grid.Column="1" Text="Run" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Grid>
+                        
+                        <!-- Running state - Activity indicator and Running text -->
+                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5" IsVisible="{Binding IsRunning, Source={x:Reference this}}">
+                            <ActivityIndicator IsRunning="{Binding IsRunning, Source={x:Reference this}}" 
+                                               Color="White" 
+                                               WidthRequest="22" 
+                                               HeightRequest="22"
+                                               HorizontalOptions="Center" 
+                                               VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="Running..." TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Grid>
                     </Grid>
                 </Border>
             </HorizontalStackLayout>

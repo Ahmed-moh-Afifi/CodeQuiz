@@ -3,6 +3,7 @@ using CodeQuizDesktop.Viewmodels;
 using CodeQuizDesktop.Models;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using CodeQuizDesktop.Repositories;
 
 namespace CodeQuizDesktop.Views;
 
@@ -143,7 +144,7 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
     }
 
     // Data Sources
-    private List<string> programmingLanguages = ["CSharp"];
+    private List<string> programmingLanguages = ["Python"];
     public List<string> ProgrammingLanguages
     {
         get
@@ -198,6 +199,7 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
                 AllowIntellisense = QuestionModel.QuestionConfiguration.AllowIntellisense;
                 AllowSignatureHelp = QuestionModel.QuestionConfiguration.AllowSignatureHelp;
             }
+            LoadProgrammingLanguages();
         }
         TestCases.CollectionChanged += (item, e) =>
         {
@@ -206,6 +208,13 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
                 TestCases[i].TestCaseNumber = i + 1;
             }
         };
+    }
+
+    public async void LoadProgrammingLanguages()
+    {
+        var executionRepository = MauiProgram.GetService<IExecutionRepository>();
+        var languages = await executionRepository.GetSupportedLanguages();
+        ProgrammingLanguages = languages.ToList();
     }
 
     public void AddTestCase()

@@ -2,22 +2,16 @@
 using CodeQuizDesktop.Repositories;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui.Core.Extensions;
-using Microsoft.Maui.Graphics;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
 {
     public class JoinedQuizzesVM : BaseViewModel
     {
-        private IAttemptsRepository _attemptsRepository;
+        private readonly IAttemptsRepository _attemptsRepository;
 
-        private ObservableCollection<ExamineeAttempt> allExamineeAttempts;
+        private ObservableCollection<ExamineeAttempt> allExamineeAttempts = [];
 
         public ObservableCollection<ExamineeAttempt> AllExamineeAttempts
         {
@@ -30,27 +24,32 @@ namespace CodeQuizDesktop.Viewmodels
         }
 
         public string QuizCode { get; set; } = "";
-        public ICommand JoinQuizCommand { get => new Command(JoinQuiz); }
-        public ICommand ContinueAttemptCommand { get => new Command<ExamineeAttempt>(OnContinueAttempt); }
-        public ICommand ReviewAttemptCommand { get => new Command<ExamineeAttempt>(OnReviewAttempt);  }
+        public ICommand JoinQuizCommand { get => new Command(async () => await JoinQuizAsync()); }
+        public ICommand ContinueAttemptCommand { get => new Command<ExamineeAttempt>(async (a) => await OnContinueAttemptAsync(a)); }
+        public ICommand ReviewAttemptCommand { get => new Command<ExamineeAttempt>(OnReviewAttempt); }
 
-        private async void JoinQuiz()
+        private async Task JoinQuizAsync()
         {
-            if (QuizCode == "")
+            if (string.IsNullOrWhiteSpace(QuizCode))
                 return;
 
-            var beginAttemptResponse = new BeginAttemptRequest() { QuizCode = this.QuizCode };
-            var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
-            await Shell.Current.GoToAsync(nameof(JoinQuiz), new Dictionary<string, object> { { "attempt", response! } });
-
+            await ExecuteAsync(async () =>
+            {
+                var beginAttemptResponse = new BeginAttemptRequest { QuizCode = this.QuizCode };
+                var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
+                await Shell.Current.GoToAsync(nameof(JoinQuiz), new Dictionary<string, object> { { "attempt", response! } });
+            }, "Joining quiz...");
         }
-        private async void OnContinueAttempt(ExamineeAttempt examineeAttempt)
+
+        private async Task OnContinueAttemptAsync(ExamineeAttempt examineeAttempt)
         {
             System.Diagnostics.Debug.WriteLine($"Clicked: {examineeAttempt.Quiz.Code}");
-            var beginAttemptResponse = new BeginAttemptRequest() { QuizCode = examineeAttempt.Quiz.Code };
-            var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
-            await Shell.Current.GoToAsync(nameof(JoinQuiz), new Dictionary<string, object> { { "attempt", response! } });
-
+            await ExecuteAsync(async () =>
+            {
+                var beginAttemptResponse = new BeginAttemptRequest { QuizCode = examineeAttempt.Quiz.Code };
+                var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
+                await Shell.Current.GoToAsync(nameof(JoinQuiz), new Dictionary<string, object> { { "attempt", response! } });
+            }, "Loading quiz...");
         }
 
         private async void OnReviewAttempt(ExamineeAttempt examineeAttempt)
@@ -61,17 +60,19 @@ namespace CodeQuizDesktop.Viewmodels
             });
         }
 
-        private async void Intialize()
+        private async void InitializeAsync()
         {
-            var response = await _attemptsRepository.GetUserAttempts();
-            AllExamineeAttempts = response.ToObservableCollection();
-
+            await ExecuteAsync(async () =>
+            {
+                var response = await _attemptsRepository.GetUserAttempts();
+                AllExamineeAttempts = response.ToObservableCollection();
+            }, "Loading quizzes...");
         }
 
         public JoinedQuizzesVM(IAttemptsRepository attemptsRepository)
         {
             _attemptsRepository = attemptsRepository;
-            Intialize();
+            InitializeAsync();
             _attemptsRepository.SubscribeCreate(a =>
             {
                 if (AllExamineeAttempts.FirstOrDefault(at => at.Id == a.Id) == null)
@@ -84,10 +85,6 @@ namespace CodeQuizDesktop.Viewmodels
                 AllExamineeAttempts.Remove(element);
                 AllExamineeAttempts.Insert(idx, a);
             });
-
-
-
         }
-
     }
 }

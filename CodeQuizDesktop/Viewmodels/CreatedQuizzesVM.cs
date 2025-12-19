@@ -2,21 +2,16 @@
 using CodeQuizDesktop.Repositories;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui.Core.Extensions;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
 {
     public class CreatedQuizzesVM : BaseViewModel
     {
-        private IQuizzesRepository _quizzesRepository;
+        private readonly IQuizzesRepository _quizzesRepository;
 
-        private ObservableCollection<ExaminerQuiz> allExaminerQuizzes;
+        private ObservableCollection<ExaminerQuiz> allExaminerQuizzes = [];
 
         public ObservableCollection<ExaminerQuiz> AllExaminerQuizzes
         {
@@ -27,9 +22,10 @@ namespace CodeQuizDesktop.Viewmodels
                 OnPropertyChanged();
             }
         }
+
         public ICommand CreateQuizCommand { get => new Command(OnCreateQuizPage); }
         public ICommand EditQuizCommand { get => new Command<ExaminerQuiz>(OnEditQuiz); }
-        public ICommand DeleteQuizCommand { get => new Command<ExaminerQuiz>(OnDeleteQuiz); }
+        public ICommand DeleteQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await OnDeleteQuizAsync(q)); }
         public ICommand ViewQuizCommand { get => new Command<ExaminerQuiz>(OnViewQuiz); }
 
         private async void OnCreateQuizPage()
@@ -46,25 +42,32 @@ namespace CodeQuizDesktop.Viewmodels
             });
         }
 
-        private async void OnDeleteQuiz(ExaminerQuiz examinerQuiz)
+        private async Task OnDeleteQuizAsync(ExaminerQuiz examinerQuiz)
         {
-            await _quizzesRepository.DeleteQuiz(examinerQuiz.Id);
+            await ExecuteAsync(async () =>
+            {
+                await _quizzesRepository.DeleteQuiz(examinerQuiz.Id);
+            }, "Deleting quiz...");
         }
+
         private async void OnViewQuiz(ExaminerQuiz examinerQuiz)
         {
             await Shell.Current.GoToAsync(nameof(ExaminerViewQuiz), new Dictionary<string, object> { { "quiz", examinerQuiz } });
         }
-        
-        private async void Intialize()
-        {
-            var response = await _quizzesRepository.GetUserQuizzes();
-            AllExaminerQuizzes = response.ToObservableCollection();
 
+        private async void InitializeAsync()
+        {
+            await ExecuteAsync(async () =>
+            {
+                var response = await _quizzesRepository.GetUserQuizzes();
+                AllExaminerQuizzes = response.ToObservableCollection();
+            }, "Loading quizzes...");
         }
+
         public CreatedQuizzesVM(IQuizzesRepository quizzesRepository)
         {
             _quizzesRepository = quizzesRepository;
-            Intialize();
+            InitializeAsync();
             _quizzesRepository.SubscribeCreate<ExaminerQuiz>(q =>
             {
                 if (AllExaminerQuizzes.FirstOrDefault(qu => qu.Id == q.Id) == null)

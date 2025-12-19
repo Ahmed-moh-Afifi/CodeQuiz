@@ -121,30 +121,38 @@ namespace CodeQuizDesktop.Viewmodels
 
         private async void Initialize()
         {
-            var attempts = await _attemptsRepository.GetUserAttempts();
-            initializedJoinedAttempts.Clear();
-            foreach (var attempt in attempts)
+            IsBusy = true;
+            try
             {
-                // Compute GradePercentage locally if server didn't provide it but all solution grades are present
-                if (attempt.GradePercentage == null && attempt.Solutions != null && attempt.Quiz != null && attempt.Quiz.TotalPoints > 0)
+                var attempts = await _attemptsRepository.GetUserAttempts();
+                initializedJoinedAttempts.Clear();
+                foreach (var attempt in attempts)
                 {
-                    if (attempt.Solutions.All(s => s.ReceivedGrade != null))
+                    // Compute GradePercentage locally if server didn't provide it but all solution grades are present
+                    if (attempt.GradePercentage == null && attempt.Solutions != null && attempt.Quiz != null && attempt.Quiz.TotalPoints > 0)
                     {
-                        attempt.GradePercentage = (attempt.Solutions.Sum(s => s.ReceivedGrade) / attempt.Quiz.TotalPoints) * 100;
+                        if (attempt.Solutions.All(s => s.ReceivedGrade != null))
+                        {
+                            attempt.GradePercentage = (attempt.Solutions.Sum(s => s.ReceivedGrade) / attempt.Quiz.TotalPoints) * 100;
+                        }
                     }
+
+                    initializedJoinedAttempts.Add(attempt);
                 }
 
-                initializedJoinedAttempts.Add(attempt);
-            }
+                var quizzes = await _quizzesRepository.GetUserQuizzes();
+                initializedCreatedQuizzes.Clear();
+                foreach (var quiz in quizzes)
+                {
+                    initializedCreatedQuizzes.Add(quiz);
+                }
 
-            var quizzes = await _quizzesRepository.GetUserQuizzes();
-            initializedCreatedQuizzes.Clear();
-            foreach (var quiz in quizzes)
+                UpdateFilteredQuizzes();
+            }
+            finally
             {
-                initializedCreatedQuizzes.Add(quiz);
+                IsBusy = false;
             }
-
-            UpdateFilteredQuizzes();
         }
 
         public DashboardVM(IAttemptsRepository attemptsRepository, IQuizzesRepository quizzesRepository)

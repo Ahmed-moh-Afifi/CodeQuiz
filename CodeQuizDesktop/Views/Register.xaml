@@ -2,7 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:rv="http://sharpnado.com"
+             xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
              x:Class="CodeQuizDesktop.Views.Register"
+             x:DataType="vm:RegisterVM"
              Title="Register"
              BackgroundColor="#1e1e1e">
     <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="1.5*,*,1.5*">
@@ -28,54 +30,64 @@
         <Border Grid.Row="1" Grid.Column="1" Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20">
 
             <rv:MaterialFrame MaterialBlurStyle="Dark" MaterialTheme="AcrylicBlur" CornerRadius="20">
-                <VerticalStackLayout Padding="30" Spacing="20">
-                    <Label Text="Can you fix it?" HorizontalOptions="Center" FontFamily="InterBlack" FontSize="44" TextColor="#D4D4D4"/>
-                    <VerticalStackLayout Spacing="15" Padding="10" >
-                        <Label Text="{}{" FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4"/>
-                        <VerticalStackLayout Padding="20" Spacing="15">
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" IsVisible="True">
-                                <Label Text="&quot;first_name&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
-                                <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
-                                    <Entry Placeholder="&quot;Ada&quot;" TextColor="#ce9178" Text="{Binding FirstName}"/>
-                                </Border>
-                                <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
-                            </Grid>
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" IsVisible="True">
-                                <Label Text="&quot;last_name&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
-                                <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
-                                    <Entry Placeholder="&quot;Lovelace&quot;" TextColor="#ce9178" Text="{Binding LastName}"/>
-                                </Border>
-                                <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
-                            </Grid>
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" IsVisible="True">
-                                <Label Text="&quot;email&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
-                                <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
-                                    <Entry Placeholder="&quot;ada@example.com&quot;" TextColor="#ce9178" Text="{Binding Email}"/>
-                                </Border>
-                                <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
-                            </Grid>
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5">
-                                <Label Text="&quot;username&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
-                                <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
-                                    <Entry Placeholder="&quot;adalovelace&quot;" TextColor="#ce9178" Text="{Binding Username}"/>
-                                </Border>
-                                <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
-                            </Grid>
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5">
-                                <Label Text="&quot;password&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
-                                <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
-                                    <Entry Placeholder="&quot;***********&quot;" TextColor="#ce9178" IsPassword="True" Text="{Binding Password}"/>
-                                </Border>
-                                <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
-                            </Grid>
+                <Grid>
+                    <VerticalStackLayout Padding="30" Spacing="20" IsEnabled="{Binding IsNotBusy}">
+                        <Label Text="Can you fix it?" HorizontalOptions="Center" FontFamily="InterBlack" FontSize="44" TextColor="#D4D4D4"/>
+                        <VerticalStackLayout Spacing="15" Padding="10" >
+                            <Label Text="{}{" FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4"/>
+                            <VerticalStackLayout Padding="20" Spacing="15">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" IsVisible="True">
+                                    <Label Text="&quot;first_name&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
+                                    <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
+                                        <Entry Placeholder="&quot;Ada&quot;" TextColor="#ce9178" Text="{Binding FirstName}"/>
+                                    </Border>
+                                    <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" IsVisible="True">
+                                    <Label Text="&quot;last_name&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
+                                    <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
+                                        <Entry Placeholder="&quot;Lovelace&quot;" TextColor="#ce9178" Text="{Binding LastName}"/>
+                                    </Border>
+                                    <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" IsVisible="True">
+                                    <Label Text="&quot;email&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
+                                    <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
+                                        <Entry Placeholder="&quot;ada@example.com&quot;" TextColor="#ce9178" Text="{Binding Email}"/>
+                                    </Border>
+                                    <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5">
+                                    <Label Text="&quot;username&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
+                                    <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
+                                        <Entry Placeholder="&quot;adalovelace&quot;" TextColor="#ce9178" Text="{Binding Username}"/>
+                                    </Border>
+                                    <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5">
+                                    <Label Text="&quot;password&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
+                                    <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
+                                        <Entry Placeholder="&quot;***********&quot;" TextColor="#ce9178" IsPassword="True" Text="{Binding Password}"/>
+                                    </Border>
+                                    <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                            <Label Text="{}}" FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4"/>
                         </VerticalStackLayout>
-                        <Label Text="{}}" FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4"/>
+                        <Button Text="Log in" HorizontalOptions="FillAndExpand" CornerRadius="20" FontFamily="InterBlack" FontSize="22" TextColor="#D4D4D4" BackgroundColor="#591c21" Padding="15" IsVisible="False" />
+                        <Button Text="Register" HorizontalOptions="FillAndExpand" CornerRadius="20" FontFamily="InterBlack" FontSize="22" TextColor="#D4D4D4" BackgroundColor="#591c21" Padding="15" IsVisible="True" Command="{Binding RegisterCommand}"/>
+                        <Button BackgroundColor="Transparent" Text="Don't have an account? Register" FontFamily="InterRegular" FontSize="18" TextColor="#569CD6" HorizontalOptions="Center" IsVisible="False"/>
+                        <Button BackgroundColor="Transparent" Text="Already have an account? Login" FontFamily="InterRegular" FontSize="18" TextColor="#569CD6" HorizontalOptions="Center" IsVisible="True" Command="{Binding OpenLoginPageCommand}"/>
                     </VerticalStackLayout>
-                    <Button Text="Log in" HorizontalOptions="FillAndExpand" CornerRadius="20" FontFamily="InterBlack" FontSize="22" TextColor="#D4D4D4" BackgroundColor="#591c21" Padding="15" IsVisible="False" />
-                    <Button Text="Register" HorizontalOptions="FillAndExpand" CornerRadius="20" FontFamily="InterBlack" FontSize="22" TextColor="#D4D4D4" BackgroundColor="#591c21" Padding="15" IsVisible="True" Command="{Binding RegisterCommand}"/>
-                    <Button BackgroundColor="Transparent" Text="Don't have an account? Register" FontFamily="InterRegular" FontSize="18" TextColor="#569CD6" HorizontalOptions="Center" IsVisible="False"/>
-                    <Button BackgroundColor="Transparent" Text="Already have an account? Login" FontFamily="InterRegular" FontSize="18" TextColor="#569CD6" HorizontalOptions="Center" IsVisible="True" Command="{Binding OpenLoginPageCommand}"/>
-                </VerticalStackLayout>
+                    
+                    <!-- Loading Overlay -->
+                    <Grid BackgroundColor="#CC1e1e1e" IsVisible="{Binding IsBusy}">
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="20">
+                            <ActivityIndicator IsRunning="{Binding IsBusy}" Color="#591c21" WidthRequest="50" HeightRequest="50"/>
+                            <Label Text="{Binding BusyMessage}" FontFamily="InterRegular" FontSize="16" TextColor="#D4D4D4" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Grid>
             </rv:MaterialFrame>
         </Border>
 
