@@ -1,6 +1,7 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
 {
@@ -39,6 +40,16 @@ namespace CodeQuizDesktop.Viewmodels
 
         protected ObservableCollection<ExamineeAttempt> initializedJoinedAttempts = new();
         protected ObservableCollection<ExaminerQuiz> initializedCreatedQuizzes = new();
+
+        public ICommand ContinueAttemptCommand => new Command<ExamineeAttempt>(OnContinueAttempt);
+        public ICommand ViewResultsCommand => new Command<ExamineeAttempt>(OnViewResults);
+        public ICommand ViewCreatedQuizCommand => new Command<ExaminerQuiz>(OnViewCreatedQuiz);
+        public ICommand DeleteCreatedQuizCommand => new Command<ExaminerQuiz>(OnDeleteCreatedQuiz);
+
+        private async void OnContinueAttempt(ExamineeAttempt attempt) { }
+        private async void OnViewResults(ExamineeAttempt attempt) { }
+        private async void OnViewCreatedQuiz(ExaminerQuiz quiz) { }
+        private async void OnDeleteCreatedQuiz(ExaminerQuiz quiz) { }
 
         public DashboardVM(
             IAttemptsRepository attemptsRepository,
