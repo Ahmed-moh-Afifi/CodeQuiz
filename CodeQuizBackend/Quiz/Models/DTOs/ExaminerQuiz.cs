@@ -16,6 +16,6 @@
         public required int AttemptsCount { get; set; }
         public required int SubmittedAttemptsCount { get; set; }
         public required float AverageAttemptScore { get; set; }
-        public required float TotalPoints { get; set; }
+        public float TotalPoints { get => Questions.Sum(q => q.Points); }
     }
 }

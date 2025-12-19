@@ -57,7 +57,6 @@ namespace CodeQuizBackend.Quiz.Repositories
             q.Questions = quiz.Questions;
             q.ExaminerId = quiz.ExaminerId;
             q.AllowMultipleAttempts = quiz.AllowMultipleAttempts;
-            q.TotalPoints = quiz.TotalPoints;
             
             await dbContext.SaveChangesAsync();
             return q;

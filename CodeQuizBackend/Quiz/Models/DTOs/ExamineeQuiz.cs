@@ -17,6 +17,6 @@ namespace CodeQuizBackend.Quiz.Models.DTOs
         public required List<QuestionDTO> Questions { get; set; }
         public required UserDTO Examiner { get; set; }
         public int QustionsCount { get => Questions.Count; }
-        public required float TotalPoints { get; set; }
+        public float TotalPoints { get => Questions.Sum(q => q.Points); }
     }
 }

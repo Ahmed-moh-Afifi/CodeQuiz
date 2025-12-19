@@ -92,7 +92,6 @@ namespace CodeQuizBackend.Quiz.Services
                 ExaminerId = newQuizModel.ExaminerId,
                 GlobalQuestionConfiguration = newQuizModel.GlobalQuestionConfiguration,
                 AllowMultipleAttempts = newQuizModel.AllowMultipleAttempts,
-                TotalPoints = newQuizModel.Questions.Sum(q => q.Points),
                 Questions = newQuizModel.Questions.Select(q => q.ToQuestion()).ToList()
             };
 
@@ -115,6 +114,8 @@ namespace CodeQuizBackend.Quiz.Services
                 .Where(a => a.QuizId == quizId)
                 .Include(a => a.Solutions)
                 .Include(a => a.Examinee)
+                .Include(a => a.Quiz)
+                .ThenInclude(q => q.Questions)
                 .Select(a => a.ToExaminerAttempt())
                 .ToListAsync();
             return examinerAttempts;

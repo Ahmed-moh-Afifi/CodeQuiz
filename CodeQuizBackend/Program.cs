@@ -210,11 +210,11 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.MapHub<AttemptsHub>("/hubs/Attempts");
+app.MapHub<QuizzesHub>("/hubs/Quizzes");
+
 app.UseRateLimiter();
 
 app.MapControllers();
-
-app.MapHub<AttemptsHub>("/hubs/Attempts");
-app.MapHub<QuizzesHub>("/hubs/Quizzes");
 
 app.Run();

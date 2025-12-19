@@ -9,6 +9,7 @@ namespace CodeQuizBackend.Quiz.Models.DTOs
         public DateTime? EndTime { get; set; } = null;
         public required int QuizId { get; set; }
         public required string ExamineeId { get; set; }
+        public required float TotalPoints { get; set; }
         public float? Grade
         {
             get
@@ -17,6 +18,17 @@ namespace CodeQuizBackend.Quiz.Models.DTOs
                     return null;
                 else
                     return Solutions.Sum(s => s.ReceivedGrade);
+            }
+        }
+        public float? GradePercentage
+        {
+            get
+            {
+                if (Grade == null || TotalPoints == 0)
+                {
+                    return null;
+                }
+                return (Grade / TotalPoints) * 100;
             }
         }
         public required List<SolutionDTO> Solutions { get; set; }
@@ -31,6 +43,7 @@ namespace CodeQuizBackend.Quiz.Models.DTOs
                 EndTime = attempt.EndTime,
                 QuizId = attempt.QuizId,
                 ExamineeId = attempt.ExamineeId,
+                TotalPoints = attempt.Quiz.Questions.Sum(q => q.Points),
                 Solutions = attempt.Solutions.Select(s => s.ToDTO()).ToList(),
                 Examinee = attempt.Examinee.ToDTO()
             };
