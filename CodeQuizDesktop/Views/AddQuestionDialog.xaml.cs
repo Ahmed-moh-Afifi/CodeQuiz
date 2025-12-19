@@ -152,8 +152,8 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
         }
         set
         {
-            OnPropertyChanged();
             programmingLanguages = value;
+            OnPropertyChanged();
         }
     }
 
@@ -161,11 +161,29 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
     public ICommand AddTestCaseCommand { get => new Command(AddTestCase); }
     public ICommand DeleteTestCaseCommand { get => new Command<TestCase>(DeleteTestCase); }
 
-    public AddQuestionDialog()
+    public AddQuestionDialog(NewQuestionModel newQuestionModel = null)
     {
         InitializeComponent();
         BindingContext = this;
-        //QuestionModel = newQuestionModel;
+        QuestionModel = newQuestionModel;
+        if (QuestionModel != null)
+        {
+            System.Diagnostics.Debug.WriteLine($"Statement: {QuestionModel.Statement}");
+            Statement = QuestionModel.Statement;
+            Points = QuestionModel.Points;
+            EditorCode = QuestionModel.EditorCode;
+            TestCases = new ObservableCollection<TestCase>(QuestionModel.TestCases);
+            if (QuestionModel.QuestionConfiguration != null)
+            {
+                IndependentlyConfigured = true;
+                ProgrammingLanguage = QuestionModel.QuestionConfiguration.Language;
+                AllowExecution = QuestionModel.QuestionConfiguration.AllowExecution;
+                ShowOutput = QuestionModel.QuestionConfiguration.ShowOutput;
+                ShowError = QuestionModel.QuestionConfiguration.ShowError;
+                AllowIntellisense = QuestionModel.QuestionConfiguration.AllowIntellisense;
+                AllowSignatureHelp = QuestionModel.QuestionConfiguration.AllowSignatureHelp;
+            }
+        }
         TestCases.CollectionChanged += (item, e) =>
         {
             for (int i = 0; i < TestCases.Count; i++)
@@ -263,7 +281,9 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
                 Language = ProgrammingLanguage!,
                 AllowExecution = AllowExecution,
                 ShowOutput = ShowOutput,
-                ShowError = ShowError
+                ShowError = ShowError,
+                AllowIntellisense = AllowIntellisense,
+                AllowSignatureHelp = AllowSignatureHelp
             } : null
         };
 

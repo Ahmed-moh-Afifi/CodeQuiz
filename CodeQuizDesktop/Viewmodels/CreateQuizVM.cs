@@ -3,6 +3,7 @@ using CodeQuizDesktop.Repositories;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core.Extensions;
+using CommunityToolkit.Maui.Extensions;
 using Microsoft.Maui.Controls.Shapes;
 using System;
 using System.Collections.Generic;
@@ -235,32 +236,7 @@ namespace CodeQuizDesktop.Viewmodels
 
         }
 
-        private ObservableCollection<NewQuestionModel> questionModels =
-        [
-            //new()
-            //{
-            //    Order = 1,
-            //    Points = 10,
-            //    Statement = "Write a program that prints \"Testing...\" to the console",
-            //    EditorCode = "// Write your code here",
-            //    QuestionConfiguration = new()
-            //    {
-            //        AllowExecution = true,
-            //        Language = "CSharp",
-            //        ShowError = true,
-            //        ShowOutput = true
-            //    },
-            //    TestCases =
-            //    [
-            //        new() 
-            //        {
-            //            Input = [""],
-            //            ExpectedOutput = "Testing...\n",
-            //            TestCaseNumber = 1
-            //        }
-            //    ]
-            //}
-        ];
+        private ObservableCollection<NewQuestionModel> questionModels = [];
         public ObservableCollection<NewQuestionModel> QuestionModels
         {
             get
@@ -269,11 +245,26 @@ namespace CodeQuizDesktop.Viewmodels
             }
             set
             {
+                if (questionModels != null)
+                {
+                    questionModels.CollectionChanged -= QuestionModels_CollectionChanged;
+                }
                 questionModels = value;
+                if (questionModels != null)
+                {
+                    questionModels.CollectionChanged += QuestionModels_CollectionChanged;
+                }
                 OnPropertyChanged();
             }
         }
 
+        private void QuestionModels_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            for (int i = 0; i < QuestionModels.Count; i++)
+            {
+                QuestionModels[i].Order = i + 1;
+            }
+        }
 
         // Data Sources
         private List<string> programmingLanguages = ["CSharp"];
@@ -324,6 +315,7 @@ namespace CodeQuizDesktop.Viewmodels
         public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }
         public ICommand PublishCommand { get => new Command(CreateAndPublishQuiz); }
         public ICommand DeleteQuestionCommand { get => new Command<NewQuestionModel>(DeleteQuestion); }
+        public ICommand EditQuestionCommand { get => new Command<NewQuestionModel>(EditQuestion); }
 
         private readonly IPopupService popupService;
         private readonly IAuthenticationRepository authenticationRepository;
@@ -345,6 +337,8 @@ namespace CodeQuizDesktop.Viewmodels
                 }
             });
 
+
+
             if (result.Result != null)
             {
                 QuestionModels.Add(result.Result);
@@ -357,9 +351,23 @@ namespace CodeQuizDesktop.Viewmodels
             QuestionModels.Remove(q);
         }
 
-        public async void EditQuestion()
+        public async void EditQuestion(NewQuestionModel newQuestionModel)
         {
+            // Create the instance manually and pass the parameter
+            var popup = new AddQuestionDialog(newQuestionModel);
 
+            // Show it using Shell.Current.CurrentPage
+            var result = await Shell.Current.CurrentPage.ShowPopupAsync<NewQuestionModel?>(popup);
+
+            if (result.Result is NewQuestionModel updatedModel)
+            {
+                System.Diagnostics.Debug.WriteLine($"Question updated successfully!");
+                int index = QuestionModels.IndexOf(newQuestionModel);
+                if (index >= 0)
+                {
+                    QuestionModels[index] = updatedModel;
+                }
+            }
         }
 
         /// <summary>
@@ -437,7 +445,9 @@ namespace CodeQuizDesktop.Viewmodels
                     Language = ProgrammingLanguage!,
                     AllowExecution = AllowExecution,
                     ShowError = ShowErrors,
-                    ShowOutput = ShowOutput
+                    ShowOutput = ShowOutput,
+                    AllowIntellisense = AllowIntellisense,
+                    AllowSignatureHelp = AllowSignatureHelp
                 },
                 Questions = QuestionModels.ToList()
             };
@@ -473,23 +483,19 @@ namespace CodeQuizDesktop.Viewmodels
                 ShowOutput = receivedQuizModel.GlobalQuestionConfiguration.ShowOutput;
                 ShowErrors = receivedQuizModel.GlobalQuestionConfiguration.ShowError;
                 QuestionModels = new ObservableCollection<NewQuestionModel>(receivedQuizModel.Questions);
+                AllowIntellisense = receivedQuizModel.GlobalQuestionConfiguration.AllowIntellisense;
+                allowSignatureHelp = receivedQuizModel.GlobalQuestionConfiguration.AllowSignatureHelp;
             }
         }
-        
+
         public CreateQuizVM(IPopupService popupService, IAuthenticationRepository authenticationRepository, IQuizzesRepository quizzesRepository)
         {
             this.popupService = popupService;
             this.authenticationRepository = authenticationRepository;
             this.quizzesRepository = quizzesRepository;
 
-            QuestionModels.CollectionChanged += (item, e) =>
-            {
-                for (int i = 0; i < QuestionModels.Count; i++)
-                {
-                    QuestionModels[i].Order = i + 1;
-                }
-            };
+            QuestionModels = [];
         }
     }
-    
+
 }

@@ -62,7 +62,6 @@
                                         </Border.GestureRecognizers>
                                         <Label Text="Grade" TextColor="White" />
                                     </Border>
-                                    
                                 </Grid>
 
                             </DataTemplate>

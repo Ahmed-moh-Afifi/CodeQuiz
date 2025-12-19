@@ -1,4 +1,5 @@
-﻿using CodeQuizDesktop.Models;
+﻿using CodeQuizDesktop.Controls;
+using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
 using System;
 using System.Collections.Generic;
@@ -64,6 +65,22 @@ namespace CodeQuizDesktop.Viewmodels
                 selectedQuestion = value;
                 HasTestCases = SelectedQuestion!.TestCases.Count != 0;
                 CodeInEditor = Attempt!.Solutions[value!.Order - 1].Code;
+                if (selectedQuestion!.QuestionConfiguration.AllowIntellisense && selectedQuestion.QuestionConfiguration.AllowSignatureHelp)
+                {
+                    EditorTypeValue = EditorType.AllHelpers;
+                }
+                else if (!(selectedQuestion.QuestionConfiguration.AllowIntellisense) && selectedQuestion.QuestionConfiguration.AllowSignatureHelp)
+                {
+                    EditorTypeValue = EditorType.SignatureOnly;
+                }
+                else if (selectedQuestion.QuestionConfiguration.AllowIntellisense && !(selectedQuestion.QuestionConfiguration.AllowSignatureHelp))
+                {
+                    EditorTypeValue = EditorType.IntellisenseOnly;
+                }
+                else
+                {
+                    EditorTypeValue = EditorType.NoHelpers;
+                }
 
                 OnPropertyChanged();
             }
@@ -112,6 +129,8 @@ namespace CodeQuizDesktop.Viewmodels
                 OnPropertyChanged();
             }
         }
+
+        public EditorType EditorTypeValue { get; set; }
 
         // Commands
         public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }

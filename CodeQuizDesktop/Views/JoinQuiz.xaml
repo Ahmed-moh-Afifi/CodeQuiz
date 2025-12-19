@@ -208,8 +208,9 @@
                         <controls:CodeEditor 
                             ShowError="{Binding SelectedQuestion.QuestionConfiguration.ShowError}"
                             ShowOutput="{Binding SelectedQuestion.QuestionConfiguration.ShowOutput}"
-                            AllowExecution="{Binding SelectedQuestion.QuestionConfiguration.AllowExecution}" 
+                            AllowExecution="{Binding SelectedQuestion.QuestionConfiguration.AllowExecution}"
                             Code="{Binding CodeInEditor}"
+                            EditorType="{Binding EditorTypeValue}"
                             HeightRequest="800"/>
                             <!--Language="{Binding SelectedQuestion.QuestionConfiguration.Language}"--> 
                     </VerticalStackLayout>
@@ -218,6 +219,6 @@
         </Grid>
 
         <!--Auto Submission Overlay-->
-        <Border Background="#88FFFFFF" Grid.RowSpan="2" IsVisible="{Binding WaitingForAutoSubmission}"/>
+        <Border Background="#88FFFFFF" Grid.RowSpan="2" IsVisible="{Binding WaitingForAutoSubmission}" />
     </Grid>
 </ContentPage>

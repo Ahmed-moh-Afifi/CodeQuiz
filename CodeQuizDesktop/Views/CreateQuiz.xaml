@@ -209,7 +209,7 @@
                                                 <HorizontalStackLayout Spacing="10" HorizontalOptions="End" VerticalOptions="Start">
                                                     <Border StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="White" Background="#1e1e1e" InputTransparent="False" HorizontalOptions="End">
                                                         <Border.GestureRecognizers>
-                                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreateQuizVM}}, Path=DeleteQuestionCommand}" CommandParameter="{Binding .}"/>
+                                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreateQuizVM}}, Path=EditQuestionCommand}" CommandParameter="{Binding .}"/>
                                                         </Border.GestureRecognizers>
                                                         <Border.Shadow>
                                                             <Shadow Opacity="0" Radius="0"/>
