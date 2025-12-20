@@ -58,6 +58,8 @@ jobs:
   desktop-tests:
     name: Desktop Tests (Windows)
     runs-on: windows-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -66,7 +68,12 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - name: Install .NET workloads
+        run: dotnet workload restore
 
       - name: Install MAUI Workload
         run: dotnet workload install maui-windows
@@ -75,7 +82,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/CodeQuizDesktop*.csproj') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
