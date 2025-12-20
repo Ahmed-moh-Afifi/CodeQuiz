@@ -1,0 +1,74 @@
+name: Deploy to Oracle VPS
+
+on:
+  push:
+    branches: ["master"]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # 1. Login to GitHub Container Registry on the VPS
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # 2. Re-create the .env file from secrets (keeps it safe)
+            echo "${{ secrets.ENV_FILE }}" > /home/ubuntu/app/.env
+
+            # 3. Pull the new image
+            sudo docker pull ghcr.io/${{ env.IMAGE_NAME }}:latest
+
+            # 4. Stop and Remove the old container
+            sudo docker stop my-api || true
+            sudo docker rm my-api || true
+
+            # 5. Run the new container (The Critical Command)
+            sudo docker run --name my-api \
+              -p 80:8080 \
+              --env-file /home/ubuntu/app/.env \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              -v /tmp/code:/tmp/code \
+              --link db:db \
+              -d \
+              --restart unless-stopped \
+              ghcr.io/${{ env.IMAGE_NAME }}:latest
+
+            # 6. Clean up unused images to save space
+            docker image prune -f
