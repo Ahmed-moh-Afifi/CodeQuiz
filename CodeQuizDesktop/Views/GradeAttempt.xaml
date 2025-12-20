@@ -7,150 +7,135 @@
              xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              x:Class="CodeQuizDesktop.Views.GradeAttempt"
              Title="GradeAttempt"
-             x:DataType="vm:GradeAttemptVM"
-             BackgroundColor="#1e1e1e">
+             x:DataType="vm:GradeAttemptVM">
 
     <Grid RowDefinitions="Auto,*">
-        <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" Padding="20,20" BackgroundColor="#171717">
-            <Border  WidthRequest="30" HeightRequest="35" StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding ReturnCommand}"/>
-                </Border.GestureRecognizers>
-                <Border.Shadow>
-                    <Shadow Opacity="0" Radius="0"/>
-                </Border.Shadow>
-                <Image Source="arrow_back_ios_new_rounded.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
-                    <Image.Behaviors>
-                        <toolkit:IconTintColorBehavior TintColor="White" />
-                    </Image.Behaviors>
-                </Image>
-            </Border>
-            <VerticalStackLayout Grid.Column="1" Margin="10,0,0,0" Spacing="8">
-                <Label Text="{Binding Quiz.Title}" FontSize="30" TextColor="White" HorizontalOptions="Start" VerticalOptions="Center"/>
-                <!--<Label Text="Question 3 of 6" FontSize="16" TextColor="#888888" HorizontalOptions="Start" VerticalOptions="Center"/>-->
-            </VerticalStackLayout>
-
-
-        </Grid>
-        <BoxView HeightRequest="1" Color="#3b3b3b" Margin="0,0" VerticalOptions="End"/>
-        <Grid Grid.Row="1">
-            <Grid ColumnDefinitions="1.14*,5*">
-                <VerticalStackLayout Padding="30" Spacing="15">
-                    <Label Text="Questions" TextColor="White"/>
-
-
-                    <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="Start" AlignItems="Center" AlignContent="Start" BindableLayout.ItemsSource="{Binding Quiz.Questions}">
-
-
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="models:Question">
-                                <Border StrokeShape="RoundRectangle 5" BackgroundColor="#2e2e2e" Padding="14,10" Stroke="White" StrokeThickness="0.8" Margin="2">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:GradeAttemptVM}}, Path=SpecificQuestionCommand}" CommandParameter="{Binding .}"/>
-                                    </Border.GestureRecognizers>
-                                    <Label Text="{Binding Order}" TextColor="White" FontSize="18" />
-                                </Border>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-
-
-
-
-
-
-                    </FlexLayout>
-
-                    <ProgressBar Progress="0.3" ProgressColor="#591c21"/>
-
-                    <Grid Grid.Column="2" ColumnDefinitions="*,*" VerticalOptions="Center" ColumnSpacing="10" Margin="0,30,0,0" HorizontalOptions="FillAndExpand">
-                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#591c21" Padding="14,10">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding PreviousQuestionCommand}"/>
-                            </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5">
-                                <Border  WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
-                                    <Image Source="arrow_back_ios_new_rounded.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
-                                        <Image.Behaviors >
-                                            <toolkit:IconTintColorBehavior TintColor="White" />
-                                        </Image.Behaviors>
-                                    </Image>
-                                </Border>
-                                <Label Grid.Column="1" Text="Previous" TextColor="White" HorizontalOptions="End" VerticalOptions="Center" />
-                            </Grid>
-                        </Border>
-
-                        <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#591c21" Padding="14,10" >
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding NextQuestionCommand}"/>
-                            </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="5">
-                                <Label Text="Next" TextColor="White" HorizontalOptions="Start" VerticalOptions="Center" />
-                                <Border  Grid.Column="1" WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="End" VerticalOptions="Center">
-                                    <Image Source="arrow_forward_ios_rounded.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
-                                        <Image.Behaviors>
-                                            <toolkit:IconTintColorBehavior TintColor="White" />
-                                        </Image.Behaviors>
-                                    </Image>
-                                </Border>
-                            </Grid>
-                        </Border>
-                    </Grid>
-
+        <!-- Header -->
+        <Border StrokeThickness="0" BackgroundColor="{StaticResource BackgroundDark}" Padding="24,16">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                <Border Style="{StaticResource BackButton}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ReturnCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Image Source="arrow_back_ios_new_rounded.png" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center">
+                        <Image.Behaviors>
+                            <toolkit:IconTintColorBehavior TintColor="{StaticResource TextPrimary}"/>
+                        </Image.Behaviors>
+                    </Image>
+                </Border>
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                    <Label Text="{Binding Quiz.Title}" Style="{StaticResource PageTitle}" FontSize="24"/>
+                    <Label Text="Grade student submission" Style="{StaticResource CaptionText}"/>
                 </VerticalStackLayout>
-                <BoxView WidthRequest="1" Color="#3b3b3b" Margin="0,0" HorizontalOptions="End" />
-                <ScrollView  Grid.Column="1" VerticalOptions="FillAndExpand">
-                    <VerticalStackLayout>
+            </Grid>
+        </Border>
+        <BoxView HeightRequest="1" Color="{StaticResource BorderDefault}" VerticalOptions="End"/>
 
-                        <Border BackgroundColor="#2e2e2e" Padding="20" StrokeThickness="0" HorizontalOptions="FillAndExpand" HeightRequest="80">
-                            <Grid ColumnDefinitions="Auto,*">
-                                <Label Text="{Binding SelectedQuestion.Order, StringFormat='Question {0}'}" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
-                                <Border Grid.Column="1" HorizontalOptions="End" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,5" BackgroundColor="#171717">
+        <!-- Content -->
+        <Grid Grid.Row="1" ColumnDefinitions="1*,4.3*">
+            <!-- Sidebar -->
+            <Border StrokeThickness="0" BackgroundColor="{StaticResource BackgroundDark}">
+                <Grid RowDefinitions="Auto,Auto">
+                    <VerticalStackLayout Padding="24" Spacing="20">
+                        <Label Text="Questions" Style="{StaticResource SectionHeader}" FontSize="16"/>
 
-                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5">
-                                        <Label Text="Grade: " HorizontalOptions="Center" VerticalOptions="Center" TextColor="White"/>
-                                        <Entry Grid.Column="1" TextColor="White" Margin="0" MinimumHeightRequest="0" MinimumWidthRequest="35" Background="Transparent" Text="{Binding Grade}"/>
-                                    </Grid>
-                                </Border>
-                            </Grid>
-                        </Border>
+                        <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="Start" AlignItems="Center" AlignContent="Start" BindableLayout.ItemsSource="{Binding Quiz.Questions}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:Question">
+                                    <Border StrokeShape="RoundRectangle 8" BackgroundColor="{StaticResource SurfaceDark}" Padding="18,14" Stroke="{StaticResource BorderDefault}" StrokeThickness="1" Margin="3">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GradeAttemptVM}}, Path=SpecificQuestionCommand}" CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal"/>
+                                                <VisualState x:Name="PointerOver">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="{StaticResource Secondary}"/>
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                        <Label Text="{Binding Order}" FontSize="16" FontAttributes="Bold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
 
-                        <VerticalStackLayout Spacing="40" Padding="30,20">
+                        <ProgressBar Progress="0"/>
+                    </VerticalStackLayout>
 
-                            <Label Text="{Binding SelectedQuestion.Statement}" TextColor="White" FontSize="16"/>
-                            <VerticalStackLayout Spacing="20">
-                                <Label Text="Examples" TextColor="White" FontSize="16" IsVisible="{Binding HasTestCases}"/>
-                                <CollectionView ItemsSource="{Binding SelectedQuestion.TestCases}">
-                                    <CollectionView.ItemsLayout>
-                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
-                                    </CollectionView.ItemsLayout>
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate x:DataType="models:TestCase">
-                                            <Border Stroke="#3b3b3b" StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#171717" >
+                    <!-- Navigation Buttons -->
+                    <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,16">
+                        <Button Text="Previous" Style="{StaticResource SecondaryButton}" Command="{Binding PreviousQuestionCommand}" ImageSource="arrow_back_ios_new_rounded.png" HeightRequest="40">
+                            <Button.Behaviors>
+                                <toolkit:IconTintColorBehavior TintColor="White"/>
+                            </Button.Behaviors>
+                        </Button>
+                        <Button Grid.Column="1" Text="Next" Style="{StaticResource PrimaryButton}" Command="{Binding NextQuestionCommand}" ImageSource="arrow_forward_ios_rounded.png" HeightRequest="40">
+                            <Button.Behaviors>
+                                <toolkit:IconTintColorBehavior TintColor="White"/>
+                            </Button.Behaviors>
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Border>
 
-                                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="15" Padding="25,25">
-                                                    <Label Grid.Row="0" Text="Input" TextColor="White" FontSize="16"/>
-                                                    <Border Grid.Row="1" Stroke="#3b3b3b" StrokeThickness="0" StrokeShape="RoundRectangle 10" BackgroundColor="#222222" MinimumHeightRequest="30" MaximumHeightRequest="180" Padding="15">
-                                                        <ScrollView>
-                                                            <Label Text="{Binding InputInOneString}" TextColor="White"/>
-                                                        </ScrollView>
-                                                    </Border>
-                                                    <Label Grid.Row="2" Text="Output" TextColor="White" FontSize="16"/>
-                                                    <Border Grid.Row="3" Stroke="#3b3b3b" StrokeThickness="0" StrokeShape="RoundRectangle 10" BackgroundColor="#222222" MinimumHeightRequest="30" MaximumHeightRequest="180" Padding="15">
-                                                        <ScrollView>
-                                                            <Label Text="{Binding ExpectedOutput}" TextColor="White"/>
-                                                        </ScrollView>
-                                                    </Border>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
-                            </VerticalStackLayout>
+            <BoxView WidthRequest="1" Color="{StaticResource SurfaceDark}" HorizontalOptions="End"/>
 
+            <!-- Main Content -->
+            <ScrollView Grid.Column="1">
+                <VerticalStackLayout>
+                    <!-- Question Header with Grade Input -->
+                    <Border BackgroundColor="{StaticResource SurfaceDark}" Padding="24,20" StrokeThickness="0">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="{Binding SelectedQuestion.Order, StringFormat='Question {0}'}" Style="{StaticResource SectionHeader}" VerticalOptions="Center"/>
+                            <Border Grid.Column="1" HorizontalOptions="End" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="15,5" BackgroundColor="#171717">
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5">
+                                    <Label Text="Grade: " Style="{StaticResource BodyText}" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    <Entry Grid.Column="1" Text="{Binding Grade}" Keyboard="Numeric" TextColor="White" Margin="0" MinimumHeightRequest="0" MinimumWidthRequest="35"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
 
+                    <!-- Question Content -->
+                    <VerticalStackLayout Spacing="32" Padding="24">
+                        <Label Text="{Binding SelectedQuestion.Statement}" Style="{StaticResource BodyText}" FontSize="16" LineBreakMode="WordWrap"/>
+
+                        <!-- Test Cases -->
+                        <VerticalStackLayout Spacing="16" IsVisible="{Binding HasTestCases}">
+                            <Label Text="Examples" Style="{StaticResource SectionHeader}" FontSize="16"/>
+                            <CollectionView ItemsSource="{Binding SelectedQuestion.TestCases}">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="12"/>
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:TestCase">
+                                        <Border Style="{StaticResource InnerCard}">
+                                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+                                                <Label Text="Input" Style="{StaticResource CaptionText}" FontAttributes="Bold"/>
+                                                <Border Grid.Row="1" Style="{StaticResource InnerCard}" BackgroundColor="{StaticResource SurfaceDark}" MinimumHeightRequest="30" MaximumHeightRequest="150">
+                                                    <ScrollView>
+                                                        <Label Text="{Binding InputInOneString}" Style="{StaticResource CodeLabel}"/>
+                                                    </ScrollView>
+                                                </Border>
+                                                <Label Grid.Row="2" Text="Expected Output" Style="{StaticResource CaptionText}" FontAttributes="Bold"/>
+                                                <Border Grid.Row="3" Style="{StaticResource InnerCard}" BackgroundColor="{StaticResource SurfaceDark}" MinimumHeightRequest="30" MaximumHeightRequest="150">
+                                                    <ScrollView>
+                                                        <Label Text="{Binding ExpectedOutput}" Style="{StaticResource CodeLabel}"/>
+                                                    </ScrollView>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
                         </VerticalStackLayout>
+                    </VerticalStackLayout>
 
-                        <controls:CodeEditor 
+                    <!-- Code Editor -->
+                    <controls:CodeEditor 
                         ShowError="True"
                         ShowOutput="True"
                         AllowExecution="True" 
@@ -158,10 +143,8 @@
                         Language="{Binding SelectedQuestion.QuestionConfiguration.Language}"
                         Code="{Binding CodeInEditor}"
                         HeightRequest="800"/>
-                    </VerticalStackLayout>
-                </ScrollView>
-            </Grid>
+                </VerticalStackLayout>
+            </ScrollView>
         </Grid>
-
     </Grid>
 </ContentPage>

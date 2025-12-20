@@ -4,77 +4,104 @@
              xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              x:Class="CodeQuizDesktop.Controls.CodeEditor" x:Name="this">
 
-    <Grid RowDefinitions="*, 5*, 3*">
-        <Grid ColumnDefinitions="*,*" BackgroundColor="#2e2e2e" Padding="20, 0">
-            <Label Text="&lt; &gt;  Solution" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
-            <HorizontalStackLayout Grid.Column="2" HorizontalOptions="End" VerticalOptions="Center" Spacing="10" >
-                <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#591c21" Padding="14,10">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding ResetCommand, Source={x:Reference this}}"/>
-                    </Border.GestureRecognizers>
-                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5">
-                        <Border  WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
-                            <Image Source="refresh.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+    <Grid RowDefinitions="Auto,5*,3*">
+        <!-- Header Bar -->
+        <Border StrokeThickness="0" BackgroundColor="{StaticResource SurfaceDark}" Padding="20,12">
+            <Grid ColumnDefinitions="*,Auto">
+                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                    <Label Text="&lt;/&gt;" TextColor="{StaticResource Primary}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                    <Label Text="Solution" TextColor="{StaticResource TextPrimary}" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                </HorizontalStackLayout>
+                
+                <HorizontalStackLayout Grid.Column="1" Spacing="12" VerticalOptions="Center">
+                    <!-- Reset Button -->
+                    <Border Style="{StaticResource ActionBadge}" StrokeShape="RoundRectangle 12" Padding="16,8">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ResetCommand, Source={x:Reference this}}"/>
+                        </Border.GestureRecognizers>
+                        <HorizontalStackLayout Spacing="8">
+                            <Image Source="refresh.png" WidthRequest="18" HeightRequest="18" VerticalOptions="Center">
                                 <Image.Behaviors>
-                                    <toolkit:IconTintColorBehavior TintColor="White" />
+                                    <toolkit:IconTintColorBehavior TintColor="{StaticResource TextPrimary}"/>
                                 </Image.Behaviors>
                             </Image>
-                        </Border>
-                        <Label Grid.Column="1" Text="Reset" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
-                    </Grid>
-                </Border>
+                            <Label Text="Reset" TextColor="{StaticResource TextPrimary}" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                    </Border>
 
-                <!-- Run Button with Loading Indicator -->
-                <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#591c21" IsVisible="{Binding AllowExecution, Source={x:Reference this}}">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding RunCommand, Source={x:Reference this}}"/>
-                    </Border.GestureRecognizers>
-                    <Grid Padding="14,10">
-                        <!-- Normal state - Play icon and Run text -->
-                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5" IsVisible="{Binding IsReadyToRun, Source={x:Reference this}}">
-                            <Border WidthRequest="22" HeightRequest="22" StrokeShape="RoundRectangle 10" StrokeThickness="0" Stroke="White" HorizontalOptions="Center" VerticalOptions="Center">
-                                <Image Source="player_play.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                    <!-- Run Button with Loading Indicator -->
+                    <Border Style="{StaticResource ActionBadge}" StrokeShape="RoundRectangle 12" Padding="16,8" IsVisible="{Binding AllowExecution, Source={x:Reference this}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding RunCommand, Source={x:Reference this}}"/>
+                        </Border.GestureRecognizers>
+                        <Grid>
+                            <!-- Normal state - Play icon and Run text -->
+                            <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsReadyToRun, Source={x:Reference this}}">
+                                <Image Source="player_play.png" WidthRequest="18" HeightRequest="18" VerticalOptions="Center">
                                     <Image.Behaviors>
-                                        <toolkit:IconTintColorBehavior TintColor="White" />
+                                        <toolkit:IconTintColorBehavior TintColor="{StaticResource TextPrimary}"/>
                                     </Image.Behaviors>
                                 </Image>
-                            </Border>
-                            <Label Grid.Column="1" Text="Run" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
+                                <Label Text="Run" TextColor="{StaticResource TextPrimary}" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                            
+                            <!-- Running state - Activity indicator and Running text -->
+                            <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsRunning, Source={x:Reference this}}">
+                                <ActivityIndicator IsRunning="{Binding IsRunning, Source={x:Reference this}}" 
+                                                   Color="{StaticResource TextPrimary}" 
+                                                   WidthRequest="18" 
+                                                   HeightRequest="18"
+                                                   VerticalOptions="Center"/>
+                                <Label Text="Running..." TextColor="{StaticResource TextPrimary}" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
                         </Grid>
-                        
-                        <!-- Running state - Activity indicator and Running text -->
-                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="5" IsVisible="{Binding IsRunning, Source={x:Reference this}}">
-                            <ActivityIndicator IsRunning="{Binding IsRunning, Source={x:Reference this}}" 
-                                               Color="White" 
-                                               WidthRequest="22" 
-                                               HeightRequest="22"
-                                               HorizontalOptions="Center" 
-                                               VerticalOptions="Center"/>
-                            <Label Grid.Column="1" Text="Running..." TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
-                        </Grid>
-                    </Grid>
-                </Border>
-            </HorizontalStackLayout>
-        </Grid>
+                    </Border>
+                </HorizontalStackLayout>
+            </Grid>
+        </Border>
+        
+        <!-- Code Editor WebView -->
         <WebView x:Name="webview" Grid.Row="1"/>
-        <Grid RowDefinitions="*, 2*" IsVisible="{Binding AllowExecution, Source={x:Reference this}}" Grid.Row="2">
+        
+        <!-- Output/Input Panel -->
+        <Grid RowDefinitions="Auto,*" IsVisible="{Binding AllowExecution, Source={x:Reference this}}" Grid.Row="2">
+            <!-- Panel Headers -->
             <Grid ColumnDefinitions="*,*">
-                <Border BackgroundColor="#2e2e2e" StrokeThickness="0" Padding="20, 0">
-                    <Label Text="&gt;&gt;- Output" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
+                <Border BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="0" Padding="20,12">
+                    <HorizontalStackLayout Spacing="8">
+                        <Label Text="»" TextColor="{StaticResource Success}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                        <Label Text="Output" TextColor="{StaticResource TextPrimary}" FontSize="15" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                    </HorizontalStackLayout>
                 </Border>
-                <BoxView WidthRequest="1" Color="#3b3b3b" Margin="0,0" HorizontalOptions="End" />
-                <Border Grid.Column="1" BackgroundColor="#2e2e2e" StrokeThickness="0" Padding="20, 0">
-                    <Label Text="&lt;&lt;- Input" TextColor="White" FontSize="16" VerticalTextAlignment="Center"/>
+                <BoxView WidthRequest="1" Color="{StaticResource BorderDefault}" HorizontalOptions="End"/>
+                <Border Grid.Column="1" BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="0" Padding="20,12">
+                    <HorizontalStackLayout Spacing="8">
+                        <Label Text="«" TextColor="{StaticResource Primary}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                        <Label Text="Input" TextColor="{StaticResource TextPrimary}" FontSize="15" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                    </HorizontalStackLayout>
                 </Border>
             </Grid>
 
+            <!-- Panel Content -->
             <Grid ColumnDefinitions="*,*" Grid.Row="1">
-                <Border StrokeThickness="0" Background="#1e1e1e" Padding="20, 0">
-                    <Label Text="{Binding Output, Source={x:Reference this}}" TextColor="White"/>
+                <Border StrokeThickness="0" BackgroundColor="{StaticResource BackgroundDark}" Padding="20,16">
+                    <ScrollView>
+                        <Label Text="{Binding Output, Source={x:Reference this}}" 
+                               TextColor="{StaticResource TextSecondary}" 
+                               FontFamily="SFMonoRegular" 
+                               FontSize="14"
+                               LineBreakMode="WordWrap"/>
+                    </ScrollView>
                 </Border>
-                <BoxView WidthRequest="1" Color="#3b3b3b" Margin="0,0" HorizontalOptions="End" />
-                <Border Grid.Column="1" StrokeThickness="0" Background="#1e1e1e" Padding="20, 0">
-                    <Editor Text="{Binding RawInput, Source={x:Reference this}}" TextColor="White"/>
+                <BoxView WidthRequest="1" Color="{StaticResource BorderDefault}" HorizontalOptions="End"/>
+                <Border Grid.Column="1" StrokeThickness="0" BackgroundColor="{StaticResource BackgroundDark}" Padding="20,16">
+                    <Editor Text="{Binding RawInput, Source={x:Reference this}}" 
+                            TextColor="{StaticResource TextPrimary}" 
+                            PlaceholderColor="{StaticResource TextMuted}"
+                            Placeholder="Enter input here..."
+                            FontFamily="SFMonoRegular"
+                            FontSize="14"
+                            BackgroundColor="Transparent"/>
                 </Border>
             </Grid>
         </Grid>

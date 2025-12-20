@@ -5,27 +5,40 @@
              x:Class="CodeQuizDesktop.Controls.NavItem"
              x:Name="this">
     
-    <Border StrokeThickness="0"
-        Padding="16,12"
-        x:Name="borderElement"
-        BackgroundColor="Transparent">
-        <Border.StrokeShape>
-            <RoundRectangle CornerRadius="25"/>
-        </Border.StrokeShape>
-
-        <HorizontalStackLayout Spacing="10">
-            <Image Source="{Binding Source={x:Reference this}, Path=Icon}" WidthRequest="20" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center">
+    <Border StrokeThickness="0" Padding="16,14" x:Name="borderElement" BackgroundColor="Transparent" StrokeShape="RoundRectangle 40">
+        <Border.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=IsSelected}" Value="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource Primary}"/>
+            </DataTrigger>
+            <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference this}, Path=IsSelected}" Value="False">
+                <Setter Property="BackgroundColor" Value="Transparent"/>
+            </DataTrigger>
+        </Border.Triggers>
+        
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal"/>
+                <VisualState x:Name="PointerOver">
+                    <VisualState.Setters>
+                        <Setter Property="BackgroundColor" Value="{StaticResource Secondary}"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        
+        <HorizontalStackLayout Spacing="14">
+            <Image Source="{Binding Source={x:Reference this}, Path=Icon}" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
                 <Image.Behaviors>
-                    <toolkit:IconTintColorBehavior TintColor="{Binding Source={x:Reference this}, Path=IconColor}" />
+                    <toolkit:IconTintColorBehavior TintColor="{Binding Source={x:Reference this}, Path=IconColor}"/>
                 </Image.Behaviors>
             </Image>
-            <Label Text="{Binding Source={x:Reference this}, Path=Text}" VerticalOptions="Center" HorizontalOptions="Start" FontSize="16">
+            <Label Text="{Binding Source={x:Reference this}, Path=Text}" VerticalOptions="Center" HorizontalOptions="Start" FontSize="15" FontAttributes="Bold">
                 <Label.Triggers>
                     <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=IsSelected}" Value="True">
-                        <Setter Property="TextColor" Value="White" />
+                        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
                     </DataTrigger>
                     <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference this}, Path=IsSelected}" Value="False">
-                        <Setter Property="TextColor" Value="#aaaaaa" />
+                        <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>
                     </DataTrigger>
                 </Label.Triggers>
             </Label>

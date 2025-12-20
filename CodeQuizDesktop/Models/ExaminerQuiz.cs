@@ -48,13 +48,16 @@ namespace CodeQuizDesktop.Models
             get
             {
                 if (StartDate > DateTime.Now)
-                    return "Not Started";
+                    return "Upcoming";
                 else if (EndDate < DateTime.Now)
                     return "Ended";
                 else
                     return "Running";
             }
         }
+        public bool IsUpcoming { get => Status == "Upcoming"; }
+        public bool IsEnded { get => Status == "Ended"; }
+        public bool IsRunning { get => Status == "Running"; }
 
         public NewQuizModel QuizToModel
         {

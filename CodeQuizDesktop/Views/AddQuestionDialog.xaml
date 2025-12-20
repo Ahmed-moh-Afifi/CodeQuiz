@@ -12,80 +12,99 @@
              CanBeDismissedByTappingOutsideOfPopup="False"
              x:TypeArguments="models:NewQuestionModel"
              xmlns:views="clr-namespace:CodeQuizDesktop.Views">
-    <Border StrokeThickness="0" 
-            StrokeShape="RoundRectangle 20" Background="Transparent" Margin="0">
-
-        <Grid VerticalOptions="Center" HorizontalOptions="Center" >
-            <Border BackgroundColor="#222222" MaximumHeightRequest="900" WidthRequest="700" HeightRequest="900" StrokeShape="RoundRectangle 20" StrokeThickness="0" Padding="0" VerticalOptions="Center" HorizontalOptions="Center">
-                <Grid RowDefinitions="Auto, *, Auto">
-                    <Grid ColumnDefinitions="*, Auto">
-                        <Label Text="Add Question" FontSize="20" Margin="20" TextColor="White" VerticalOptions="Center" />
-                        <Button Grid.Column="1" HorizontalOptions="End" WidthRequest="38" HeightRequest="38" BackgroundColor="#f7fafc" Text="✕" FontSize="18" TextColor="#222222" CornerRadius="30" Padding="0" Margin="20,0" MinimumHeightRequest="0" MinimumWidthRequest="0" Clicked="OnCloseButtonClicked"/>
+             
+    <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" Background="Transparent" Margin="0">
+        <Grid VerticalOptions="Center" HorizontalOptions="Center">
+            <Border Style="{StaticResource DialogContainer}" MaximumHeightRequest="900" WidthRequest="720" HeightRequest="900" Padding="0" VerticalOptions="Center" HorizontalOptions="Center">
+                <Grid RowDefinitions="Auto,*,Auto">
+                    
+                    <!-- Dialog Header -->
+                    <Grid Style="{StaticResource DialogHeader}" ColumnDefinitions="*,Auto">
+                        <Label Text="Add Question" Style="{StaticResource SectionHeader}" VerticalOptions="Center"/>
+                        <Border Grid.Column="1" Style="{StaticResource CloseButton}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCloseButtonClicked"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="✕" FontSize="16" TextColor="{StaticResource TextPrimary}" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
                     </Grid>
-                    <BoxView HeightRequest="1" Color="#e2e8f0" VerticalOptions="End" />
+                    
+                    <BoxView HeightRequest="1" Color="{StaticResource BorderDefault}" VerticalOptions="End"/>
+                    
+                    <!-- Dialog Body -->
                     <ScrollView Grid.Row="1">
-                        <VerticalStackLayout Margin="20" Spacing="20">
-                            <Label Text="Question Statement" FontSize="18" TextColor="White"/>
-                            <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e">
-                                <Editor MaximumHeightRequest="150" AutoSize="TextChanges" TextColor="White" Text="{Binding Statement}" VerticalTextAlignment="Center"/>
-                            </Border>
-                            <Label Text="Points" FontSize="18" TextColor="White"/>
-                            <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e">
-                                <Editor MaximumHeightRequest="150" AutoSize="TextChanges" TextColor="White" Text="{Binding Points}" VerticalTextAlignment="Center"/>
-                            </Border>
-                            <Label Text="Starter Code in Editor" FontSize="18" TextColor="White"/>
-                            <Border StrokeShape="RoundRectangle 20" Stroke="#3b3b3b">
-                                <local:CodeEditor EditorType="IntellisenseOnly" Code="{Binding EditorCode}" x:Name="code" HeightRequest="500"/>
-                            </Border>
-                            <Grid ColumnDefinitions="3*,*">
-                                <Label Text="Test Cases" TextColor="White" FontSize="18" VerticalOptions="Center"/>
-                            </Grid>
-                            <VerticalStackLayout>
+                        <VerticalStackLayout Padding="24" Spacing="20">
+                            
+                            <!-- Question Statement -->
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Question Statement" Style="{StaticResource ItemTitle}"/>
+                                <Border Style="{StaticResource MultilineInputBorder}">
+                                    <Editor MaximumHeightRequest="150" AutoSize="TextChanges" Style="{StaticResource TextEditor}" Text="{Binding Statement}"/>
+                                </Border>
+                            </VerticalStackLayout>
+                            
+                            <!-- Points -->
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Points" Style="{StaticResource ItemTitle}"/>
+                                <Border Style="{StaticResource InputBorder}">
+                                    <Entry Text="{Binding Points}" Keyboard="Numeric" Style="{StaticResource TextInput}" VerticalTextAlignment="Center"/>
+                                </Border>
+                            </VerticalStackLayout>
+                            
+                            <!-- Starter Code -->
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Starter Code in Editor" Style="{StaticResource ItemTitle}"/>
+                                <Border Stroke="{StaticResource BorderDefault}" StrokeThickness="1" StrokeShape="RoundRectangle 12">
+                                    <local:CodeEditor EditorType="IntellisenseOnly" Code="{Binding EditorCode}" x:Name="code" HeightRequest="400"/>
+                                </Border>
+                            </VerticalStackLayout>
+                            
+                            <!-- Test Cases -->
+                            <VerticalStackLayout Spacing="12">
+                                <Label Text="Test Cases" Style="{StaticResource ItemTitle}"/>
+                                
                                 <CollectionView ItemsSource="{Binding TestCases}">
                                     <CollectionView.ItemsLayout>
-                                        <LinearItemsLayout 
-                                        Orientation="Vertical"
-                                        ItemSpacing="10"/>
+                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="12"/>
                                     </CollectionView.ItemsLayout>
                                     <CollectionView.EmptyView>
-                                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e" Padding="40">
-                                            <Label Text="No testcases added yet" TextColor="#878787" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                        <Border Style="{StaticResource InnerCard}" Padding="32">
+                                            <Label Text="No test cases added yet" Style="{StaticResource CaptionText}" HorizontalOptions="Center" VerticalOptions="Center"/>
                                         </Border>
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e">
+                                            <Border Style="{StaticResource InnerCard}" Padding="0">
                                                 <VerticalStackLayout Spacing="0">
-                                                    <VerticalStackLayout>
-                                                        <Grid Padding="15">
-                                                            <Label Text="{Binding TestCaseNumber, StringFormat='TestCase {0}'}" TextColor="White" FontSize="16" VerticalOptions="Center" HorizontalOptions="Start"/>
-                                                            <Border StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="White" Background="#1e1e1e" InputTransparent="False" HorizontalOptions="End">
-                                                                <Border.GestureRecognizers>
-                                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type views:AddQuestionDialog}}, Path=DeleteTestCaseCommand}" CommandParameter="{Binding .}"/>
-                                                                </Border.GestureRecognizers>
-                                                                <Border.Shadow>
-                                                                    <Shadow Opacity="0" Radius="0"/>
-                                                                </Border.Shadow>
-                                                                <Image Source="trash.png" WidthRequest="22" HeightRequest="22" InputTransparent="True" Margin="10">
-                                                                    <Image.Behaviors>
-                                                                        <toolkit:IconTintColorBehavior TintColor="White" />
-                                                                    </Image.Behaviors>
-                                                                </Image>
-                                                            </Border>
-                                                        </Grid>
-                                                        <BoxView HeightRequest="1" Color="#3b3b3b"/>
-                                                    </VerticalStackLayout>
-                                                    <VerticalStackLayout Spacing="15" Margin="20">
-                                                        <VerticalStackLayout Spacing="5">
-                                                            <Label Grid.Row="1" Text="Input" TextColor="White" FontSize="16"/>
-                                                            <Border Grid.Row="2" Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#222222">
-                                                                <Editor Text="{Binding InputInOneString}" MaximumHeightRequest="150" AutoSize="TextChanges" TextColor="White" VerticalTextAlignment="Center"/>
+                                                    <!-- Test Case Header -->
+                                                    <Grid Padding="16" BackgroundColor="{StaticResource BackgroundDark}">
+                                                        <Label Text="{Binding TestCaseNumber, StringFormat='Test Case {0}'}" Style="{StaticResource ItemTitle}" VerticalOptions="Center"/>
+                                                        <Border Style="{StaticResource DangerIconButton}" HorizontalOptions="End">
+                                                            <Border.GestureRecognizers>
+                                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type views:AddQuestionDialog}}, Path=DeleteTestCaseCommand}" CommandParameter="{Binding .}"/>
+                                                            </Border.GestureRecognizers>
+                                                            <Image Source="trash.png" WidthRequest="18" HeightRequest="18" InputTransparent="True">
+                                                                <Image.Behaviors>
+                                                                    <toolkit:IconTintColorBehavior TintColor="{StaticResource Error}"/>
+                                                                </Image.Behaviors>
+                                                            </Image>
+                                                        </Border>
+                                                    </Grid>
+                                                    
+                                                    <BoxView HeightRequest="1" Color="{StaticResource BorderDefault}"/>
+                                                    
+                                                    <!-- Test Case Content -->
+                                                    <VerticalStackLayout Spacing="16" Padding="16">
+                                                        <VerticalStackLayout Spacing="6">
+                                                            <Label Text="Input" Style="{StaticResource CaptionText}"/>
+                                                            <Border Style="{StaticResource MultilineInputBorder}" BackgroundColor="{StaticResource Secondary}" Padding="0">
+                                                                <Editor Text="{Binding InputInOneString}" MaximumHeightRequest="120" AutoSize="TextChanges" Style="{StaticResource TextEditor}"/>
                                                             </Border>
                                                         </VerticalStackLayout>
-                                                        <VerticalStackLayout Spacing="5">
-                                                            <Label Grid.Row="3" Text="Output" TextColor="White" FontSize="16"/>
-                                                            <Border Grid.Row="4" Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#222222">
-                                                                <Editor Text="{Binding ExpectedOutput}" MaximumHeightRequest="150" AutoSize="TextChanges" TextColor="White" VerticalTextAlignment="Center"/>
+                                                        <VerticalStackLayout Spacing="6">
+                                                            <Label Text="Expected Output" Style="{StaticResource CaptionText}"/>
+                                                            <Border Style="{StaticResource MultilineInputBorder}" BackgroundColor="{StaticResource Secondary}" Stroke="{StaticResource Success}" Padding="0">
+                                                                <Editor Text="{Binding ExpectedOutput}" MaximumHeightRequest="120" AutoSize="TextChanges" TextColor="{StaticResource Success}"/>
                                                             </Border>
                                                         </VerticalStackLayout>
                                                     </VerticalStackLayout>
@@ -94,55 +113,66 @@
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
-                                <Border StrokeShape="RoundRectangle 20" Padding="20" Stroke="#591c21" StrokeDashArray="3" StrokeThickness="2" Background="#1e1e1e" Margin="0, 20">
+                                
+                                <!-- Add Test Case Button -->
+                                <Border Style="{StaticResource AddItemButton}" Margin="0,8">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding AddTestCaseCommand}"/>
                                     </Border.GestureRecognizers>
-                                    <Label Text="Add Testcase" TextColor="#591c21" HorizontalTextAlignment="Center"/>
+                                    <Label Text="+ Add Test Case" TextColor="{StaticResource Primary}" HorizontalTextAlignment="Center" FontAttributes="Bold"/>
                                 </Border>
                             </VerticalStackLayout>
-                            <Grid>
-                                <!--<CheckBox VerticalOptions="Center" Color="#591c21"/>-->
-                                <Label Text="Configure this question independently" FontSize="18" TextColor="White" VerticalOptions="Center"/>
-                                <Switch  Grid.Column="1" OnColor="#591c21" ThumbColor="White" HorizontalOptions="End" MinimumWidthRequest="0" WidthRequest="50" IsToggled="{Binding IndependentlyConfigured}"/>
-                                <!--<Switch Grid.Column="1" OnColor="#591c21" ThumbColor="White" Background="red"/>-->
+                            
+                            <!-- Independent Configuration Toggle -->
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Configure this question independently" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+                                <Switch Grid.Column="1" Style="{StaticResource PrimarySwitch}" IsToggled="{Binding IndependentlyConfigured}"/>
                             </Grid>
-                            <Border Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#1e1e1e" Padding="25,25" IsVisible="{Binding IndependentlyConfigured}">
-                                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,*" RowSpacing="15" >
-                                    <Label Grid.ColumnSpan="2" Text="Programming Language" TextColor="White" FontSize="16"/>
-                                    <Border Grid.ColumnSpan="2" Grid.Row="1" Stroke="#3b3b3b" StrokeThickness="0.8" HeightRequest="45" StrokeShape="RoundRectangle 20" BackgroundColor="#222222">
-                                        <Picker TextColor="White" TitleColor="White" ItemsSource="{Binding ProgrammingLanguages}" SelectedItem="{Binding ProgrammingLanguage}"/>
-                                    </Border>
-                                    <HorizontalStackLayout Grid.Column="0" Grid.Row="2">
-                                        <CheckBox VerticalOptions="Center" Color="#591c21" IsChecked="{Binding AllowIntellisense}"/>
-                                        <Label Text="Allow IntelliSense" FontSize="16" TextColor="White" VerticalOptions="Center"/>
-                                    </HorizontalStackLayout>
-                                    <HorizontalStackLayout Grid.Column="1" Grid.Row="2">
-                                        <CheckBox VerticalOptions="Center" Color="#591c21" IsChecked="{Binding AllowSignatureHelp}"/>
-                                        <Label Text="Allow Signature Help" FontSize="16" TextColor="White" VerticalOptions="Center"/>
-                                    </HorizontalStackLayout>
-                                    <HorizontalStackLayout Grid.Column="0" Grid.Row="3">
-                                        <CheckBox VerticalOptions="Center" Color="#591c21" IsChecked="{Binding AllowExecution}"/>
-                                        <Label Text="Allow Code Execution" FontSize="16" TextColor="White" VerticalOptions="Center"/>
-                                    </HorizontalStackLayout>
-                                    <HorizontalStackLayout Grid.Column="1" Grid.Row="3" IsVisible="{Binding AllowExecution}">
-                                        <CheckBox VerticalOptions="Center" Color="#591c21" IsChecked="{Binding ShowOutput}"/>
-                                        <Label Text="Show Output" FontSize="16" TextColor="White" VerticalOptions="Center"/>
-                                    </HorizontalStackLayout>
-
-                                    <HorizontalStackLayout Grid.Column="0" Grid.Row="4" IsVisible="{Binding AllowExecution}">
-                                        <CheckBox VerticalOptions="Center" Color="#591c21" IsChecked="{Binding ShowError}"/>
-                                        <Label Text="Show Errors" FontSize="16" TextColor="White" VerticalOptions="Center"/>
-                                    </HorizontalStackLayout>
-                                </Grid>
+                            
+                            <!-- Independent Configuration Panel -->
+                            <Border Style="{StaticResource InnerCard}" IsVisible="{Binding IndependentlyConfigured}">
+                                <VerticalStackLayout Spacing="16">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="Programming Language" Style="{StaticResource CaptionText}"/>
+                                        <Border Style="{StaticResource InputBorder}" BackgroundColor="{StaticResource Secondary}">
+                                            <Picker ItemsSource="{Binding ProgrammingLanguages}" SelectedItem="{Binding ProgrammingLanguage}"/>
+                                        </Border>
+                                    </VerticalStackLayout>
+                                    
+                                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*" RowSpacing="12">
+                                        <HorizontalStackLayout Grid.Column="0" Grid.Row="0" Spacing="12">
+                                            <CheckBox Style="{StaticResource PrimaryCheckBox}" IsChecked="{Binding AllowIntellisense}" MinimumWidthRequest="0"/>
+                                            <Label Text="Allow IntelliSense" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Grid.Column="1" Grid.Row="0" Spacing="12">
+                                            <CheckBox Style="{StaticResource PrimaryCheckBox}" IsChecked="{Binding AllowSignatureHelp}" MinimumWidthRequest="0"/>
+                                            <Label Text="Allow Signature Help" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Grid.Column="0" Grid.Row="1" Spacing="12">
+                                            <CheckBox Style="{StaticResource PrimaryCheckBox}" IsChecked="{Binding AllowExecution}" MinimumWidthRequest="0"/>
+                                            <Label Text="Allow Code Execution" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Grid.Column="1" Grid.Row="1" Spacing="12" IsVisible="{Binding AllowExecution}">
+                                            <CheckBox Style="{StaticResource PrimaryCheckBox}" IsChecked="{Binding ShowOutput}" MinimumWidthRequest="0"/>
+                                            <Label Text="Show Output" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Grid.Column="0" Grid.Row="2" Spacing="12" IsVisible="{Binding AllowExecution}">
+                                            <CheckBox Style="{StaticResource PrimaryCheckBox}" IsChecked="{Binding ShowError}" MinimumWidthRequest="0"/>
+                                            <Label Text="Show Errors" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+                                        </HorizontalStackLayout>
+                                    </Grid>
+                                </VerticalStackLayout>
                             </Border>
                         </VerticalStackLayout>
                     </ScrollView>
-                    <!--<BoxView Grid.Row="2" HeightRequest="1" Color="#e2e8f0" VerticalOptions="Start" />-->
-                    <Grid Grid.Row="2" Margin="20" ColumnDefinitions="*,*" ColumnSpacing="20">
-                        <Button Text="Cancel" FontSize="18" TextColor="White" VerticalOptions="Center" BackgroundColor="#591c21" Clicked="OnCloseButtonClicked"/>
-                        <Button Grid.Column="1" Text="Save" FontSize="18" TextColor="White" VerticalOptions="Center" BackgroundColor="#591c21" Clicked="OnAddButtonClicked"/>
-                    </Grid>
+                    
+                    <!-- Dialog Footer -->
+                    <Border Grid.Row="2" Style="{StaticResource DialogFooter}" StrokeShape="RoundRectangle 0,0,16,16">
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                            <Button Text="Cancel" Style="{StaticResource SecondaryButton}" Clicked="OnCloseButtonClicked"/>
+                            <Button Grid.Column="1" Text="Save Question" Style="{StaticResource PrimaryButton}" Clicked="OnAddButtonClicked"/>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Border>
         </Grid>

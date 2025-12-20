@@ -2,94 +2,106 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:rv="http://sharpnado.com"
-             xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
              x:Class="CodeQuizDesktop.Views.Register"
-             x:DataType="vm:RegisterVM"
-             Title="Register"
-             BackgroundColor="#1e1e1e">
+             Title="Register">
+    
     <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="1.5*,*,1.5*">
 
-        <Label Margin="160,60" Grid.Row="1" Grid.ColumnSpan="3" VerticalOptions="Start" HorizontalOptions="Start" FontSize="60" Opacity="0.5">
+        <!-- Background Decorative Text -->
+        <Label Margin="160,60" Grid.Row="1" Grid.ColumnSpan="3" VerticalOptions="Start" HorizontalOptions="Start" FontSize="56" Opacity="0.4">
             <Label.FormattedText>
                 <FormattedString>
-                    <Span Text="Roses are " TextColor="#D4D4D4" FontFamily="InterExtraBold"/>
-                    <Span Text="red" TextColor="#c10007" FontFamily="InterExtraBold"/>
+                    <Span Text="Roses are " TextColor="{StaticResource TextMuted}" FontFamily="InterExtraBold"/>
+                    <Span Text="red" TextColor="{StaticResource Primary}" FontFamily="InterExtraBold"/>
                 </FormattedString>
             </Label.FormattedText>
         </Label>
-        <Label Margin="100,100" Grid.Row="1" Grid.ColumnSpan="3" VerticalOptions="End" HorizontalOptions="End" FontSize="60" Opacity="0.5">
+        
+        <Label Margin="100,100" Grid.Row="1" Grid.ColumnSpan="3" VerticalOptions="End" HorizontalOptions="End" FontSize="56" Opacity="0.4">
             <Label.FormattedText>
                 <FormattedString>
-                    <Span Text="Violets are " TextColor="#D4D4D4" FontFamily="InterExtraBold"/>
-                    <Span Text="blue" TextColor="#1447e6" FontFamily="InterExtraBold"/>
+                    <Span Text="Violets are " TextColor="{StaticResource TextMuted}" FontFamily="InterExtraBold"/>
+                    <Span Text="blue" TextColor="{StaticResource Info}" FontFamily="InterExtraBold"/>
                 </FormattedString>
             </Label.FormattedText>
         </Label>
-        <Label Grid.Row="2" Grid.ColumnSpan="3" Text="Unexpected &quot;{&quot; on line 32" VerticalOptions="Center" HorizontalOptions="Center" FontFamily="InterExtraBold" FontSize="60" TextColor="#fdc700" Opacity="0.5"/>
+        
+        <Label Grid.Row="2" Grid.ColumnSpan="3" Text="Unexpected &quot;{&quot; on line 32" VerticalOptions="Center" HorizontalOptions="Center" FontFamily="InterExtraBold" FontSize="56" TextColor="{StaticResource Warning}" Opacity="0.4"/>
 
-        <Border Grid.Row="1" Grid.Column="1" Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20">
+        <!-- Register Card -->
+        <Border Grid.Row="1" Grid.Column="1" Stroke="{StaticResource BorderDefault}" StrokeThickness="1" StrokeShape="RoundRectangle 16">
+            <Border.Shadow>
+                <Shadow Brush="#000000" Opacity="0.3" Radius="24" Offset="0,8"/>
+            </Border.Shadow>
 
-            <rv:MaterialFrame MaterialBlurStyle="Dark" MaterialTheme="AcrylicBlur" CornerRadius="20">
-                <Grid>
-                    <VerticalStackLayout Padding="30" Spacing="20" IsEnabled="{Binding IsNotBusy}">
-                        <Label Text="Can you fix it?" HorizontalOptions="Center" FontFamily="InterBlack" FontSize="44" TextColor="#D4D4D4"/>
-                        <VerticalStackLayout Spacing="15" Padding="10" >
-                            <Label Text="{}{" FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4"/>
-                            <VerticalStackLayout Padding="20" Spacing="15">
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" IsVisible="True">
-                                    <Label Text="&quot;first_name&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
-                                    <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
-                                        <Entry Placeholder="&quot;Ada&quot;" TextColor="#ce9178" Text="{Binding FirstName}"/>
-                                    </Border>
-                                    <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
-                                </Grid>
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" IsVisible="True">
-                                    <Label Text="&quot;last_name&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
-                                    <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
-                                        <Entry Placeholder="&quot;Lovelace&quot;" TextColor="#ce9178" Text="{Binding LastName}"/>
-                                    </Border>
-                                    <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
-                                </Grid>
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" IsVisible="True">
-                                    <Label Text="&quot;email&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
-                                    <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
-                                        <Entry Placeholder="&quot;ada@example.com&quot;" TextColor="#ce9178" Text="{Binding Email}"/>
-                                    </Border>
-                                    <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
-                                </Grid>
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5">
-                                    <Label Text="&quot;username&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
-                                    <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
-                                        <Entry Placeholder="&quot;adalovelace&quot;" TextColor="#ce9178" Text="{Binding Username}"/>
-                                    </Border>
-                                    <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
-                                </Grid>
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5">
-                                    <Label Text="&quot;password&quot;:" FontFamily="SFMonoRegular" FontSize="20" TextColor="#9CDCFE" HorizontalOptions="Start" VerticalOptions="End"/>
-                                    <Border Grid.Column="1" StrokeThickness="0"  StrokeShape="RoundRectangle 8" VerticalOptions="End" HeightRequest="35">
-                                        <Entry Placeholder="&quot;***********&quot;" TextColor="#ce9178" IsPassword="True" Text="{Binding Password}"/>
-                                    </Border>
-                                    <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4" HorizontalOptions="End" VerticalOptions="End"/>
-                                </Grid>
-                            </VerticalStackLayout>
-                            <Label Text="{}}" FontFamily="SFMonoRegular" FontSize="20" TextColor="#D4D4D4"/>
+            <rv:MaterialFrame MaterialBlurStyle="Dark" MaterialTheme="AcrylicBlur" CornerRadius="16">
+                <VerticalStackLayout Padding="32" Spacing="24">
+                    <Label Text="Can you fix it?" HorizontalOptions="Center" Style="{StaticResource CardTitle}"/>
+                    
+                    <VerticalStackLayout Spacing="14" Padding="8">
+                        <Label Text="{}{" FontFamily="SFMonoRegular" FontSize="16" TextColor="{StaticResource TextMuted}"/>
+                        
+                        <VerticalStackLayout Padding="20,0" Spacing="12">
+                            <!-- First Name Field -->
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+                                <Label Text="&quot;first_name&quot;:" FontFamily="SFMonoRegular" FontSize="14" TextColor="{StaticResource CodeKeyword}" VerticalOptions="Center"/>
+                                <Border Grid.Column="1" Style="{StaticResource InputBorder}">
+                                    <Entry Placeholder="&quot;Ada&quot;" Style="{StaticResource CodeInput}" Text="{Binding FirstName}" VerticalTextAlignment="Center"/>
+                                </Border>
+                                <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="14" TextColor="{StaticResource TextMuted}" VerticalOptions="Center"/>
+                            </Grid>
+                            
+                            <!-- Last Name Field -->
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+                                <Label Text="&quot;last_name&quot;:" FontFamily="SFMonoRegular" FontSize="14" TextColor="{StaticResource CodeKeyword}" VerticalOptions="Center"/>
+                                <Border Grid.Column="1" Style="{StaticResource InputBorder}">
+                                    <Entry Placeholder="&quot;Lovelace&quot;" Style="{StaticResource CodeInput}" Text="{Binding LastName}" VerticalTextAlignment="Center"/>
+                                </Border>
+                                <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="14" TextColor="{StaticResource TextMuted}" VerticalOptions="Center"/>
+                            </Grid>
+                            
+                            <!-- Email Field -->
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+                                <Label Text="&quot;email&quot;:" FontFamily="SFMonoRegular" FontSize="14" TextColor="{StaticResource CodeKeyword}" VerticalOptions="Center"/>
+                                <Border Grid.Column="1" Style="{StaticResource InputBorder}">
+                                    <Entry Placeholder="&quot;ada@example.com&quot;" Style="{StaticResource CodeInput}" Text="{Binding Email}" Keyboard="Email" VerticalTextAlignment="Center"/>
+                                </Border>
+                                <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="14" TextColor="{StaticResource TextMuted}" VerticalOptions="Center"/>
+                            </Grid>
+                            
+                            <!-- Username Field -->
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+                                <Label Text="&quot;username&quot;:" FontFamily="SFMonoRegular" FontSize="14" TextColor="{StaticResource CodeKeyword}" VerticalOptions="Center"/>
+                                <Border Grid.Column="1" Style="{StaticResource InputBorder}">
+                                    <Entry Placeholder="&quot;adalovelace&quot;" Style="{StaticResource CodeInput}" Text="{Binding Username}" VerticalTextAlignment="Center"/>
+                                </Border>
+                                <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="14" TextColor="{StaticResource TextMuted}" VerticalOptions="Center"/>
+                            </Grid>
+                            
+                            <!-- Password Field -->
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+                                <Label Text="&quot;password&quot;:" FontFamily="SFMonoRegular" FontSize="14" TextColor="{StaticResource CodeKeyword}" VerticalOptions="Center"/>
+                                <Border Grid.Column="1" Style="{StaticResource InputBorder}">
+                                    <Entry Placeholder="&quot;***********&quot;" Style="{StaticResource CodeInput}" IsPassword="True" Text="{Binding Password}" VerticalTextAlignment="Center"/>
+                                </Border>
+                                <Label Grid.Column="2" Text="," FontFamily="SFMonoRegular" FontSize="14" TextColor="{StaticResource TextMuted}" VerticalOptions="Center"/>
+                            </Grid>
                         </VerticalStackLayout>
-                        <Button Text="Log in" HorizontalOptions="FillAndExpand" CornerRadius="20" FontFamily="InterBlack" FontSize="22" TextColor="#D4D4D4" BackgroundColor="#591c21" Padding="15" IsVisible="False" />
-                        <Button Text="Register" HorizontalOptions="FillAndExpand" CornerRadius="20" FontFamily="InterBlack" FontSize="22" TextColor="#D4D4D4" BackgroundColor="#591c21" Padding="15" IsVisible="True" Command="{Binding RegisterCommand}"/>
-                        <Button BackgroundColor="Transparent" Text="Don't have an account? Register" FontFamily="InterRegular" FontSize="18" TextColor="#569CD6" HorizontalOptions="Center" IsVisible="False"/>
-                        <Button BackgroundColor="Transparent" Text="Already have an account? Login" FontFamily="InterRegular" FontSize="18" TextColor="#569CD6" HorizontalOptions="Center" IsVisible="True" Command="{Binding OpenLoginPageCommand}"/>
+                        
+                        <Label Text="{}}" FontFamily="SFMonoRegular" FontSize="16" TextColor="{StaticResource TextMuted}"/>
                     </VerticalStackLayout>
                     
-                    <!-- Loading Overlay -->
-                    <Grid BackgroundColor="#CC1e1e1e" IsVisible="{Binding IsBusy}">
-                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="20">
-                            <ActivityIndicator IsRunning="{Binding IsBusy}" Color="#591c21" WidthRequest="50" HeightRequest="50"/>
-                            <Label Text="{Binding BusyMessage}" FontFamily="InterRegular" FontSize="16" TextColor="#D4D4D4" HorizontalOptions="Center"/>
-                        </VerticalStackLayout>
-                    </Grid>
-                </Grid>
+                    <!-- Register Button -->
+                    <Button Text="Register" Style="{StaticResource PrimaryButton}" HorizontalOptions="FillAndExpand" FontFamily="InterBlack" FontSize="18" Command="{Binding RegisterCommand}">
+                        <Button.Shadow>
+                            <Shadow Brush="{StaticResource Primary}" Opacity="0.4" Radius="12" Offset="0,4"/>
+                        </Button.Shadow>
+                    </Button>
+                    
+                    <!-- Login Link -->
+                    <Button Text="Already have an account? Login" Style="{StaticResource GhostButton}" FontFamily="InterRegular" HorizontalOptions="Center" Command="{Binding OpenLoginPageCommand}"/>
+                </VerticalStackLayout>
             </rv:MaterialFrame>
         </Border>
-
     </Grid>
 </ContentPage>
