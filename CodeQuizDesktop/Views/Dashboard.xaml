@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CodeQuizDesktop.Views.Dashboard">
+             xmlns:models="clr-namespace:CodeQuizDesktop.Models"
+             xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
+             x:Class="CodeQuizDesktop.Views.Dashboard"
+             x:DataType="vm:DashboardVM"
+             xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui">
     <ScrollView>
         <VerticalStackLayout Padding="32,24" Spacing="28">
             
@@ -14,109 +18,139 @@
             <!-- Cards Grid -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="24">
                 
-                <!-- Joined Exams Card -->
+                <!-- Joined Quizzes Card -->
                 <Border Grid.Column="0" Style="{StaticResource ElevatedCard}">
                     <VerticalStackLayout Spacing="20">
                         <!-- Card Header -->
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="Joined Quizzes" Style="{StaticResource SectionHeader}"/>
-                            <Label Grid.Column="1" Text="View All →" Style="{StaticResource CaptionText}" TextColor="{StaticResource Primary}"/>
+                            <Border Grid.Column="1" BackgroundColor="Transparent" StrokeThickness="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ViewAllJoinedCommand}"/>
+                                </Border.GestureRecognizers>
+                                <Label Text="View All →" Style="{StaticResource CaptionText}" TextColor="{StaticResource Primary}"/>
+                            </Border>
                         </Grid>
 
-                        <!-- Active Quiz Item -->
-                        <Border Style="{StaticResource HighlightedCard}">
-                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="14">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Text="Advanced JavaScript Patterns" Style="{StaticResource ItemTitle}"/>
-                                    <Border Grid.Column="1" Style="{StaticResource LiveBadge}">
-                                        <Label Text="LIVE" Style="{StaticResource BadgeText}"/>
-                                    </Border>
-                                </Grid>
-                                <VerticalStackLayout Grid.Row="1" Spacing="4">
-                                    <Label Text="Created by: Sarah Johnson" Style="{StaticResource CaptionText}"/>
-                                    <Label Text="90 minutes  •  5 Questions" Style="{StaticResource CaptionText}"/>
+                        <!-- Joined Quizzes List -->
+                        <CollectionView ItemsSource="{Binding JoinedAttempts}" MaximumHeightRequest="400">
+                            <CollectionView.EmptyView>
+                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="20">
+                                    <Label Text="No quizzes joined yet" TextColor="{StaticResource TextMuted}" FontSize="15" HorizontalOptions="Center"/>
+                                    <Label Text="Join a quiz to see it here" TextColor="{StaticResource TextDisabled}" FontSize="13" HorizontalOptions="Center" Margin="0,6,0,0"/>
                                 </VerticalStackLayout>
-                                <HorizontalStackLayout Grid.Row="2" Spacing="6">
-                                    <Label Text="Ends in:" Style="{StaticResource CaptionText}"/>
-                                    <Label Text="2h 30m" Style="{StaticResource ScoreText}"/>
-                                </HorizontalStackLayout>
-                                <Button Grid.Row="3" Text="Continue ▶" Style="{StaticResource PrimaryButton}"/>
-                            </Grid>
-                        </Border>
-
-                        <!-- Completed Quiz Item -->
-                        <Border Style="{StaticResource InnerCard}">
-                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="14">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Text="React Component Patterns" Style="{StaticResource ItemTitle}"/>
-                                    <Border Grid.Column="1" Style="{StaticResource SuccessBadge}">
-                                        <Label Text="COMPLETED" Style="{StaticResource BadgeText}"/>
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:ExamineeAttempt">
+                                    <Border Style="{StaticResource InnerCard}" Margin="0,0,0,12">
+                                        <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="14">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <Label Text="{Binding Quiz.Title}" Style="{StaticResource ItemTitle}"/>
+                                                <Border Grid.Column="1" Style="{StaticResource LiveBadge}" IsVisible="{Binding IsRunning}">
+                                                    <Label Text="LIVE" Style="{StaticResource BadgeText}"/>
+                                                </Border>
+                                                <Border Grid.Column="1" Style="{StaticResource SuccessBadge}" IsVisible="{Binding IsCompleted}">
+                                                    <Label Text="COMPLETED" Style="{StaticResource BadgeText}"/>
+                                                </Border>
+                                            </Grid>
+                                            <VerticalStackLayout Grid.Row="1" Spacing="4">
+                                                <Label Text="{Binding Quiz.Examiner.FullName, StringFormat='Created by: {0}'}" Style="{StaticResource CaptionText}"/>
+                                                <Label Text="{Binding Quiz.QustionsCount, StringFormat='{0} Questions'}" Style="{StaticResource CaptionText}"/>
+                                            </VerticalStackLayout>
+                                            
+                                            <!-- Running: Show time started -->
+                                            <HorizontalStackLayout Grid.Row="2" Spacing="6" IsVisible="{Binding IsRunning}">
+                                                <Label Text="Started:" Style="{StaticResource CaptionText}"/>
+                                                <Label Text="{Binding StartTime, StringFormat='{0:MMM dd, HH:mm}'}" Style="{StaticResource ScoreText}"/>
+                                            </HorizontalStackLayout>
+                                            
+                                            <!-- Completed: Show score -->
+                                            <HorizontalStackLayout Grid.Row="2" Spacing="6" IsVisible="{Binding IsCompleted}">
+                                                <Label Text="Score:" Style="{StaticResource CaptionText}"/>
+                                                <Label Text="{Binding GradePercentage, StringFormat='{0:F1}%'}" Style="{StaticResource SuccessText}"/>
+                                            </HorizontalStackLayout>
+                                            
+                                            <!-- Running: Continue button -->
+                                            <Button Grid.Row="3" Text="Continue ▶" Style="{StaticResource PrimaryButton}" IsVisible="{Binding IsRunning}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardVM}}, Path=ContinueAttemptCommand}" 
+                                                    CommandParameter="{Binding .}"/>
+                                            
+                                            <!-- Completed: View Results button -->
+                                            <Button Grid.Row="3" Text="View Results" Style="{StaticResource SecondaryButton}" IsVisible="{Binding IsCompleted}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardVM}}, Path=ViewResultsCommand}" 
+                                                    CommandParameter="{Binding .}"/>
+                                        </Grid>
                                     </Border>
-                                </Grid>
-                                <VerticalStackLayout Grid.Row="1" Spacing="4">
-                                    <Label Text="Created by: Emily Taylor" Style="{StaticResource CaptionText}"/>
-                                    <Label Text="Completed in 75m" Style="{StaticResource CaptionText}"/>
-                                </VerticalStackLayout>
-                                <HorizontalStackLayout Grid.Row="2" Spacing="6">
-                                    <Label Text="Score:" Style="{StaticResource CaptionText}"/>
-                                    <Label Text="92%" Style="{StaticResource SuccessText}"/>
-                                </HorizontalStackLayout>
-                                <Button Grid.Row="3" Text="View Results" Style="{StaticResource SecondaryButton}"/>
-                            </Grid>
-                        </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Created Exams Card -->
+                <!-- Created Quizzes Card -->
                 <Border Grid.Column="1" Style="{StaticResource ElevatedCard}">
                     <VerticalStackLayout Spacing="20">
                         <!-- Card Header -->
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="Created Quizzes" Style="{StaticResource SectionHeader}"/>
-                            <Label Grid.Column="1" Text="Manage All →" Style="{StaticResource CaptionText}" TextColor="{StaticResource Primary}"/>
+                            <Border Grid.Column="1" BackgroundColor="Transparent" StrokeThickness="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ViewAllCreatedCommand}"/>
+                                </Border.GestureRecognizers>
+                                <Label Text="Manage All →" Style="{StaticResource CaptionText}" TextColor="{StaticResource Primary}"/>
+                            </Border>
                         </Grid>
 
-                        <!-- Upcoming Quiz Item -->
-                        <Border Style="{StaticResource InnerCard}">
-                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="14">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Text="Advanced JavaScript Patterns" Style="{StaticResource ItemTitle}"/>
-                                    <Border Grid.Column="1" Style="{StaticResource WarningBadge}">
-                                        <Label Text="UPCOMING" Style="{StaticResource BadgeText}" TextColor="{StaticResource BackgroundDark}"/>
+                        <!-- Created Quizzes List -->
+                        <CollectionView ItemsSource="{Binding CreatedQuizzes}" MaximumHeightRequest="400">
+                            <CollectionView.EmptyView>
+                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="20">
+                                    <Label Text="No quizzes created yet" TextColor="{StaticResource TextMuted}" FontSize="15" HorizontalOptions="Center"/>
+                                    <Label Text="Create a quiz to see it here" TextColor="{StaticResource TextDisabled}" FontSize="13" HorizontalOptions="Center" Margin="0,6,0,0"/>
+                                </VerticalStackLayout>
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:ExaminerQuiz">
+                                    <Border Style="{StaticResource InnerCard}" Margin="0,0,0,12">
+                                        <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="14">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <Label Text="{Binding Title}" Style="{StaticResource ItemTitle}"/>
+                                                <!-- Status Badges -->
+                                                <Border Grid.Column="1" Style="{StaticResource LiveBadge}" IsVisible="{Binding IsRunning}">
+                                                    <Label Text="RUNNING" Style="{StaticResource BadgeText}"/>
+                                                </Border>
+                                                <Border Grid.Column="1" Style="{StaticResource WarningBadge}" IsVisible="{Binding IsUpcoming}">
+                                                    <Label Text="UPCOMING" Style="{StaticResource BadgeText}" TextColor="{StaticResource BackgroundDark}"/>
+                                                </Border>
+                                                <Border Grid.Column="1" Style="{StaticResource StatusBadge}" IsVisible="{Binding IsEnded}">
+                                                    <Label Text="ENDED" Style="{StaticResource BadgeText}"/>
+                                                </Border>
+                                            </Grid>
+                                            
+                                            <Label Grid.Row="1" Text="{Binding QustionsCount, StringFormat='{0} Questions'}" Style="{StaticResource CaptionText}"/>
+                                            
+                                            <!-- Quiz Code -->
+                                            <Border Grid.Row="2" Style="{StaticResource StatusBadge}" Padding="12,10">
+                                                <HorizontalStackLayout Spacing="8">
+                                                    <Label Text="Code:" Style="{StaticResource CaptionText}"/>
+                                                    <Label Text="{Binding Code}" FontFamily="SFMonoRegular" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
+                                                </HorizontalStackLayout>
+                                            </Border>
+                                            
+                                            <!-- Action Buttons -->
+                                            <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="10">
+                                                <Button Text="View" Style="{StaticResource SecondaryButton}" Padding="0,12"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardVM}}, Path=ViewCreatedQuizCommand}" 
+                                                        CommandParameter="{Binding .}"/>
+                                                <Button Grid.Column="1" Text="Delete" Style="{StaticResource DangerButton}" Padding="0,12"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardVM}}, Path=DeleteCreatedQuizCommand}" 
+                                                        CommandParameter="{Binding .}"/>
+                                            </Grid>
+                                        </Grid>
                                     </Border>
-                                </Grid>
-                                <Label Grid.Row="1" Text="90 minutes  •  5 Questions" Style="{StaticResource CaptionText}"/>
-                                <Border Grid.Row="2" Style="{StaticResource StatusBadge}" Padding="12,10">
-                                    <HorizontalStackLayout Spacing="8">
-                                        <Label Text="Code:" Style="{StaticResource CaptionText}"/>
-                                        <Label Text="EXAM-2025-ABC" FontFamily="SFMonoRegular" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
-                                    </HorizontalStackLayout>
-                                </Border>
-                                <Button Grid.Row="3" Text="View Details" Style="{StaticResource SecondaryButton}"/>
-                            </Grid>
-                        </Border>
-
-                        <!-- Ended Quiz Item -->
-                        <Border Style="{StaticResource InnerCard}">
-                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="14">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Text="React Component Patterns" Style="{StaticResource ItemTitle}"/>
-                                    <Border Grid.Column="1" Style="{StaticResource StatusBadge}">
-                                        <Label Text="ENDED" Style="{StaticResource BadgeText}"/>
-                                    </Border>
-                                </Grid>
-                                <Label Grid.Row="1" Text="67 Submitted" Style="{StaticResource CaptionText}"/>
-                                <HorizontalStackLayout Grid.Row="2" Spacing="6">
-                                    <Label Text="Avg Score:" Style="{StaticResource CaptionText}"/>
-                                    <Label Text="92%" Style="{StaticResource SuccessText}"/>
-                                </HorizontalStackLayout>
-                                <Grid Grid.Row="3" ColumnDefinitions="*,*,*" ColumnSpacing="10">
-                                    <Button Text="View" Style="{StaticResource SecondaryButton}" Padding="0,12"/>
-                                    <Button Grid.Column="1" Text="Edit" Style="{StaticResource OutlinedButton}" Padding="0,12"/>
-                                    <Button Grid.Column="2" Text="Delete" Style="{StaticResource DangerButton}" Padding="0,12"/>
-                                </Grid>
-                            </Grid>
-                        </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
                     </VerticalStackLayout>
                 </Border>
             </Grid>

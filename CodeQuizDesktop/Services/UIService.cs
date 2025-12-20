@@ -11,7 +11,7 @@ namespace CodeQuizDesktop.Services;
 public class UIService(IAppLogger<UIService> logger) : IUIService
 {
     private bool _isLoading;
-    private Page? _loadingOverlayPage;
+    private Grid? _loadingOverlay;
     private readonly SemaphoreSlim _loadingSemaphore = new(1, 1);
 
     public bool IsLoading => _isLoading;
@@ -87,31 +87,24 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
 
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
-                if (Application.Current?.Windows.Count > 0)
+                var rootPage = GetRootPage();
+                if (rootPage == null)
+                    return;
+
+                _loadingOverlay = CreateLoadingOverlay(message);
+
+                // Try to add overlay to the root page's layout
+                if (rootPage is ContentPage contentPage)
                 {
-                    var window = Application.Current.Windows[0];
-                    var currentPage = window.Page;
-
-                    if (currentPage is Shell shell)
+                    AddOverlayToContentPage(contentPage, _loadingOverlay);
+                }
+                else if (rootPage is Shell shell)
+                {
+                    // For Shell, try to add to the current page
+                    var currentPage = shell.CurrentPage;
+                    if (currentPage is ContentPage shellContentPage)
                     {
-                        currentPage = shell.CurrentPage;
-                    }
-
-                    if (currentPage != null)
-                    {
-                        // Create and add the loading overlay
-                        var loadingOverlay = CreateLoadingOverlay(message);
-                        
-                        if (currentPage is ContentPage contentPage && contentPage.Content is Layout layout)
-                        {
-                            // Wrap existing content in a grid with overlay
-                            var existingContent = contentPage.Content;
-                            var grid = new Grid();
-                            grid.Children.Add(existingContent);
-                            grid.Children.Add(loadingOverlay);
-                            contentPage.Content = grid;
-                            _loadingOverlayPage = contentPage;
-                        }
+                        AddOverlayToContentPage(shellContentPage, _loadingOverlay);
                     }
                 }
             });
@@ -127,21 +120,30 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
         await _loadingSemaphore.WaitAsync();
         try
         {
-            if (!_isLoading)
+            if (!_isLoading || _loadingOverlay == null)
                 return;
 
             _isLoading = false;
 
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
-                if (_loadingOverlayPage is ContentPage contentPage && contentPage.Content is Grid grid && grid.Children.Count > 1)
+                // Remove the overlay from its parent
+                if (_loadingOverlay?.Parent is Grid parentGrid)
                 {
-                    // Remove the overlay and restore original content
-                    var originalContent = grid.Children[0];
-                    grid.Children.Clear();
-                    contentPage.Content = (View)originalContent;
+                    parentGrid.Children.Remove(_loadingOverlay);
+                    
+                    // If the parent grid was our wrapper, unwrap it
+                    if (parentGrid.Parent is ContentPage contentPage && 
+                        parentGrid.Children.Count == 1 &&
+                        parentGrid.StyleId == "LoadingWrapper")
+                    {
+                        var originalContent = parentGrid.Children[0];
+                        parentGrid.Children.Clear();
+                        contentPage.Content = (View)originalContent;
+                    }
                 }
-                _loadingOverlayPage = null;
+                
+                _loadingOverlay = null;
             });
         }
         finally
@@ -176,13 +178,55 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
         }
     }
 
-    private static View CreateLoadingOverlay(string? message)
+    private static Page? GetRootPage()
+    {
+        if (Application.Current?.Windows.Count > 0)
+        {
+            return Application.Current.Windows[0].Page;
+        }
+        return null;
+    }
+
+    private static void AddOverlayToContentPage(ContentPage contentPage, Grid overlay)
+    {
+        var existingContent = contentPage.Content;
+        
+        if (existingContent == null)
+            return;
+
+        // Check if already wrapped
+        if (existingContent is Grid existingGrid && existingGrid.StyleId == "LoadingWrapper")
+        {
+            // Just add the overlay to existing wrapper
+            existingGrid.Children.Add(overlay);
+            return;
+        }
+
+        // Create a wrapper grid
+        var wrapperGrid = new Grid
+        {
+            StyleId = "LoadingWrapper"
+        };
+        
+        // Move existing content to wrapper
+        contentPage.Content = null; // Detach first
+        wrapperGrid.Children.Add(existingContent);
+        wrapperGrid.Children.Add(overlay);
+        
+        contentPage.Content = wrapperGrid;
+    }
+
+    private static Grid CreateLoadingOverlay(string? message)
     {
         var overlay = new Grid
         {
             BackgroundColor = Color.FromArgb("#CC1e1e1e"),
-            ZIndex = 1000
+            ZIndex = 1000,
+            InputTransparent = false
         };
+
+        // Add tap gesture to prevent interaction with underlying content
+        overlay.GestureRecognizers.Add(new TapGestureRecognizer());
 
         var container = new VerticalStackLayout
         {

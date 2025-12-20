@@ -1,5 +1,6 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
 using CommunityToolkit.Maui.Core.Extensions;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace CodeQuizDesktop.Viewmodels
     {
         private IAttemptsRepository _attemptsRepository;
         private IQuizzesRepository _quizzesRepository;
+        private readonly INavigationService _navigationService;
 
         private ObservableCollection<ExamineeAttempt> joinedAttempts;
         public ObservableCollection<ExamineeAttempt> JoinedAttempts
@@ -47,35 +49,65 @@ namespace CodeQuizDesktop.Viewmodels
         private ObservableCollection<ExamineeAttempt> initializedJoinedAttempts = new();
         private ObservableCollection<ExaminerQuiz> initializedCreatedQuizzes = new();
 
-        public ICommand ContinueAttemptCommand { get => new Command<ExamineeAttempt>(OnContinueAttempt); }
-        public ICommand ViewResultsCommand { get => new Command<ExamineeAttempt>(OnViewResults); }
+        public ICommand ContinueAttemptCommand { get => new Command<ExamineeAttempt>(async (a) => await ContinueAttemptAsync(a)); }
+        public ICommand ViewResultsCommand { get => new Command<ExamineeAttempt>(async (a) => await ViewResultsAsync(a)); }
 
-        public ICommand ViewCreatedQuizCommand { get => new Command<ExaminerQuiz>(OnViewCreatedQuiz); }
-        public ICommand DeleteCreatedQuizCommand { get => new Command<ExaminerQuiz>(OnDeleteCreatedQuiz); }
+        public ICommand ViewCreatedQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await ViewCreatedQuizAsync(q)); }
+        public ICommand DeleteCreatedQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await DeleteCreatedQuizAsync(q)); }
 
-        private async void OnContinueAttempt(ExamineeAttempt attempt)
+        // Navigation commands for "View All" and "Manage All" links
+        public ICommand ViewAllJoinedCommand { get => new Command(ViewAllJoined); }
+        public ICommand ViewAllCreatedCommand { get => new Command(ViewAllCreated); }
+
+        private void ViewAllJoined()
+        {
+            // Navigate to Joined Quizzes tab by triggering the MainPage selection change
+            if (Application.Current?.MainPage is Shell shell)
+            {
+                var mainPage = shell.CurrentPage as MainPage;
+                if (mainPage != null)
+                {
+                    mainPage.JoinedSelected = true;
+                }
+            }
+        }
+
+        private void ViewAllCreated()
+        {
+            // Navigate to Created Quizzes tab by triggering the MainPage selection change
+            if (Application.Current?.MainPage is Shell shell)
+            {
+                var mainPage = shell.CurrentPage as MainPage;
+                if (mainPage != null)
+                {
+                    mainPage.CreatedSelected = true;
+                }
+            }
+        }
+
+        public async Task ContinueAttemptAsync(ExamineeAttempt attempt)
         {
             var beginAttemptRequest = new BeginAttemptRequest() { QuizCode = attempt.Quiz.Code };
             var response = await _attemptsRepository.BeginAttempt(beginAttemptRequest);
-            await Shell.Current.GoToAsync($"///JoinQuizPage", new Dictionary<string, object> { { "attempt", response! } });
+            await _navigationService.GoToAsync($"///JoinQuizPage", new Dictionary<string, object> { { "attempt", response! } });
         }
 
-        private async void OnViewResults(ExamineeAttempt attempt)
+        public async Task ViewResultsAsync(ExamineeAttempt attempt)
         {
             // Navigate to the examinee review page using the registered route name
-            await Shell.Current.GoToAsync(nameof(CodeQuizDesktop.Views.ExamineeReviewQuiz), new Dictionary<string, object> { { "attempt", attempt } });
+            await _navigationService.GoToAsync(nameof(CodeQuizDesktop.Views.ExamineeReviewQuiz), new Dictionary<string, object> { { "attempt", attempt } });
         }
 
-        private async void OnViewCreatedQuiz(ExaminerQuiz quiz)
+        public async Task ViewCreatedQuizAsync(ExaminerQuiz quiz)
         {
-            await Shell.Current.GoToAsync(nameof(CodeQuizDesktop.Views.ExaminerViewQuiz), new Dictionary<string, object> { { "quiz", quiz } });
+            await _navigationService.GoToAsync(nameof(CodeQuizDesktop.Views.ExaminerViewQuiz), new Dictionary<string, object> { { "quiz", quiz } });
         }
 
         // Edit handler removed — editing is available in the full CreatedQuizzes view.
 
-        private async void OnDeleteCreatedQuiz(ExaminerQuiz quiz)
+        public async Task DeleteCreatedQuizAsync(ExaminerQuiz quiz)
         {
-            var confirm = await Shell.Current.DisplayAlert("Delete Quiz", $"Are you sure you want to delete '{quiz.Title}'?", "Delete", "Cancel");
+            var confirm = await _navigationService.DisplayAlert("Delete Quiz", $"Are you sure you want to delete '{quiz.Title}'?", "Delete", "Cancel");
             if (!confirm) return;
 
             try
@@ -97,7 +129,7 @@ namespace CodeQuizDesktop.Viewmodels
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Delete Failed", ex.Message, "OK");
+                await _navigationService.DisplayAlert("Delete Failed", ex.Message, "OK");
             }
         }
 
@@ -119,7 +151,7 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        private async void Initialize()
+        public async Task InitializeAsync()
         {
             IsBusy = true;
             try
@@ -155,10 +187,11 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        public DashboardVM(IAttemptsRepository attemptsRepository, IQuizzesRepository quizzesRepository)
+        public DashboardVM(IAttemptsRepository attemptsRepository, IQuizzesRepository quizzesRepository, INavigationService navigationService)
         {
             _attemptsRepository = attemptsRepository;
             _quizzesRepository = quizzesRepository;
+            _navigationService = navigationService;
 
             // Initialize collection properties to point to our backing fields
             JoinedAttempts = initializedJoinedAttempts;
@@ -226,10 +259,6 @@ namespace CodeQuizDesktop.Viewmodels
                 // Update filtered collections
                 UpdateFilteredQuizzes();
             });
-
-
-            // Initialize data AFTER subscriptions are set up
-            Initialize();
         }
     }
 }

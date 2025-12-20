@@ -56,12 +56,16 @@ namespace CodeQuizBackend.Quiz.Services
                     throw new MultipleAttemptsNotAllowedException();
                 }
 
+                var examinee = await dbContext.Users.FindAsync(examineeId)
+                    ?? throw new ResourceNotFoundException("Examinee not found");
+
                 attempt = new()
                 {
                     Id = 0,
                     StartTime = DateTime.Now,
                     QuizId = quiz.Id,
                     ExamineeId = examineeId,
+                    Examinee = examinee,
                     Quiz = quiz,
                     Solutions = quiz.Questions.Select(q => new Solution
                     {

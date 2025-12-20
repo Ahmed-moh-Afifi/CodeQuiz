@@ -6,7 +6,7 @@ using System.Text;
 
 namespace CodeQuizBackend.Authentication.Services
 {
-    public class TokenService(IConfiguration configuration, ILogger<TokenService> logger)
+    public class TokenService(IConfiguration configuration, ILogger<TokenService> logger) : ITokenService
     {
         public string GenerateAccessToken(IEnumerable<Claim> claims)
         {

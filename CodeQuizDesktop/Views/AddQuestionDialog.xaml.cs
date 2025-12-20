@@ -1,9 +1,10 @@
-using CommunityToolkit.Maui.Views;
-using CodeQuizDesktop.Viewmodels;
 using CodeQuizDesktop.Models;
+using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
+using CodeQuizDesktop.Viewmodels;
+using CommunityToolkit.Maui.Views;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using CodeQuizDesktop.Repositories;
 
 namespace CodeQuizDesktop.Views;
 
@@ -162,6 +163,8 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
     public ICommand AddTestCaseCommand { get => new Command(AddTestCase); }
     public ICommand DeleteTestCaseCommand { get => new Command<TestCase>(DeleteTestCase); }
 
+    private readonly IUIService uiService = MauiProgram.GetService<IUIService>();
+
     public AddQuestionDialog(NewQuestionModel newQuestionModel = null)
     {
         InitializeComponent();
@@ -290,6 +293,7 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
         if (errors.Count > 0)
         {
             System.Diagnostics.Debug.WriteLine(string.Join('\n', errors));
+            await uiService.ShowErrorAsync(string.Join("\n", errors), "Invalid Input");
             return;
         }
 

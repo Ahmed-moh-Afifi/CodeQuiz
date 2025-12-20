@@ -6,9 +6,9 @@ using System.Text;
 
 namespace CodeQuizBackend.Execution.Services
 {
-    public class DockerSandbox(IAppLogger<DockerSandbox> logger) : IDockerSandbox
+    public class DockerSandbox(IAppLogger<DockerSandbox> logger, IConfiguration configuration) : IDockerSandbox
     {
-        private readonly DockerClient _client = new DockerClientConfiguration().CreateClient();
+        private readonly DockerClient _client = new DockerClientConfiguration(new Uri(configuration["DockerClientUri"] ?? "unix:///var/run/docker.sock")).CreateClient();
 
         public async Task<SandboxResult> ExecuteAsync(SandboxRequest request, CancellationToken cancellationToken = default)
         {

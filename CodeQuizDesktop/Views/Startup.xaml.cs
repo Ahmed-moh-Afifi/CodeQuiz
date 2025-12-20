@@ -9,4 +9,13 @@ public partial class Startup : ContentPage
         InitializeComponent();
         BindingContext = vm;
     }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        if (BindingContext is StartupViewModel vm)
+        {
+            await vm.InitializeAsync();
+        }
+    }
 }

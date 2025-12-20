@@ -169,5 +169,17 @@
                 </VerticalStackLayout>
             </Border>
         </Grid>
+        
+        <!-- Loading -->
+        <Grid Grid.RowSpan="2" BackgroundColor="#E6121212" IsVisible="{Binding IsBusy}">
+            <Border Style="{StaticResource Card}" WidthRequest="400" HeightRequest="250" HorizontalOptions="Center" VerticalOptions="Center">
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="24">
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" WidthRequest="60" HeightRequest="60"/>
+                    <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                        <Label Text="Submitting your answers..." Style="{StaticResource CaptionText}" HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
     </Grid>
 </ContentPage>

@@ -1,5 +1,6 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core.Extensions;
@@ -31,8 +32,11 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 editedQuizId = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsCreatingNew));
             }
         }
+
+        public bool IsCreatingNew => EditedQuizId == null;
 
         private string header = "New Quiz";
         public string Header
@@ -306,42 +310,37 @@ namespace CodeQuizDesktop.Viewmodels
         }
 
         // Button Commands, mapped to viewmodel methods
-        public ICommand AddQuestionCommand { get => new Command(AddQuestion); }
-        public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }
+        public ICommand AddQuestionCommand { get => new Command(async () => await AddQuestion()); }
+        public ICommand ReturnCommand { get => new Command(async () => await ReturnToPreviousPage()); }
         public ICommand PublishCommand { get => new Command(async () => await CreateAndPublishQuizAsync()); }
         public ICommand DeleteQuestionCommand { get => new Command<NewQuestionModel>(DeleteQuestion); }
-        public ICommand EditQuestionCommand { get => new Command<NewQuestionModel>(EditQuestion); }
+        public ICommand EditQuestionCommand { get => new Command<NewQuestionModel>(async (q) => await EditQuestion(q)); }
 
-        private readonly IPopupService popupService;
+        private readonly IQuizDialogService quizDialogService;
+        private readonly INavigationService navigationService;
         private readonly IAuthenticationRepository authenticationRepository;
         private readonly IQuizzesRepository quizzesRepository;
         private readonly IExecutionRepository executionRepository;
+        private readonly IUIService uiService;
 
-        public async void LoadProgrammingLanguages()
+        public async Task LoadProgrammingLanguages()
         {
             var languages = await executionRepository.GetSupportedLanguages();
             ProgrammingLanguages = languages.ToList();
         }
 
-        private async void ReturnToPreviousPage()
+        public async Task ReturnToPreviousPage()
         {
-            await Shell.Current.GoToAsync("..");
+            await navigationService.GoToAsync("..");
         }
 
-        public async void AddQuestion()
+        public async Task AddQuestion()
         {
-            var result = await popupService.ShowPopupAsync<AddQuestionDialog, NewQuestionModel?>(Shell.Current, new PopupOptions
-            {
-                Shape = new RoundRectangle
-                {
-                    CornerRadius = new CornerRadius(20),
-                    StrokeThickness = 0
-                }
-            });
+            var result = await quizDialogService.ShowAddQuestionDialogAsync();
 
-            if (result.Result != null)
+            if (result != null)
             {
-                QuestionModels.Add(result.Result);
+                QuestionModels.Add(result);
             }
         }
 
@@ -350,12 +349,11 @@ namespace CodeQuizDesktop.Viewmodels
             QuestionModels.Remove(q);
         }
 
-        public async void EditQuestion(NewQuestionModel newQuestionModel)
+        public async Task EditQuestion(NewQuestionModel newQuestionModel)
         {
-            var popup = new AddQuestionDialog(newQuestionModel);
-            var result = await Shell.Current.CurrentPage.ShowPopupAsync<NewQuestionModel?>(popup);
+            var result = await quizDialogService.ShowEditQuestionDialogAsync(newQuestionModel);
 
-            if (result.Result is NewQuestionModel updatedModel)
+            if (result is NewQuestionModel updatedModel)
             {
                 System.Diagnostics.Debug.WriteLine($"Question updated successfully!");
                 int index = QuestionModels.IndexOf(newQuestionModel);
@@ -408,6 +406,7 @@ namespace CodeQuizDesktop.Viewmodels
             if (errors.Count > 0)
             {
                 System.Diagnostics.Debug.WriteLine("Missing or invalid input");
+                await uiService.ShowErrorAsync(string.Join("\n", errors), "Invalid Input");
                 return;
             }
 
@@ -473,14 +472,16 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        public CreateQuizVM(IPopupService popupService, IAuthenticationRepository authenticationRepository, IQuizzesRepository quizzesRepository, IExecutionRepository executionRepository)
+        public CreateQuizVM(IQuizDialogService quizDialogService, INavigationService navigationService, IAuthenticationRepository authenticationRepository, IQuizzesRepository quizzesRepository, IExecutionRepository executionRepository, IUIService uiService)
         {
-            this.popupService = popupService;
+            this.quizDialogService = quizDialogService;
+            this.navigationService = navigationService;
             this.authenticationRepository = authenticationRepository;
             this.quizzesRepository = quizzesRepository;
             this.executionRepository = executionRepository;
+            this.uiService = uiService;
             QuestionModels = [];
-            LoadProgrammingLanguages();
+            _ = LoadProgrammingLanguages();
         }
     }
 }

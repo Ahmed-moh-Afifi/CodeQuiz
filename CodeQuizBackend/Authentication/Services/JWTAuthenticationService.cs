@@ -12,12 +12,12 @@ using System.Security.Claims;
 
 namespace CodeQuizBackend.Authentication.Services
 {
-    public class JWTAuthenticationService(UserManager<User> userManager, TokenService tokenService, ApplicationDbContext dbContext, IConfiguration configuration, IMailService mailService) : IAuthenticationService
+    public class JWTAuthenticationService(UserManager<User> userManager, ITokenService tokenService, ApplicationDbContext dbContext, IConfiguration configuration, IMailService mailService) : IAuthenticationService
     {
         public async Task ForgetPassword(ForgetPasswordModel forgetPasswordModel)
         {
             var user = await userManager.FindByEmailAsync(forgetPasswordModel.Email);
-            
+
             // Always return success message to prevent email enumeration attacks
             if (user == null)
             {
@@ -129,7 +129,7 @@ namespace CodeQuizBackend.Authentication.Services
                 {
                     throw new WeakPasswordException();
                 }
-                
+
                 // Generic registration failure without exposing internal details
                 throw new AuthenticationException("Registration failed. Please check your information and try again.");
             }

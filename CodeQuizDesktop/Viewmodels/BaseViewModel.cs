@@ -1,13 +1,41 @@
-﻿using System;
+﻿using CodeQuizDesktop.Services;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 namespace CodeQuizDesktop.Viewmodels
 {
     public partial class BaseViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        // UI service for loading indicators - lazily resolved from DI container
+        // Can be set directly for testing purposes
+        private IUIService? _uiService;
+        private bool _uiServiceResolved;
+        protected IUIService? UIService
+        {
+            get
+            {
+                if (!_uiServiceResolved && _uiService == null)
+                {
+                    try
+                    {
+                        _uiService = MauiProgram.GetService<IUIService>();
+                    }
+                    catch
+                    {
+                        // In test environments, the service provider may not be available
+                    }
+                    _uiServiceResolved = true;
+                }
+                return _uiService;
+            }
+            set
+            {
+                _uiService = value;
+                _uiServiceResolved = true;
+            }
+        }
 
         private bool _isBusy;
         /// <summary>
@@ -50,7 +78,7 @@ namespace CodeQuizDesktop.Viewmodels
         }
 
         /// <summary>
-        /// Helper method to execute an async operation with busy state management.
+        /// Helper method to execute an async operation with busy state management and UI loading indicator.
         /// </summary>
         protected async Task ExecuteAsync(Func<Task> operation, string? busyMessage = null)
         {
@@ -61,17 +89,21 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 IsBusy = true;
                 BusyMessage = busyMessage;
+                if (UIService != null)
+                    await UIService.ShowLoadingAsync(busyMessage);
                 await operation();
             }
             finally
             {
+                if (UIService != null)
+                    await UIService.HideLoadingAsync();
                 IsBusy = false;
                 BusyMessage = null;
             }
         }
 
         /// <summary>
-        /// Helper method to execute an async operation with busy state management and return a value.
+        /// Helper method to execute an async operation with busy state management, UI loading indicator, and return a value.
         /// </summary>
         protected async Task<T?> ExecuteAsync<T>(Func<Task<T>> operation, string? busyMessage = null)
         {
@@ -82,10 +114,14 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 IsBusy = true;
                 BusyMessage = busyMessage;
+                if (UIService != null)
+                    await UIService.ShowLoadingAsync(busyMessage);
                 return await operation();
             }
             finally
             {
+                if (UIService != null)
+                    await UIService.HideLoadingAsync();
                 IsBusy = false;
                 BusyMessage = null;
             }

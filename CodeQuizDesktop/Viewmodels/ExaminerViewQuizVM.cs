@@ -1,5 +1,6 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Maui.Storage;
@@ -12,6 +13,7 @@ namespace CodeQuizDesktop.Viewmodels
     public class ExaminerViewQuizVM : BaseViewModel, IQueryAttributable
     {
         private readonly IQuizzesRepository _quizzesRepository;
+        private readonly INavigationService _navigationService;
 
         private ExaminerQuiz? quiz;
 
@@ -37,27 +39,27 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }
+        public ICommand ReturnCommand { get => new Command(async () => await ReturnToPreviousPage()); }
 
-        private async void ReturnToPreviousPage()
+        public async Task ReturnToPreviousPage()
         {
-            await Shell.Current.GoToAsync("..");
+            await _navigationService.GoToAsync("..");
         }
 
-        public ICommand GoToGradeAttemptPageCommand { get => new Command<ExaminerAttempt>(OnGoToGradeAttemptPage); }
-        
-        private async void OnGoToGradeAttemptPage(ExaminerAttempt examinerAttempt)
+        public ICommand GoToGradeAttemptPageCommand { get => new Command<ExaminerAttempt>(async (a) => await OnGoToGradeAttemptPage(a)); }
+
+        public async Task OnGoToGradeAttemptPage(ExaminerAttempt examinerAttempt)
         {
-            await Shell.Current.GoToAsync(nameof(GradeAttempt), new Dictionary<string, object>
+            await _navigationService.GoToAsync(nameof(GradeAttempt), new Dictionary<string, object>
             {
                 { "attempt", examinerAttempt! },
                 { "quiz", Quiz! }
             });
         }
 
-        public ICommand SaveGradesReportCommand { get => new Command(OnSaveGradesReport); }
+        public ICommand SaveGradesReportCommand { get => new Command(async () => await OnSaveGradesReport()); }
 
-        private async void OnSaveGradesReport()
+        public async Task OnSaveGradesReport()
         {
             await ExportToExcel(Attempts.ToList());
         }
@@ -128,7 +130,7 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        private async Task LoadAttemptsAsync()
+        public async Task LoadAttemptsAsync()
         {
             await ExecuteAsync(async () =>
             {
@@ -137,9 +139,10 @@ namespace CodeQuizDesktop.Viewmodels
             }, "Loading attempts...");
         }
 
-        public ExaminerViewQuizVM(IQuizzesRepository quizzesRepository)
+        public ExaminerViewQuizVM(IQuizzesRepository quizzesRepository, INavigationService navigationService)
         {
             _quizzesRepository = quizzesRepository;
+            _navigationService = navigationService;
         }
     }
 }

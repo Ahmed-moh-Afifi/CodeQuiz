@@ -73,15 +73,17 @@ namespace CodeQuizDesktop
             builder.Services.AddSingleton<IQuizzesRepository, QuizzesRepository>();
             builder.Services.AddSingleton<IUsersRepository, UsersRepository>();
             builder.Services.AddSingleton<IExecutionRepository, ExecutionRepository>();
+            builder.Services.AddSingleton<INavigationService, NavigationService>();
+            builder.Services.AddSingleton<IQuizDialogService, QuizDialogService>();
             builder.Services.AddTransient<AuthHandler>();
             builder.Services.AddTransient<LoggingHandler>();
             builder.Services.AddSingleton(typeof(IAppLogger<>), typeof(AppLogger<>));
-            
+
             // UIService replaces AlertService and provides both alert and loading indicator functionality
             builder.Services.AddSingleton<UIService>();
             builder.Services.AddSingleton<IUIService>(sp => sp.GetRequiredService<UIService>());
             builder.Services.AddSingleton<IAlertService>(sp => sp.GetRequiredService<UIService>());
-            
+
             builder.Services.AddSingleton<GlobalExceptionHandler>();
 
             // APIs

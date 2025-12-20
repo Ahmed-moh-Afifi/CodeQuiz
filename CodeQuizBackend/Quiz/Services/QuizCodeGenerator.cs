@@ -5,7 +5,7 @@ using CodeQuizBackend.Core.Utils;
 
 namespace CodeQuizBackend.Quiz.Services
 {
-    public class QuizCodeGenerator(ApplicationDbContext dbContext, IAppLogger<QuizCodeGenerator> logger)
+    public class QuizCodeGenerator(ApplicationDbContext dbContext, IAppLogger<QuizCodeGenerator> logger) : IQuizCodeGenerator
     {
         private const int baseLength = 6;
         private const int maxLength = 10;
@@ -28,7 +28,7 @@ namespace CodeQuizBackend.Quiz.Services
                 length++;
                 logger.LogWarning($"Failed to generate unique quiz code with length {length - 1}. Increasing length to {length}.");
             }
-            
+
             logger.LogError($"Unable to generate unique quiz code with {maxLength} characters!");
             throw new ServiceUnavailableException("Unable to create quiz at this time. Please try again later.");
         }

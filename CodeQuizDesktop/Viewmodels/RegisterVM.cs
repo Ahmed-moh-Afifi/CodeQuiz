@@ -1,5 +1,6 @@
 ﻿using CodeQuizDesktop.Models.Authentication;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
 using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
@@ -7,6 +8,7 @@ namespace CodeQuizDesktop.Viewmodels
     public class RegisterVM : BaseViewModel
     {
         private readonly IAuthenticationRepository _authenticationRepository;
+        private readonly INavigationService _navigationService;
 
         public string FirstName { get; set; } = "";
         public string LastName { get; set; } = "";
@@ -15,24 +17,25 @@ namespace CodeQuizDesktop.Viewmodels
         public string Password { get; set; } = "";
 
         public ICommand RegisterCommand { get => new Command(async () => await RegisterAsync()); }
-        public ICommand OpenLoginPageCommand { get => new Command(OpenLoginPage); }
+        public ICommand OpenLoginPageCommand { get => new Command(async () => await OpenLoginPageAsync()); }
 
-        public RegisterVM(IAuthenticationRepository authenticationRepository)
+        public RegisterVM(IAuthenticationRepository authenticationRepository, INavigationService navigationService)
         {
             _authenticationRepository = authenticationRepository;
+            _navigationService = navigationService;
         }
 
-        private async void OpenLoginPage()
+        public async Task OpenLoginPageAsync()
         {
-            await Shell.Current.GoToAsync("///LoginPage");
+            await _navigationService.GoToAsync("///LoginPage");
         }
 
-        private async Task RegisterAsync()
+        public async Task RegisterAsync()
         {
-            if (string.IsNullOrWhiteSpace(FirstName) || 
-                string.IsNullOrWhiteSpace(LastName) || 
-                string.IsNullOrWhiteSpace(Email) || 
-                string.IsNullOrWhiteSpace(Username) || 
+            if (string.IsNullOrWhiteSpace(FirstName) ||
+                string.IsNullOrWhiteSpace(LastName) ||
+                string.IsNullOrWhiteSpace(Email) ||
+                string.IsNullOrWhiteSpace(Username) ||
                 string.IsNullOrWhiteSpace(Password))
                 return;
 
@@ -47,7 +50,7 @@ namespace CodeQuizDesktop.Viewmodels
                     Password = this.Password
                 };
                 var response = await _authenticationRepository.Register(registerModel);
-                await Shell.Current.GoToAsync("///LoginPage");
+                await _navigationService.GoToAsync("///LoginPage");
             }, "Creating your account...");
         }
     }

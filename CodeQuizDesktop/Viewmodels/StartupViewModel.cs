@@ -36,15 +36,17 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        public StartupViewModel(ITokenService tokenService, IAuthenticationRepository authenticationRepository, IUsersRepository usersRepository)
+        private readonly INavigationService _navigationService;
+
+        public StartupViewModel(ITokenService tokenService, IAuthenticationRepository authenticationRepository, IUsersRepository usersRepository, INavigationService navigationService)
         {
             _tokenService = tokenService;
             _authenticationRepository = authenticationRepository;
             _usersRepository = usersRepository;
-            InitializeAsync();
+            _navigationService = navigationService;
         }
 
-        private async void InitializeAsync()
+        public async Task InitializeAsync()
         {
             try
             {
@@ -60,11 +62,11 @@ namespace CodeQuizDesktop.Viewmodels
                 {
                     LoadingMessage = "Loading user profile...";
                     _authenticationRepository.LoggedInUser = await _usersRepository.GetUser();
-                    await Shell.Current.GoToAsync("///MainPage");
+                    await _navigationService.GoToAsync("///MainPage");
                 }
                 else
                 {
-                    await Shell.Current.GoToAsync("///LoginPage");
+                    await _navigationService.GoToAsync("///LoginPage");
                 }
             }
             catch (Exception ex)
@@ -72,7 +74,7 @@ namespace CodeQuizDesktop.Viewmodels
                 System.Diagnostics.Debug.WriteLine($"Startup error: {ex.Message}");
                 LoadingMessage = "Connection failed. Redirecting...";
                 await Task.Delay(1000);
-                await Shell.Current.GoToAsync("///LoginPage");
+                await _navigationService.GoToAsync("///LoginPage");
             }
             finally
             {

@@ -180,7 +180,7 @@
                             <Label Text="Questions Overview" Style="{StaticResource SectionHeader}" FontSize="20"/>
                             <Label Text="{Binding QuestionModels.Count, StringFormat='{0} questions added'}" Style="{StaticResource CaptionText}" FontSize="15"/>
                         </VerticalStackLayout>
-                        <Button Grid.Column="1" Text="Add Question" Style="{StaticResource PrimaryButton}" Command="{Binding AddQuestionCommand}"/>
+                        <Button Grid.Column="1" Text="Add Question" Style="{StaticResource PrimaryButton}" Command="{Binding AddQuestionCommand}" IsVisible="{Binding IsCreatingNew}"/>
                     </Grid>
                 </Border>
 
@@ -212,7 +212,7 @@
                                                             <Label Text="{Binding Points, StringFormat='{0} pts'}" Style="{StaticResource BadgeText}" FontSize="13"/>
                                                         </Border>
                                                     </HorizontalStackLayout>
-                                                    <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                                                    <HorizontalStackLayout Grid.Column="1" Spacing="10" IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:CreateQuizVM}}, Path=IsCreatingNew}">
                                                         <Border Style="{StaticResource OutlinedIconButton}" StrokeShape="RoundRectangle 12">
                                                             <Border.GestureRecognizers>
                                                                 <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreateQuizVM}}, Path=EditQuestionCommand}" CommandParameter="{Binding .}"/>

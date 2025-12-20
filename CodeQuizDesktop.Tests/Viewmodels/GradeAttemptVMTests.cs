@@ -1,0 +1,193 @@
+using CodeQuizDesktop.Models;
+using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
+using CodeQuizDesktop.Viewmodels;
+using FluentAssertions;
+using Moq;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace CodeQuizDesktop.Tests.Viewmodels
+{
+    public class GradeAttemptVMTests
+    {
+        private readonly Mock<IExecutionRepository> _executionRepoMock;
+        private readonly Mock<IAttemptsRepository> _attemptsRepoMock;
+        private readonly Mock<INavigationService> _navServiceMock;
+        private readonly GradeAttemptVM _viewModel;
+
+        public GradeAttemptVMTests()
+        {
+            _executionRepoMock = new Mock<IExecutionRepository>();
+            _attemptsRepoMock = new Mock<IAttemptsRepository>();
+            _navServiceMock = new Mock<INavigationService>();
+            _viewModel = new GradeAttemptVM(_executionRepoMock.Object, _attemptsRepoMock.Object, _navServiceMock.Object);
+        }
+
+        private ExaminerQuiz CreateMockQuiz()
+        {
+            return new ExaminerQuiz
+            {
+                Id = 1,
+                Title = "Test Quiz",
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(1),
+                Duration = TimeSpan.FromMinutes(60),
+                Code = "TESTCODE",
+                ExaminerId = "examiner1",
+                GlobalQuestionConfiguration = new QuestionConfiguration
+                {
+                    Language = "csharp",
+                    AllowExecution = true,
+                    ShowOutput = true,
+                    ShowError = true
+                },
+                AllowMultipleAttempts = false,
+                Questions = new List<Question>
+                {
+                    new Question
+                    {
+                        Id = 101,
+                        Statement = "Q1",
+                        EditorCode = "code1",
+                        QuestionConfiguration = new QuestionConfiguration
+                        {
+                            Language = "csharp",
+                            AllowExecution = true,
+                            ShowOutput = true,
+                            ShowError = true
+                        },
+                        TestCases = new List<TestCase>(),
+                        QuizId = 1,
+                        Order = 1,
+                        Points = 10
+                    },
+                    new Question
+                    {
+                        Id = 102,
+                        Statement = "Q2",
+                        EditorCode = "code2",
+                        QuestionConfiguration = new QuestionConfiguration
+                        {
+                            Language = "csharp",
+                            AllowExecution = true,
+                            ShowOutput = true,
+                            ShowError = true
+                        },
+                        TestCases = new List<TestCase>(),
+                        QuizId = 1,
+                        Order = 2,
+                        Points = 10
+                    }
+                },
+                QustionsCount = 2,
+                AttemptsCount = 0,
+                SubmittedAttemptsCount = 0,
+                AverageAttemptScore = 0,
+                TotalPoints = 20
+            };
+        }
+
+        private ExaminerAttempt CreateMockAttempt()
+        {
+            return new ExaminerAttempt
+            {
+                Id = 1,
+                StartTime = DateTime.Now,
+                QuizId = 1,
+                ExamineeId = "examinee1",
+                Solutions = new List<Solution>
+                {
+                    new Solution { Id = 201, Code = "sol1", QuestionId = 101, AttemptId = 1, ReceivedGrade = 5 },
+                    new Solution { Id = 202, Code = "sol2", QuestionId = 102, AttemptId = 1, ReceivedGrade = 8 }
+                },
+                Examinee = new User
+                {
+                    Id = "examinee1",
+                    UserName = "user1",
+                    FirstName = "User",
+                    LastName = "One",
+                    Email = "user1@example.com",
+                    JoinDate = DateTime.Now
+                }
+            };
+        }
+
+        private void SetupViewModel()
+        {
+            var quiz = CreateMockQuiz();
+            var attempt = CreateMockAttempt();
+            _viewModel.Quiz = quiz;
+            _viewModel.Attempt = attempt;
+            _viewModel.SelectedQuestion = quiz.Questions[0];
+            _viewModel.Grade = attempt.Solutions[0].ReceivedGrade;
+        }
+
+        [Fact]
+        public async Task ReturnToPreviousPage_ShouldSaveAndNavigateBack()
+        {
+            // Arrange
+            SetupViewModel();
+
+            // Act
+            await _viewModel.ReturnToPreviousPage();
+
+            // Assert
+            _attemptsRepoMock.Verify(x => x.UpdateSolution(It.IsAny<Solution>()), Times.Once);
+            _navServiceMock.Verify(x => x.GoToAsync(".."), Times.Once);
+        }
+
+        [Fact]
+        public void NextQuestion_ShouldSaveAndMoveToNext()
+        {
+            // Arrange
+            SetupViewModel();
+            _viewModel.SelectedQuestion.Order.Should().Be(1);
+
+            // Act
+            _viewModel.NextQuestion();
+
+            // Assert
+            _attemptsRepoMock.Verify(x => x.UpdateSolution(It.IsAny<Solution>()), Times.Once);
+            _viewModel.SelectedQuestion.Order.Should().Be(2);
+            _viewModel.Grade.Should().Be(8); // Grade for Q2
+        }
+
+        [Fact]
+        public void PreviousQuestion_ShouldSaveAndMoveToPrevious()
+        {
+            // Arrange
+            SetupViewModel();
+            _viewModel.NextQuestion(); // Move to 2
+            _viewModel.SelectedQuestion.Order.Should().Be(2);
+            _attemptsRepoMock.Invocations.Clear(); // Clear previous save
+
+            // Act
+            _viewModel.PreviousQuestion();
+
+            // Assert
+            _attemptsRepoMock.Verify(x => x.UpdateSolution(It.IsAny<Solution>()), Times.Once);
+            _viewModel.SelectedQuestion.Order.Should().Be(1);
+            _viewModel.Grade.Should().Be(5); // Grade for Q1
+        }
+
+        [Fact]
+        public async Task Run_ShouldExecuteCode()
+        {
+            // Arrange
+            SetupViewModel();
+            _viewModel.CodeInEditor = "Console.WriteLine(\"Hello\");";
+            _executionRepoMock.Setup(x => x.RunCode(It.IsAny<RunCodeRequest>()))
+                .ReturnsAsync(new CodeRunnerResult { Success = true, Output = "Hello" });
+
+            // Act
+            await _viewModel.Run();
+
+            // Assert
+            _executionRepoMock.Verify(x => x.RunCode(It.Is<RunCodeRequest>(r => r.Code == "Console.WriteLine(\"Hello\");")), Times.Once);
+            _viewModel.Output.Should().Be("Hello");
+        }
+    }
+}

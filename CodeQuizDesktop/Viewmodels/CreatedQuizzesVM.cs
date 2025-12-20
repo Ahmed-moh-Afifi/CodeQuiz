@@ -1,5 +1,6 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui.Core.Extensions;
 using System.Collections.ObjectModel;
@@ -10,6 +11,7 @@ namespace CodeQuizDesktop.Viewmodels
     public class CreatedQuizzesVM : BaseViewModel
     {
         private readonly IQuizzesRepository _quizzesRepository;
+        private readonly INavigationService _navigationService;
 
         private ObservableCollection<ExaminerQuiz> allExaminerQuizzes = [];
 
@@ -23,26 +25,26 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        public ICommand CreateQuizCommand { get => new Command(OnCreateQuizPage); }
-        public ICommand EditQuizCommand { get => new Command<ExaminerQuiz>(OnEditQuiz); }
+        public ICommand CreateQuizCommand { get => new Command(async () => await OnCreateQuizPage()); }
+        public ICommand EditQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await OnEditQuiz(q)); }
         public ICommand DeleteQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await OnDeleteQuizAsync(q)); }
-        public ICommand ViewQuizCommand { get => new Command<ExaminerQuiz>(OnViewQuiz); }
+        public ICommand ViewQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await OnViewQuiz(q)); }
 
-        private async void OnCreateQuizPage()
+        public async Task OnCreateQuizPage()
         {
-            await Shell.Current.GoToAsync(nameof(CreateQuiz));
+            await _navigationService.GoToAsync(nameof(CreateQuiz));
         }
 
-        private async void OnEditQuiz(ExaminerQuiz examinerQuiz)
+        public async Task OnEditQuiz(ExaminerQuiz examinerQuiz)
         {
-            await Shell.Current.GoToAsync(nameof(CreateQuiz), new Dictionary<string, object>
+            await _navigationService.GoToAsync(nameof(CreateQuiz), new Dictionary<string, object>
             {
                 { "quizModel", examinerQuiz.QuizToModel },
                 { "id", examinerQuiz.Id }
             });
         }
 
-        private async Task OnDeleteQuizAsync(ExaminerQuiz examinerQuiz)
+        public async Task OnDeleteQuizAsync(ExaminerQuiz examinerQuiz)
         {
             await ExecuteAsync(async () =>
             {
@@ -50,12 +52,12 @@ namespace CodeQuizDesktop.Viewmodels
             }, "Deleting quiz...");
         }
 
-        private async void OnViewQuiz(ExaminerQuiz examinerQuiz)
+        public async Task OnViewQuiz(ExaminerQuiz examinerQuiz)
         {
-            await Shell.Current.GoToAsync(nameof(ExaminerViewQuiz), new Dictionary<string, object> { { "quiz", examinerQuiz } });
+            await _navigationService.GoToAsync(nameof(ExaminerViewQuiz), new Dictionary<string, object> { { "quiz", examinerQuiz } });
         }
 
-        private async void InitializeAsync()
+        public async Task InitializeAsync()
         {
             await ExecuteAsync(async () =>
             {
@@ -64,10 +66,11 @@ namespace CodeQuizDesktop.Viewmodels
             }, "Loading quizzes...");
         }
 
-        public CreatedQuizzesVM(IQuizzesRepository quizzesRepository)
+        public CreatedQuizzesVM(IQuizzesRepository quizzesRepository, INavigationService navigationService)
         {
             _quizzesRepository = quizzesRepository;
-            InitializeAsync();
+            _navigationService = navigationService;
+
             _quizzesRepository.SubscribeCreate<ExaminerQuiz>(q =>
             {
                 if (AllExaminerQuizzes.FirstOrDefault(qu => qu.Id == q.Id) == null)

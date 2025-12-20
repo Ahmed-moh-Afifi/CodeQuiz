@@ -1,12 +1,14 @@
 ﻿using CodeQuizDesktop.Controls;
 using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
 using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
 {
     public class JoinQuizVM : BaseViewModel, IQueryAttributable
     {
+        private readonly INavigationService _navigationService;
         private ExamineeAttempt? attempt;
         public ExamineeAttempt? Attempt
         {
@@ -28,6 +30,7 @@ namespace CodeQuizDesktop.Viewmodels
                 if (value.Hours == 0 && value.Minutes == 0 && value.Seconds == 0)
                 {
                     WaitingForAutoSubmission = true;
+                    SaveSolution();
                 }
                 OnPropertyChanged();
             }
@@ -139,7 +142,7 @@ namespace CodeQuizDesktop.Viewmodels
         public EditorType EditorTypeValue { get; set; }
 
         // Commands
-        public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }
+        public ICommand ReturnCommand { get => new Command(async () => await ReturnToPreviousPageAsync()); }
         public ICommand SubmitQuizCommand { get => new Command(async () => await SubmitQuizAsync()); }
         public ICommand NextQuestionCommand { get => new Command(NextQuestion); }
         public ICommand PreviousQuestionCommand { get => new Command(PreviousQuestion); }
@@ -172,7 +175,7 @@ namespace CodeQuizDesktop.Viewmodels
                         dispatcherTimer?.Stop();
                         dispatcherTimer = null;
                         WaitingForAutoSubmission = false;
-                        ReturnToPreviousPage();
+                        await ReturnToPreviousPageAsync();
                     });
                 }
             }
@@ -192,9 +195,9 @@ namespace CodeQuizDesktop.Viewmodels
             RemainingTime = tmpRemainingTime.TotalSeconds > 0 ? tmpRemainingTime : TimeSpan.Zero;
         }
 
-        private async void ReturnToPreviousPage()
+        public async Task ReturnToPreviousPageAsync()
         {
-            await Shell.Current.GoToAsync("///MainPage");
+            await _navigationService.GoToAsync("///MainPage");
         }
 
         private void SaveSolution()
@@ -209,8 +212,8 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 SaveSolution();
                 var response = await _attemptsRepository.SubmitAttempt(Attempt!.Id);
-                ReturnToPreviousPage();
             }, "Submitting quiz...");
+            await ReturnToPreviousPageAsync();
         }
 
         private void NextQuestion()
@@ -292,10 +295,11 @@ namespace CodeQuizDesktop.Viewmodels
         private readonly IAttemptsRepository _attemptsRepository;
         private readonly IExecutionRepository _executionRepository;
 
-        public JoinQuizVM(IAttemptsRepository attemptsRepository, IExecutionRepository executionRepository)
+        public JoinQuizVM(IAttemptsRepository attemptsRepository, IExecutionRepository executionRepository, INavigationService navigationService)
         {
             _attemptsRepository = attemptsRepository;
             _executionRepository = executionRepository;
+            _navigationService = navigationService;
             _attemptsRepository.SubscribeUpdate(a => Attempt = a);
         }
     }

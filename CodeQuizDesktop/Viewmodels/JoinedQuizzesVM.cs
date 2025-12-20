@@ -1,5 +1,6 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui.Core.Extensions;
 using System.Collections.ObjectModel;
@@ -10,6 +11,7 @@ namespace CodeQuizDesktop.Viewmodels
     public class JoinedQuizzesVM : BaseViewModel
     {
         private readonly IAttemptsRepository _attemptsRepository;
+        private readonly INavigationService _navigationService;
 
         private ObservableCollection<ExamineeAttempt> allExamineeAttempts = [];
 
@@ -26,9 +28,9 @@ namespace CodeQuizDesktop.Viewmodels
         public string QuizCode { get; set; } = "";
         public ICommand JoinQuizCommand { get => new Command(async () => await JoinQuizAsync()); }
         public ICommand ContinueAttemptCommand { get => new Command<ExamineeAttempt>(async (a) => await OnContinueAttemptAsync(a)); }
-        public ICommand ReviewAttemptCommand { get => new Command<ExamineeAttempt>(OnReviewAttempt); }
+        public ICommand ReviewAttemptCommand { get => new Command<ExamineeAttempt>(async (a) => await OnReviewAttempt(a)); }
 
-        private async Task JoinQuizAsync()
+        public async Task JoinQuizAsync()
         {
             if (string.IsNullOrWhiteSpace(QuizCode))
                 return;
@@ -37,30 +39,30 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 var beginAttemptResponse = new BeginAttemptRequest { QuizCode = this.QuizCode };
                 var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
-                await Shell.Current.GoToAsync(nameof(JoinQuiz), new Dictionary<string, object> { { "attempt", response! } });
+                await _navigationService.GoToAsync(nameof(JoinQuiz), new Dictionary<string, object> { { "attempt", response! } });
             }, "Joining quiz...");
         }
 
-        private async Task OnContinueAttemptAsync(ExamineeAttempt examineeAttempt)
+        public async Task OnContinueAttemptAsync(ExamineeAttempt examineeAttempt)
         {
             System.Diagnostics.Debug.WriteLine($"Clicked: {examineeAttempt.Quiz.Code}");
             await ExecuteAsync(async () =>
             {
                 var beginAttemptResponse = new BeginAttemptRequest { QuizCode = examineeAttempt.Quiz.Code };
                 var response = await _attemptsRepository.BeginAttempt(beginAttemptResponse);
-                await Shell.Current.GoToAsync(nameof(JoinQuiz), new Dictionary<string, object> { { "attempt", response! } });
+                await _navigationService.GoToAsync(nameof(JoinQuiz), new Dictionary<string, object> { { "attempt", response! } });
             }, "Loading quiz...");
         }
 
-        private async void OnReviewAttempt(ExamineeAttempt examineeAttempt)
+        public async Task OnReviewAttempt(ExamineeAttempt examineeAttempt)
         {
-            await Shell.Current.GoToAsync(nameof(ExamineeReviewQuiz), new Dictionary<string, object>
+            await _navigationService.GoToAsync(nameof(ExamineeReviewQuiz), new Dictionary<string, object>
             {
                 { "attempt", examineeAttempt! }
             });
         }
 
-        private async void InitializeAsync()
+        public async Task InitializeAsync()
         {
             await ExecuteAsync(async () =>
             {
@@ -69,10 +71,11 @@ namespace CodeQuizDesktop.Viewmodels
             }, "Loading quizzes...");
         }
 
-        public JoinedQuizzesVM(IAttemptsRepository attemptsRepository)
+        public JoinedQuizzesVM(IAttemptsRepository attemptsRepository, INavigationService navigationService)
         {
             _attemptsRepository = attemptsRepository;
-            InitializeAsync();
+            _navigationService = navigationService;
+
             _attemptsRepository.SubscribeCreate(a =>
             {
                 if (AllExamineeAttempts.FirstOrDefault(at => at.Id == a.Id) == null)

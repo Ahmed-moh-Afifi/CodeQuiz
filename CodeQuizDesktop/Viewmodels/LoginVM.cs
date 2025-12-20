@@ -9,30 +9,32 @@ namespace CodeQuizDesktop.Viewmodels
     {
         private readonly IAuthenticationRepository _authenticationRepository;
         private readonly ITokenService _tokenService;
+        private readonly INavigationService _navigationService;
 
         public string Username { get; set; } = "";
         public string Password { get; set; } = "";
-        
-        public ICommand LoginCommand { get => new Command(async () => await LoginAsync()); }
-        public ICommand OpenRegisterPageCommand { get => new Command(OpenRegisterPage); }
 
-        public LoginVM(IAuthenticationRepository authenticationRepository, ITokenService tokenService)
+        public ICommand LoginCommand { get => new Command(async () => await LoginAsync()); }
+        public ICommand OpenRegisterPageCommand { get => new Command(async () => await OpenRegisterPageAsync()); }
+
+        public LoginVM(IAuthenticationRepository authenticationRepository, ITokenService tokenService, INavigationService navigationService)
         {
             _authenticationRepository = authenticationRepository;
             _tokenService = tokenService;
+            _navigationService = navigationService;
         }
 
         private async Task OpenHomePage()
         {
-            await Shell.Current.GoToAsync("///MainPage");
+            await _navigationService.GoToAsync("///MainPage");
         }
 
-        private async void OpenRegisterPage()
+        public async Task OpenRegisterPageAsync()
         {
-            await Shell.Current.GoToAsync("///RegisterPage");
+            await _navigationService.GoToAsync("///RegisterPage");
         }
 
-        private async Task LoginAsync()
+        public async Task LoginAsync()
         {
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
                 return;
