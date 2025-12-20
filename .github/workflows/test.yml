@@ -7,13 +7,12 @@ on:
     branches: [master, frontend]
 
 env:
-  DOTNET_VERSION: "10.0.x"
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
-  build-and-test:
-    name: Build and Test
+  backend-tests:
+    name: Backend Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -23,23 +22,21 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            9.0.x
-            10.0.x
+          dotnet-version: 10.0.x
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/CodeQuizBackend*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Restore dependencies
-        run: dotnet restore CodeQuiz.sln
+      - name: Restore Backend dependencies
+        run: dotnet restore CodeQuizBackend.Tests/CodeQuizBackend.Tests.csproj
 
-      - name: Build solution
-        run: dotnet build CodeQuiz.sln --configuration Release --no-restore
+      - name: Build Backend Tests
+        run: dotnet build CodeQuizBackend.Tests/CodeQuizBackend.Tests.csproj --configuration Release --no-restore
 
       - name: Run Backend Tests
         run: dotnet test CodeQuizBackend.Tests/CodeQuizBackend.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=backend-test-results.trx" --collect:"XPlat Code Coverage"
@@ -58,7 +55,7 @@ jobs:
           name: coverage-report
           path: "**/coverage.cobertura.xml"
 
-  test-desktop:
+  desktop-tests:
     name: Desktop Tests (Windows)
     runs-on: windows-latest
 
@@ -69,9 +66,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            9.0.x
-            10.0.x
+          dotnet-version: 9.0.x
 
       - name: Install MAUI Workload
         run: dotnet workload install maui-windows
@@ -80,7 +75,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/CodeQuizDesktop*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
