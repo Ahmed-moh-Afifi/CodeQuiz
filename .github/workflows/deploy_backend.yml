@@ -20,6 +20,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 1. NEW STEP: Force lowercase image name
+      - name: Lowercase the image name
+        run: |
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -31,7 +36,9 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./CodeQuizBackend/Dockerfile
           push: true
+          # 2. UPDATED: Use the environment variable we just lowercased
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
   deploy:
@@ -39,15 +46,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Lowercase the image name
+        run: |
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_IP }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: IMAGE_NAME
           script: |
             # 1. Login to GitHub Container Registry on the VPS
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             # 2. Re-create the .env file from secrets (keeps it safe)
             echo "${{ secrets.ENV_FILE }}" > /home/ubuntu/app/.env
@@ -71,4 +83,4 @@ jobs:
               ghcr.io/${{ env.IMAGE_NAME }}:latest
 
             # 6. Clean up unused images to save space
-            docker image prune -f
+            sudo docker image prune -f
