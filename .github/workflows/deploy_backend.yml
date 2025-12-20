@@ -36,6 +36,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./CodeQuizBackend/Dockerfile
           push: true
           # 2. UPDATED: Use the environment variable we just lowercased
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
