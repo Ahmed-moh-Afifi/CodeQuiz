@@ -54,7 +54,7 @@ namespace CodeQuizBackend.Quiz.Repositories
             q.Duration = quiz.Duration;
             q.Code = quiz.Code;
             q.GlobalQuestionConfiguration = quiz.GlobalQuestionConfiguration;
-            q.Questions = quiz.Questions;
+            //q.Questions = quiz.Questions;
             q.ExaminerId = quiz.ExaminerId;
             q.AllowMultipleAttempts = quiz.AllowMultipleAttempts;
             

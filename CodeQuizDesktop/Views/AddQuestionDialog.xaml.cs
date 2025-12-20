@@ -1,6 +1,8 @@
-using CommunityToolkit.Maui.Views;
-using CodeQuizDesktop.Viewmodels;
 using CodeQuizDesktop.Models;
+using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
+using CodeQuizDesktop.Viewmodels;
+using CommunityToolkit.Maui.Views;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -8,16 +10,30 @@ namespace CodeQuizDesktop.Views;
 
 public partial class AddQuestionDialog : Popup<NewQuestionModel?>
 {
+    private NewQuestionModel? questionModel;
     private string? statement;
     private string editorCode = "";
-    private string? language;
+    private string? programmingLanguage;
     private bool allowExecution = false;
     private bool showOutput = false;
     private bool showError = false;
+    private bool allowIntellisense = false;
+    private bool allowSignatureHelp = false;
     private ObservableCollection<TestCase> testCases = [];
     private float points = 0;
     private bool independentlyConfigured = false;
 
+
+
+    public NewQuestionModel? QuestionModel
+    {
+        get => questionModel;
+        set
+        {
+            questionModel = value;
+            OnPropertyChanged();
+        }
+    }
     public string? Statement
     {
         get => statement;
@@ -57,13 +73,16 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
     }
 
     // Configuration
-    public string? Language
+    public string? ProgrammingLanguage
     {
-        get => language;
+        get
+        {
+            return programmingLanguage;
+        }
         set
         {
-            language = value;
             OnPropertyChanged();
+            programmingLanguage = value;
         }
     }
     public bool AllowExecution
@@ -93,6 +112,24 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
             OnPropertyChanged();
         }
     }
+    public bool AllowIntellisense
+    {
+        get => allowIntellisense;
+        set
+        {
+            allowIntellisense = value;
+            OnPropertyChanged();
+        }
+    }
+    public bool AllowSignatureHelp
+    {
+        get => allowSignatureHelp;
+        set
+        {
+            allowSignatureHelp = value;
+            OnPropertyChanged();
+        }
+    }
 
     public bool IndependentlyConfigured
     {
@@ -107,15 +144,66 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
         }
     }
 
+    // Data Sources
+    private List<string> programmingLanguages = ["Python"];
+    public List<string> ProgrammingLanguages
+    {
+        get
+        {
+            return programmingLanguages;
+        }
+        set
+        {
+            programmingLanguages = value;
+            OnPropertyChanged();
+        }
+    }
+
     //Commands
     public ICommand AddTestCaseCommand { get => new Command(AddTestCase); }
     public ICommand DeleteTestCaseCommand { get => new Command<TestCase>(DeleteTestCase); }
 
-    public AddQuestionDialog()
+    private readonly IUIService uiService = MauiProgram.GetService<IUIService>();
+
+    public AddQuestionDialog(NewQuestionModel newQuestionModel = null)
     {
         InitializeComponent();
         BindingContext = this;
+        QuestionModel = newQuestionModel;
+        if (QuestionModel != null)
+        {
+            System.Diagnostics.Debug.WriteLine($"Statement: {QuestionModel.Statement}");
+            Statement = QuestionModel.Statement;
+            Points = QuestionModel.Points;
+            EditorCode = QuestionModel.EditorCode;
+            //TestCases = new ObservableCollection<TestCase>(QuestionModel.TestCases);
+            TestCases = new ObservableCollection<TestCase>();
+            this.Opened += async (s, e) =>
+            {
+                // Optional: A tiny delay to let the animation finish completely
+                await Task.Delay(100);
 
+                if (QuestionModel.TestCases != null)
+                {
+                    foreach (var tc in QuestionModel.TestCases)
+                    {
+                        // Add them one by one, just like clicking the button
+                        TestCases.Add(tc);
+                    }
+                }
+            };
+            if (QuestionModel.QuestionConfiguration != null)
+            {
+                IndependentlyConfigured = true;
+                ProgrammingLanguage = QuestionModel.QuestionConfiguration.Language;
+                AllowExecution = QuestionModel.QuestionConfiguration.AllowExecution;
+                ShowOutput = QuestionModel.QuestionConfiguration.ShowOutput;
+                ShowError = QuestionModel.QuestionConfiguration.ShowError;
+                AllowIntellisense = QuestionModel.QuestionConfiguration.AllowIntellisense;
+                AllowSignatureHelp = QuestionModel.QuestionConfiguration.AllowSignatureHelp;
+            }
+            LoadProgrammingLanguages();
+        }
         TestCases.CollectionChanged += (item, e) =>
         {
             for (int i = 0; i < TestCases.Count; i++)
@@ -123,6 +211,13 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
                 TestCases[i].TestCaseNumber = i + 1;
             }
         };
+    }
+
+    public async void LoadProgrammingLanguages()
+    {
+        var executionRepository = MauiProgram.GetService<IExecutionRepository>();
+        var languages = await executionRepository.GetSupportedLanguages();
+        ProgrammingLanguages = languages.ToList();
     }
 
     public void AddTestCase()
@@ -152,7 +247,7 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
             errorMessages.Add("Question statement cannot be empty");
         }
 
-        if (IndependentlyConfigured && string.IsNullOrEmpty(Language?.Trim()))
+        if (IndependentlyConfigured && string.IsNullOrEmpty(ProgrammingLanguage?.Trim()))
         {
             // Programming language not selected error
             errorMessages.Add("Programming language not selected");
@@ -198,6 +293,7 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
         if (errors.Count > 0)
         {
             System.Diagnostics.Debug.WriteLine(string.Join('\n', errors));
+            await uiService.ShowErrorAsync(string.Join("\n", errors), "Invalid Input");
             return;
         }
 
@@ -210,10 +306,12 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
             Order = Order,
             QuestionConfiguration = IndependentlyConfigured ? new QuestionConfiguration
             {
-                Language = Language!,
+                Language = ProgrammingLanguage!,
                 AllowExecution = AllowExecution,
                 ShowOutput = ShowOutput,
-                ShowError = ShowError
+                ShowError = ShowError,
+                AllowIntellisense = AllowIntellisense,
+                AllowSignatureHelp = AllowSignatureHelp
             } : null
         };
 

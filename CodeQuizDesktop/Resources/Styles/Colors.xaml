@@ -4,42 +4,82 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
+    <!-- ========== CodeQuiz Dark Theme Colors ========== -->
+    
+    <!-- Background Colors -->
+    <Color x:Key="BackgroundDark">#171717</Color>
+    <Color x:Key="SurfaceDark">#1F1F1F</Color>
+    <Color x:Key="CardBackground">#1F1F1F</Color>
+    <Color x:Key="CardBackgroundAlt">#2A2A2A</Color>
+    <Color x:Key="ElevatedSurface">#252525</Color>
 
-    <Color x:Key="Primary">#512BD4</Color>
-    <Color x:Key="PrimaryDark">#ac99ea</Color>
-    <Color x:Key="PrimaryDarkText">#242424</Color>
-    <Color x:Key="Secondary">#DFD8F7</Color>
-    <Color x:Key="SecondaryDarkText">#9880e5</Color>
-    <Color x:Key="Tertiary">#2B0B98</Color>
+    <!-- Border Colors -->
+    <Color x:Key="BorderDefault">#2A2A2A</Color>
+    <Color x:Key="BorderSubtle">#3B3B3B</Color>
+    <Color x:Key="BorderFocus">#591C21</Color>
 
-    <Color x:Key="White">White</Color>
-    <Color x:Key="Black">Black</Color>
-    <Color x:Key="Magenta">#D600AA</Color>
-    <Color x:Key="MidnightBlue">#190649</Color>
-    <Color x:Key="OffBlack">#1f1f1f</Color>
+    <!-- Primary Colors (Dark Red) -->
+    <Color x:Key="Primary">#591C21</Color>
+    <Color x:Key="PrimaryHover">#6D242A</Color>
+    <Color x:Key="PrimaryPressed">#4A171C</Color>
+    <Color x:Key="PrimaryLight">#7A2A32</Color>
 
+    <!-- Secondary Colors -->
+    <Color x:Key="Secondary">#2A2A2A</Color>
+    <Color x:Key="SecondaryHover">#363636</Color>
+    <Color x:Key="SecondaryPressed">#1E1E1E</Color>
+
+    <!-- Text Colors -->
+    <Color x:Key="TextPrimary">#EDEDED</Color>
+    <Color x:Key="TextSecondary">#B3B3B3</Color>
+    <Color x:Key="TextMuted">#8A8A8A</Color>
+    <Color x:Key="TextDisabled">#5A5A5A</Color>
+
+    <!-- Status Colors -->
+    <Color x:Key="Success">#1F7A4D</Color>
+    <Color x:Key="SuccessLight">#2D9D66</Color>
+    <Color x:Key="Error">#8B1E1E</Color>
+    <Color x:Key="ErrorLight">#B52A2A</Color>
+    <Color x:Key="Warning">#C9A227</Color>
+    <Color x:Key="WarningLight">#E5C13D</Color>
+    <Color x:Key="Info">#1447E6</Color>
+    <Color x:Key="Running">#990065FF</Color>
+    <Color x:Key="Completed">#9936B37E</Color>
+
+    <!-- Code Editor Colors -->
+    <Color x:Key="CodeKeyword">#9CDCFE</Color>
+    <Color x:Key="CodeString">#CE9178</Color>
+
+    <!-- Transparent Variants -->
+    <Color x:Key="PrimaryTransparent">#33591C21</Color>
+    <Color x:Key="SuccessTransparent">#331F7A4D</Color>
+    <Color x:Key="ErrorTransparent">#338B1E1E</Color>
+
+    <!-- Legacy -->
+    <Color x:Key="White">#FFFFFF</Color>
+    <Color x:Key="Black">#000000</Color>
+    <Color x:Key="Transparent">Transparent</Color>
+
+    <!-- Gray Scale -->
     <Color x:Key="Gray100">#E1E1E1</Color>
     <Color x:Key="Gray200">#C8C8C8</Color>
     <Color x:Key="Gray300">#ACACAC</Color>
     <Color x:Key="Gray400">#919191</Color>
     <Color x:Key="Gray500">#6E6E6E</Color>
     <Color x:Key="Gray600">#404040</Color>
-    <Color x:Key="Gray900">#212121</Color>
-    <Color x:Key="Gray950">#141414</Color>
+    <Color x:Key="Gray700">#2E2E2E</Color>
+    <Color x:Key="Gray800">#1E1E1E</Color>
+    <Color x:Key="Gray900">#171717</Color>
 
+    <!-- Brushes -->
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
-    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
-    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
-    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
-    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
+    <SolidColorBrush x:Key="BackgroundDarkBrush" Color="{StaticResource BackgroundDark}"/>
+    <SolidColorBrush x:Key="SurfaceDarkBrush" Color="{StaticResource SurfaceDark}"/>
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}"/>
 
-    <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}"/>
-    <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}"/>
-    <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}"/>
-    <SolidColorBrush x:Key="Gray400Brush" Color="{StaticResource Gray400}"/>
-    <SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500}"/>
-    <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
-    <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
-    <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
+    <LinearGradientBrush x:Key="PrimaryGradient" EndPoint="1,1">
+        <GradientStop Color="{StaticResource PrimaryLight}" Offset="0"/>
+        <GradientStop Color="{StaticResource Primary}" Offset="1"/>
+    </LinearGradientBrush>
+
 </ResourceDictionary>

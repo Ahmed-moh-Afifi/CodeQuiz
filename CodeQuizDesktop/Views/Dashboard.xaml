@@ -1,185 +1,159 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CodeQuizDesktop.Views.Dashboard">
-    <Grid>
-
-
-        <ScrollView >
-            <VerticalStackLayout Padding="30,20" Spacing="24">
-
-
-                <VerticalStackLayout  Spacing="4">
-                    <Label Text="Dashboard" FontSize="28" FontFamily="InterExtraBold" TextColor="White"/>
-                    <Label Text="Welcome back, Ahmed Afifi!" FontSize="14" FontFamily="InterRegular" TextColor="#6B7280"/>
-                </VerticalStackLayout>
-
-
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="24">
-
-
-                    <Border Grid.Column="0" BackgroundColor="#2e2e2e" Padding="24" StrokeThickness="0" StrokeShape="RoundRectangle 16">
-                        <Border.Shadow>
-                            <Shadow Brush="Black" Opacity="0.08" Radius="20" Offset="0,4"/>
-                        </Border.Shadow>
-
-                        <VerticalStackLayout Spacing="20">
-
-                            <Grid ColumnDefinitions="*,Auto">
-                                <Label Grid.Column="0" Text="Joined Exams" FontSize="20" FontFamily="InterExtraBold" TextColor="White" VerticalOptions="Center"/>
-                                <Label Grid.Column="1" Text="View All →" FontSize="14" FontFamily="InterRegular" TextColor="#888888" VerticalOptions="Center"/>
-                            </Grid>
-
-
-                            <Border BackgroundColor="#1e1e1e" Padding="16" StrokeThickness="1" Stroke="#591c21" StrokeShape="RoundRectangle 12">
-                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
-
-                                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
-                                        <Label Grid.Column="0" Text="Advanced JavaScript Patterns" FontSize="16" FontFamily="InterRegular" FontAttributes="Bold" TextColor="White"/>
-                                        <Border Grid.Column="1" BackgroundColor="#591c21" Padding="8,4" StrokeThickness="0" StrokeShape="RoundRectangle 6">
-                                            <Label Text="LIVE" FontSize="10" FontFamily="InterExtraBold" TextColor="White"/>
-                                        </Border>
-                                    </Grid>
-
-
-                                    <VerticalStackLayout Grid.Row="1" Spacing="6">
-                                        <Label Text="Created by: Sarah Johnson" FontSize="13" TextColor="#888888"/>
-                                        <Label Text="90 minutes  •  5 Questions" FontSize="13" TextColor="#888888"/>
-                                    </VerticalStackLayout>
-
-
-                                    <HorizontalStackLayout Grid.Row="2" Spacing="8">
-                                        <Label Text="Ends in:" FontSize="13" TextColor="#888888"/>
-                                        <Label Text="2h 30m" FontSize="13" FontFamily="InterExtraBold" TextColor="#EF4444"/>
-                                    </HorizontalStackLayout>
-
-
-                                    <Button Grid.Row="3" Text="Continue ▶" BackgroundColor="#591c21" TextColor="White" FontFamily="InterRegular" FontSize="14" Padding="0,12"/>
-                                </Grid>
-                            </Border>
-
-
-
-
-                            <Border BackgroundColor="#1e1e1e" Padding="16" StrokeThickness="0" Stroke="#E5E7EB" StrokeShape ="RoundRectangle 12">
-                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
-
-                                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
-                                        <Label Grid.Column="0" Text="React Component Patterns" FontSize="16" FontFamily="InterRegular" FontAttributes="Bold" TextColor="White"/>
-                                        <Border Grid.Column="1" BackgroundColor="#888888" Padding="8,4" StrokeThickness="0" StrokeShape="RoundRectangle 6">
-                                            <Label Text="COMPLETED" FontSize="10" FontFamily="InterExtraBold" TextColor="White"/>
-                                        </Border>
-                                    </Grid>
-
-
-                                    <VerticalStackLayout Grid.Row="1" Spacing="6">
-                                        <Label Text="Created by: Emily Taylor" FontSize="13" TextColor="#888888"/>
-                                        <Label Text="Completed in 75m" FontSize="13" TextColor="#888888"/>
-                                    </VerticalStackLayout>
-
-
-                                    <HorizontalStackLayout Grid.Row="2" Spacing="8">
-                                        <Label Text="Score:" FontSize="13" TextColor="#888888"/>
-                                        <Label Text="92%" FontSize="13" FontFamily="InterExtraBold" TextColor="#10B981"/>
-                                    </HorizontalStackLayout>
-
-
-                                    <Button Grid.Row="3" Text="View Results" BackgroundColor="#888888" TextColor="White" FontFamily="InterRegular" FontSize="14" Padding="0,12"/>
-                                </Grid>
-                            </Border>
-
-                        </VerticalStackLayout>
-
-                    </Border>
-
-
-
-
-
-                    <Border Grid.Column="1" BackgroundColor="#2e2e2e" Padding="24" StrokeThickness="0" StrokeShape="RoundRectangle 16">
-                        <Border.Shadow>
-                            <Shadow Brush="Black" Opacity="0.08" Radius="20" Offset="0,4"/>
-                        </Border.Shadow>
-
-                        <VerticalStackLayout Spacing="20">
-
-                            <Grid ColumnDefinitions="*,Auto">
-                                <Label Grid.Column="0" Text="Created Exams" FontSize="20" FontFamily="InterExtraBold" TextColor="White" VerticalOptions="Center"/>
-                                <Label Grid.Column="1" Text="Manage All →" FontSize="14" FontFamily="InterRegular" TextColor="#888888" VerticalOptions="Center"/>
-                            </Grid>
-
-
-                            <Border BackgroundColor="#1e1e1e" Padding="16" StrokeThickness="0" Stroke="#591c21" StrokeShape="RoundRectangle 12">
-                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
-
-                                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
-                                        <Label Grid.Column="0" Text="Advanced JavaScript Patterns" FontSize="16" FontFamily="InterRegular" FontAttributes="Bold" TextColor="White"/>
-                                        <Border Grid.Column="1" BackgroundColor="#888888" Padding="8,4" StrokeThickness="0" StrokeShape="RoundRectangle 6">
-                                            <Label Text="UPCOMING" FontSize="10" FontFamily="InterExtraBold" TextColor="White"/>
-                                        </Border>
-                                    </Grid>
-
-
-                                    <Label Grid.Row="1" Text="90 minutes  •  5 Questions" FontSize="13" TextColor="#888888"/>
-
-
-
-                                    <Border Grid.Row="2" BackgroundColor="#2e2e2e" Padding="12,8" StrokeThickness="0" StrokeShape="RoundRectangle 8">
-                                        <HorizontalStackLayout Spacing="8">
-                                            <Label Text="Code:" FontSize="13" TextColor="#6B7280"/>
-                                            <Label Text="EXAM-2025-ABC" FontSize="13" FontFamily="SFMonoRegular" FontAttributes="Bold" TextColor="#2563EB"/>
-                                        </HorizontalStackLayout>
-                                    </Border>
-
-
-
-                                    <Button Grid.Row="3" Text="View Details" BackgroundColor="#888888" TextColor="White" FontFamily="InterRegular" FontSize="14" Padding="0,12"/>
-                                </Grid>
-                            </Border>
-
-
-
-
-                            <Border BackgroundColor="#1e1e1e" Padding="16" StrokeThickness="0" Stroke="#E5E7EB" StrokeShape ="RoundRectangle 12">
-                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
-
-                                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
-                                        <Label Grid.Column="0" Text="React Component Patterns" FontSize="16" FontFamily="InterRegular" FontAttributes="Bold" TextColor="White"/>
-                                        <Border Grid.Column="1" BackgroundColor="#888888" Padding="8,4" StrokeThickness="0" StrokeShape="RoundRectangle 6">
-                                            <Label Text="ENDED" FontSize="10" FontFamily="InterExtraBold" TextColor="White"/>
-                                        </Border>
-                                    </Grid>
-
-
-
-                                    <Label Grid.Row="1" Text="67 Submitted" FontSize="13" TextColor="#888888"/>
-
-
-
-                                    <HorizontalStackLayout Grid.Row="2" Spacing="8">
-                                        <Label Text="Avg Score:" FontSize="13" TextColor="#888888"/>
-                                        <Label Text="92%" FontSize="13" FontFamily="InterExtraBold" TextColor="#10B981"/>
-                                    </HorizontalStackLayout>
-
-                                    <Grid Grid.Row="3" ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                                        <Button Text="View" BackgroundColor="#888888" TextColor="White" FontFamily="InterRegular" FontSize="14" Padding="0,12"/>
-                                        <Button Grid.Column="1" Text="Edit" BackgroundColor="#888888" TextColor="White" FontFamily="InterRegular" FontSize="14" Padding="0,12"/>
-                                        <Button Grid.Column="2" Text="Delete" BackgroundColor="#888888" TextColor="White" FontFamily="InterRegular" FontSize="14" Padding="0,12"/>
-                                        
-                                    </Grid>
-                                </Grid>
-                            </Border>
-
-                        </VerticalStackLayout>
-
-                    </Border>
-
-
-
-
-
-                </Grid>
+             xmlns:models="clr-namespace:CodeQuizDesktop.Models"
+             xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
+             x:Class="CodeQuizDesktop.Views.Dashboard"
+             x:DataType="vm:DashboardVM"
+             xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui">
+    <ScrollView>
+        <VerticalStackLayout Padding="32,24" Spacing="28">
+            
+            <!-- Header Section -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Dashboard" Style="{StaticResource PageTitle}"/>
+                <Label Text="Welcome back! Here's an overview of your activity." Style="{StaticResource CaptionText}"/>
             </VerticalStackLayout>
-        </ScrollView>
-    </Grid>
+
+            <!-- Cards Grid -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="24">
+                
+                <!-- Joined Quizzes Card -->
+                <Border Grid.Column="0" Style="{StaticResource ElevatedCard}">
+                    <VerticalStackLayout Spacing="20">
+                        <!-- Card Header -->
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Joined Quizzes" Style="{StaticResource SectionHeader}"/>
+                            <Border Grid.Column="1" BackgroundColor="Transparent" StrokeThickness="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ViewAllJoinedCommand}"/>
+                                </Border.GestureRecognizers>
+                                <Label Text="View All →" Style="{StaticResource CaptionText}" TextColor="{StaticResource Primary}"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Joined Quizzes List -->
+                        <CollectionView ItemsSource="{Binding JoinedAttempts}" MaximumHeightRequest="400">
+                            <CollectionView.EmptyView>
+                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="20">
+                                    <Label Text="No quizzes joined yet" TextColor="{StaticResource TextMuted}" FontSize="15" HorizontalOptions="Center"/>
+                                    <Label Text="Join a quiz to see it here" TextColor="{StaticResource TextDisabled}" FontSize="13" HorizontalOptions="Center" Margin="0,6,0,0"/>
+                                </VerticalStackLayout>
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:ExamineeAttempt">
+                                    <Border Style="{StaticResource InnerCard}" Margin="0,0,0,12">
+                                        <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="14">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <Label Text="{Binding Quiz.Title}" Style="{StaticResource ItemTitle}"/>
+                                                <Border Grid.Column="1" Style="{StaticResource LiveBadge}" IsVisible="{Binding IsRunning}">
+                                                    <Label Text="LIVE" Style="{StaticResource BadgeText}"/>
+                                                </Border>
+                                                <Border Grid.Column="1" Style="{StaticResource SuccessBadge}" IsVisible="{Binding IsCompleted}">
+                                                    <Label Text="COMPLETED" Style="{StaticResource BadgeText}"/>
+                                                </Border>
+                                            </Grid>
+                                            <VerticalStackLayout Grid.Row="1" Spacing="4">
+                                                <Label Text="{Binding Quiz.Examiner.FullName, StringFormat='Created by: {0}'}" Style="{StaticResource CaptionText}"/>
+                                                <Label Text="{Binding Quiz.QustionsCount, StringFormat='{0} Questions'}" Style="{StaticResource CaptionText}"/>
+                                            </VerticalStackLayout>
+                                            
+                                            <!-- Running: Show time started -->
+                                            <HorizontalStackLayout Grid.Row="2" Spacing="6" IsVisible="{Binding IsRunning}">
+                                                <Label Text="Started:" Style="{StaticResource CaptionText}"/>
+                                                <Label Text="{Binding StartTime, StringFormat='{0:MMM dd, HH:mm}'}" Style="{StaticResource ScoreText}"/>
+                                            </HorizontalStackLayout>
+                                            
+                                            <!-- Completed: Show score -->
+                                            <HorizontalStackLayout Grid.Row="2" Spacing="6" IsVisible="{Binding IsCompleted}">
+                                                <Label Text="Score:" Style="{StaticResource CaptionText}"/>
+                                                <Label Text="{Binding GradePercentage, StringFormat='{0:F1}%'}" Style="{StaticResource SuccessText}"/>
+                                            </HorizontalStackLayout>
+                                            
+                                            <!-- Running: Continue button -->
+                                            <Button Grid.Row="3" Text="Continue ▶" Style="{StaticResource PrimaryButton}" IsVisible="{Binding IsRunning}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardVM}}, Path=ContinueAttemptCommand}" 
+                                                    CommandParameter="{Binding .}"/>
+                                            
+                                            <!-- Completed: View Results button -->
+                                            <Button Grid.Row="3" Text="View Results" Style="{StaticResource SecondaryButton}" IsVisible="{Binding IsCompleted}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardVM}}, Path=ViewResultsCommand}" 
+                                                    CommandParameter="{Binding .}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Created Quizzes Card -->
+                <Border Grid.Column="1" Style="{StaticResource ElevatedCard}">
+                    <VerticalStackLayout Spacing="20">
+                        <!-- Card Header -->
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Created Quizzes" Style="{StaticResource SectionHeader}"/>
+                            <Border Grid.Column="1" BackgroundColor="Transparent" StrokeThickness="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ViewAllCreatedCommand}"/>
+                                </Border.GestureRecognizers>
+                                <Label Text="Manage All →" Style="{StaticResource CaptionText}" TextColor="{StaticResource Primary}"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Created Quizzes List -->
+                        <CollectionView ItemsSource="{Binding CreatedQuizzes}" MaximumHeightRequest="400">
+                            <CollectionView.EmptyView>
+                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="20">
+                                    <Label Text="No quizzes created yet" TextColor="{StaticResource TextMuted}" FontSize="15" HorizontalOptions="Center"/>
+                                    <Label Text="Create a quiz to see it here" TextColor="{StaticResource TextDisabled}" FontSize="13" HorizontalOptions="Center" Margin="0,6,0,0"/>
+                                </VerticalStackLayout>
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:ExaminerQuiz">
+                                    <Border Style="{StaticResource InnerCard}" Margin="0,0,0,12">
+                                        <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="14">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <Label Text="{Binding Title}" Style="{StaticResource ItemTitle}"/>
+                                                <!-- Status Badges -->
+                                                <Border Grid.Column="1" Style="{StaticResource LiveBadge}" IsVisible="{Binding IsRunning}">
+                                                    <Label Text="RUNNING" Style="{StaticResource BadgeText}"/>
+                                                </Border>
+                                                <Border Grid.Column="1" Style="{StaticResource WarningBadge}" IsVisible="{Binding IsUpcoming}">
+                                                    <Label Text="UPCOMING" Style="{StaticResource BadgeText}" TextColor="{StaticResource BackgroundDark}"/>
+                                                </Border>
+                                                <Border Grid.Column="1" Style="{StaticResource StatusBadge}" IsVisible="{Binding IsEnded}">
+                                                    <Label Text="ENDED" Style="{StaticResource BadgeText}"/>
+                                                </Border>
+                                            </Grid>
+                                            
+                                            <Label Grid.Row="1" Text="{Binding QustionsCount, StringFormat='{0} Questions'}" Style="{StaticResource CaptionText}"/>
+                                            
+                                            <!-- Quiz Code -->
+                                            <Border Grid.Row="2" Style="{StaticResource StatusBadge}" Padding="12,10">
+                                                <HorizontalStackLayout Spacing="8">
+                                                    <Label Text="Code:" Style="{StaticResource CaptionText}"/>
+                                                    <Label Text="{Binding Code}" FontFamily="SFMonoRegular" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
+                                                </HorizontalStackLayout>
+                                            </Border>
+                                            
+                                            <!-- Action Buttons -->
+                                            <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="10">
+                                                <Button Text="View" Style="{StaticResource SecondaryButton}" Padding="0,12"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardVM}}, Path=ViewCreatedQuizCommand}" 
+                                                        CommandParameter="{Binding .}"/>
+                                                <Button Grid.Column="1" Text="Delete" Style="{StaticResource DangerButton}" Padding="0,12"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardVM}}, Path=DeleteCreatedQuizCommand}" 
+                                                        CommandParameter="{Binding .}"/>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentView>

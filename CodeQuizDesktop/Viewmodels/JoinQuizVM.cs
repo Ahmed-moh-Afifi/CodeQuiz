@@ -1,16 +1,14 @@
-﻿using CodeQuizDesktop.Models;
+﻿using CodeQuizDesktop.Controls;
+using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CodeQuizDesktop.Services;
 using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
 {
     public class JoinQuizVM : BaseViewModel, IQueryAttributable
     {
+        private readonly INavigationService _navigationService;
         private ExamineeAttempt? attempt;
         public ExamineeAttempt? Attempt
         {
@@ -32,6 +30,7 @@ namespace CodeQuizDesktop.Viewmodels
                 if (value.Hours == 0 && value.Minutes == 0 && value.Seconds == 0)
                 {
                     WaitingForAutoSubmission = true;
+                    SaveSolution();
                 }
                 OnPropertyChanged();
             }
@@ -64,6 +63,22 @@ namespace CodeQuizDesktop.Viewmodels
                 selectedQuestion = value;
                 HasTestCases = SelectedQuestion!.TestCases.Count != 0;
                 CodeInEditor = Attempt!.Solutions[value!.Order - 1].Code;
+                if (selectedQuestion!.QuestionConfiguration.AllowIntellisense && selectedQuestion.QuestionConfiguration.AllowSignatureHelp)
+                {
+                    EditorTypeValue = EditorType.AllHelpers;
+                }
+                else if (!(selectedQuestion.QuestionConfiguration.AllowIntellisense) && selectedQuestion.QuestionConfiguration.AllowSignatureHelp)
+                {
+                    EditorTypeValue = EditorType.SignatureOnly;
+                }
+                else if (selectedQuestion.QuestionConfiguration.AllowIntellisense && !(selectedQuestion.QuestionConfiguration.AllowSignatureHelp))
+                {
+                    EditorTypeValue = EditorType.IntellisenseOnly;
+                }
+                else
+                {
+                    EditorTypeValue = EditorType.NoHelpers;
+                }
 
                 OnPropertyChanged();
             }
@@ -113,13 +128,26 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
+        private bool isRunningCode;
+        public bool IsRunningCode
+        {
+            get { return isRunningCode; }
+            set
+            {
+                isRunningCode = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public EditorType EditorTypeValue { get; set; }
+
         // Commands
-        public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }
-        public ICommand SubmitQuizCommand { get => new Command(SubmitQuiz); }
+        public ICommand ReturnCommand { get => new Command(async () => await ReturnToPreviousPageAsync()); }
+        public ICommand SubmitQuizCommand { get => new Command(async () => await SubmitQuizAsync()); }
         public ICommand NextQuestionCommand { get => new Command(NextQuestion); }
         public ICommand PreviousQuestionCommand { get => new Command(PreviousQuestion); }
         public ICommand SpecificQuestionCommand { get => new Command<Question>(SpecificQuestion); }
-        public ICommand RunCommand { get => new Command(Run); }
+        public ICommand RunCommand { get => new Command(async () => await RunAsync()); }
 
         // Remaining Time Timer
         IDispatcherTimer? dispatcherTimer;
@@ -147,7 +175,7 @@ namespace CodeQuizDesktop.Viewmodels
                         dispatcherTimer?.Stop();
                         dispatcherTimer = null;
                         WaitingForAutoSubmission = false;
-                        ReturnToPreviousPage();
+                        await ReturnToPreviousPageAsync();
                     });
                 }
             }
@@ -167,9 +195,9 @@ namespace CodeQuizDesktop.Viewmodels
             RemainingTime = tmpRemainingTime.TotalSeconds > 0 ? tmpRemainingTime : TimeSpan.Zero;
         }
 
-        private async void ReturnToPreviousPage()
+        public async Task ReturnToPreviousPageAsync()
         {
-            await Shell.Current.GoToAsync("///MainPage");
+            await _navigationService.GoToAsync("///MainPage");
         }
 
         private void SaveSolution()
@@ -178,11 +206,14 @@ namespace CodeQuizDesktop.Viewmodels
             _attemptsRepository.UpdateSolution(Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!);
         }
 
-        private async void SubmitQuiz()
+        private async Task SubmitQuizAsync()
         {
-            SaveSolution();
-            var response = await _attemptsRepository.SubmitAttempt(Attempt!.Id);
-            ReturnToPreviousPage();
+            await ExecuteAsync(async () =>
+            {
+                SaveSolution();
+                var response = await _attemptsRepository.SubmitAttempt(Attempt!.Id);
+            }, "Submitting quiz...");
+            await ReturnToPreviousPageAsync();
         }
 
         private void NextQuestion()
@@ -209,56 +240,66 @@ namespace CodeQuizDesktop.Viewmodels
             SelectedQuestion = question;
         }
 
-        private async void Run()
+        private async Task RunAsync()
         {
-            var runCodeRequest = new RunCodeRequest()
+            if (IsRunningCode)
+                return;
+
+            try
             {
-                Language = SelectedQuestion!.QuestionConfiguration.Language,
-                ContainOutput = SelectedQuestion!.QuestionConfiguration.ShowOutput,
-                ContainError = SelectedQuestion!.QuestionConfiguration.ShowError,
+                IsRunningCode = true;
+                Output = "Running...";
 
-                Code = CodeInEditor,
-
-                Input = (this.Input).Split('\n').ToList()
-
-            };
-
-            var response = await _executionRepository.RunCode(runCodeRequest);
-            if (SelectedQuestion.QuestionConfiguration.AllowExecution)
-            {
-                if (response.Success)
+                var runCodeRequest = new RunCodeRequest()
                 {
-                    if (SelectedQuestion.QuestionConfiguration.ShowOutput)
+                    Language = SelectedQuestion!.QuestionConfiguration.Language,
+                    ContainOutput = SelectedQuestion!.QuestionConfiguration.ShowOutput,
+                    ContainError = SelectedQuestion!.QuestionConfiguration.ShowError,
+                    Code = CodeInEditor,
+                    Input = (this.Input).Split('\n').ToList()
+                };
+
+                var response = await _executionRepository.RunCode(runCodeRequest);
+                if (SelectedQuestion.QuestionConfiguration.AllowExecution)
+                {
+                    if (response.Success)
                     {
-                        Output = response.Output!;
+                        if (SelectedQuestion.QuestionConfiguration.ShowOutput)
+                        {
+                            Output = response.Output!;
+                        }
+                        else
+                        {
+                            Output = "Code executed successfully";
+                        }
                     }
                     else
                     {
-                        Output = "Code executed successfully";
-                    }
-                }
-                else
-                {
-                    if (SelectedQuestion.QuestionConfiguration.ShowError)
-                    {
-                        Output = response.Error!;
-                    }
-                    else
-                    {
-                        Output = "Code execution failed";
+                        if (SelectedQuestion.QuestionConfiguration.ShowError)
+                        {
+                            Output = response.Error!;
+                        }
+                        else
+                        {
+                            Output = "Code execution failed";
+                        }
                     }
                 }
             }
-
+            finally
+            {
+                IsRunningCode = false;
+            }
         }
 
-        private IAttemptsRepository _attemptsRepository;
-        private IExecutionRepository _executionRepository;
+        private readonly IAttemptsRepository _attemptsRepository;
+        private readonly IExecutionRepository _executionRepository;
 
-        public JoinQuizVM(IAttemptsRepository attemptsRepository, IExecutionRepository executionRepository)
+        public JoinQuizVM(IAttemptsRepository attemptsRepository, IExecutionRepository executionRepository, INavigationService navigationService)
         {
             _attemptsRepository = attemptsRepository;
             _executionRepository = executionRepository;
+            _navigationService = navigationService;
             _attemptsRepository.SubscribeUpdate(a => Attempt = a);
         }
     }

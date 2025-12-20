@@ -1,5 +1,6 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -96,11 +97,11 @@ namespace CodeQuizDesktop.Viewmodels
         }
 
         //Commands
-        public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }
+        public ICommand ReturnCommand { get => new Command(async () => await ReturnToPreviousPage()); }
         public ICommand NextQuestionCommand { get => new Command(NextQuestion); }
         public ICommand PreviousQuestionCommand { get => new Command(PreviousQuestion); }
         public ICommand SpecificQuestionCommand { get => new Command<Question>(SpecificQuestion); }
-        public ICommand RunCommand { get => new Command(Run); }
+        public ICommand RunCommand { get => new Command(async () => await Run()); }
         public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.ContainsKey("attempt") && query["attempt"] is ExamineeAttempt receivedAttempt)
@@ -110,12 +111,12 @@ namespace CodeQuizDesktop.Viewmodels
                 System.Diagnostics.Debug.WriteLine($"Clicked: {Attempt.Quiz.Title}");
             }
         }
-        private async void ReturnToPreviousPage()
+        public async Task ReturnToPreviousPage()
         {
-            await Shell.Current.GoToAsync("..");
+            await _navigationService.GoToAsync("..");
         }
 
-        private void NextQuestion()
+        public void NextQuestion()
         {
             if (SelectedQuestion!.Order + 1 <= Attempt!.Quiz.Questions.Count)
             {
@@ -124,7 +125,7 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        private void PreviousQuestion()
+        public void PreviousQuestion()
         {
             if (SelectedQuestion!.Order - 1 > 0)
             {
@@ -133,13 +134,13 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        private void SpecificQuestion(Question question)
+        public void SpecificQuestion(Question question)
         {
             SelectedQuestion = question;
             Grade = Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.ReceivedGrade;
         }
 
-        private async void Run()
+        public async Task Run()
         {
             var runCodeRequest = new RunCodeRequest()
             {
@@ -183,10 +184,12 @@ namespace CodeQuizDesktop.Viewmodels
         }
 
         private IExecutionRepository _executionRepository;
+        private INavigationService _navigationService;
 
-        public ExamineeReviewQuizVM(IExecutionRepository executionRepository)
+        public ExamineeReviewQuizVM(IExecutionRepository executionRepository, INavigationService navigationService)
         {
             _executionRepository = executionRepository;
+            _navigationService = navigationService;
         }
     }
 }

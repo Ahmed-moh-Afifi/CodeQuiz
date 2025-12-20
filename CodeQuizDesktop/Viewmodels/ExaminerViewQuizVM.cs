@@ -1,24 +1,23 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui.Core.Extensions;
-using System;
-using System.Collections.Generic;
+using CommunityToolkit.Maui.Storage;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
+using ClosedXML.Excel;
 
 namespace CodeQuizDesktop.Viewmodels
 {
     public class ExaminerViewQuizVM : BaseViewModel, IQueryAttributable
     {
-        private IQuizzesRepository _quizzesRepository;
+        private readonly IQuizzesRepository _quizzesRepository;
+        private readonly INavigationService _navigationService;
 
-        private ExaminerQuiz quiz;
+        private ExaminerQuiz? quiz;
 
-        public ExaminerQuiz Quiz
+        public ExaminerQuiz? Quiz
         {
             get { return quiz; }
             set
@@ -28,7 +27,7 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        private ObservableCollection<ExaminerAttempt> attempts;
+        private ObservableCollection<ExaminerAttempt> attempts = [];
 
         public ObservableCollection<ExaminerAttempt> Attempts
         {
@@ -40,40 +39,110 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }
+        public ICommand ReturnCommand { get => new Command(async () => await ReturnToPreviousPage()); }
 
-        private async void ReturnToPreviousPage()
+        public async Task ReturnToPreviousPage()
         {
-            await Shell.Current.GoToAsync("///MainPage");
+            await _navigationService.GoToAsync("..");
         }
 
-        public ICommand GoToGradeAttemptPageCommand { get => new Command<ExaminerAttempt>(OnGoToGradeAttemptPage); }
-        private async void OnGoToGradeAttemptPage(ExaminerAttempt examinerAttempt)
+        public ICommand GoToGradeAttemptPageCommand { get => new Command<ExaminerAttempt>(async (a) => await OnGoToGradeAttemptPage(a)); }
+
+        public async Task OnGoToGradeAttemptPage(ExaminerAttempt examinerAttempt)
         {
-            await Shell.Current.GoToAsync(nameof(GradeAttempt), new Dictionary<string, object> 
-            { 
+            await _navigationService.GoToAsync(nameof(GradeAttempt), new Dictionary<string, object>
+            {
                 { "attempt", examinerAttempt! },
-                { "quiz", Quiz!  }
+                { "quiz", Quiz! }
             });
-
         }
-        
+
+        public ICommand SaveGradesReportCommand { get => new Command(async () => await OnSaveGradesReport()); }
+
+        public async Task OnSaveGradesReport()
+        {
+            await ExportToExcel(Attempts.ToList());
+        }
+
+        public async Task ExportToExcel(List<ExaminerAttempt> examinerAttempts)
+        {
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("Grades Report");
+
+            // Header row
+            ws.Cell(1, 1).Value = "Username";
+            ws.Cell(1, 2).Value = "Full Name";
+            ws.Cell(1, 3).Value = "Submission Date";
+
+            int maxQs = examinerAttempts.Max(a => a.Solutions.Count);
+            for (int i = 0; i < maxQs; i++)
+                ws.Cell(1, i + 4).Value = $"Q{i + 1}";
+
+            ws.Cell(1, maxQs + 4).Value = "Total Grade";
+
+            // Data rows
+            for (int i = 0; i < examinerAttempts.Count; i++)
+            {
+                var a = examinerAttempts[i];
+                int row = i + 2;
+
+                ws.Cell(row, 1).Value = a.Examinee.UserName;
+                ws.Cell(row, 2).Value = a.Examinee.FullName;
+
+
+                ws.Cell(row, 3).Value = a.EndTime;
+                ws.Cell(row, 3).Style.DateFormat.Format = "yyyy-mm-dd hh:mm AM/PM";
+
+                for (int j = 0; j < a.Solutions.Count; j++)
+                    ws.Cell(row, j + 4).Value = a.Solutions[j].ReceivedGrade;
+
+                ws.Cell(row, maxQs + 4).Value = a.Grade;
+            }
+
+            // Styling
+            var headerRange = ws.Range(1, 1, 1, maxQs + 4);
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#591c21");
+            headerRange.Style.Font.FontColor = XLColor.White;
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            // Add borders to the data
+            var dataRange = ws.Range(1, 1, examinerAttempts.Count + 1, maxQs + 4);
+            dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            // Auto-fit columns
+            ws.Columns().AdjustToContents();
+
+            // Save and Export
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            await FileSaver.Default.SaveAsync("GradesReport.xlsx", stream, default);
+        }
 
         public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.ContainsKey("quiz") && query["quiz"] is ExaminerQuiz receivedQuiz)
             {
                 Quiz = receivedQuiz;
-                var response = await _quizzesRepository.GetQuizAttempts(Quiz.Id);
-                Attempts = response.ToObservableCollection();
+                await LoadAttemptsAsync();
             }
         }
 
-        public ExaminerViewQuizVM(IQuizzesRepository quizzesRepository)
+        public async Task LoadAttemptsAsync()
+        {
+            await ExecuteAsync(async () =>
+            {
+                var response = await _quizzesRepository.GetQuizAttempts(Quiz!.Id);
+                Attempts = response.ToObservableCollection();
+            }, "Loading attempts...");
+        }
+
+        public ExaminerViewQuizVM(IQuizzesRepository quizzesRepository, INavigationService navigationService)
         {
             _quizzesRepository = quizzesRepository;
-            //subscribe update
-
+            _navigationService = navigationService;
         }
     }
 }

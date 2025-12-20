@@ -14,7 +14,7 @@ namespace CodeQuizDesktop.APIs
         public Task<Models.ApiResponse<ExaminerQuiz>> CreateQuiz([Body] NewQuizModel newQuizModel);
 
         [Put("/Quizzes/{id}")]
-        public Task<Models.ApiResponse<ExaminerQuiz>> UpdateQuiz(int id, [Body] ExaminerQuiz examinerQuiz);
+        public Task<Models.ApiResponse<ExaminerQuiz>> UpdateQuiz(int id, [Body] NewQuizModel newQuizModel);
 
         [Delete("/Quizzes/{id}")]
         public Task<Models.ApiResponse<object>> DeleteQuiz(int id);

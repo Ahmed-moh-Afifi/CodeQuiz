@@ -1,4 +1,5 @@
 ﻿using CodeQuizDesktop.APIs;
+using CodeQuizDesktop.Exceptions;
 using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Resources;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -37,10 +38,9 @@ namespace CodeQuizDesktop.Repositories
                 NotifyCreate(attempt);
                 return attempt;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log exception here...
-                throw; // Replace with a custom exception
+                throw ApiServiceException.FromException(ex, "Failed to begin attempt.");
             }
         }
 
@@ -50,10 +50,9 @@ namespace CodeQuizDesktop.Repositories
             {
                 return (await attemptsAPI.GetUserAttempts()).Data!;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log exception here...
-                throw; // Replace with a custom exception
+                throw ApiServiceException.FromException(ex, "Failed to load attempts.");
             }
         }
 
@@ -65,10 +64,9 @@ namespace CodeQuizDesktop.Repositories
                 NotifyUpdate(attempt);
                 return attempt;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log exception here...
-                throw; // Replace with a custom exception
+                throw ApiServiceException.FromException(ex, "Failed to submit attempt.");
             }
         }
 
@@ -78,10 +76,9 @@ namespace CodeQuizDesktop.Repositories
             {
                 return (await attemptsAPI.UpdateSolution(solution)).Data!;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log exception here...
-                throw; // Replace with a custom exception
+                throw ApiServiceException.FromException(ex, "Failed to save solution.");
             }
         }
     }

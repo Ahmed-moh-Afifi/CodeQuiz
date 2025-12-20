@@ -137,8 +137,8 @@ builder.Services.AddScoped<IQuizzesRepository, QuizzesRepository>();
 builder.Services.AddScoped<IQuizzesService, QuizzesService>();
 builder.Services.AddScoped<IAttemptsService, AttemptsService>();
 builder.Services.AddScoped<IMailService, SmtpMailService>();
-builder.Services.AddScoped<TokenService>();
-builder.Services.AddScoped<QuizCodeGenerator>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IQuizCodeGenerator, QuizCodeGenerator>();
 
 // Running code services
 builder.Services.AddScoped<ICodeRunner, CSharpCodeRunner>();

@@ -1,65 +1,56 @@
 ﻿using CodeQuizDesktop.APIs;
+using CodeQuizDesktop.Exceptions;
 using CodeQuizDesktop.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CodeQuizDesktop.Repositories
+namespace CodeQuizDesktop.Repositories;
+
+public class UsersRepository(IUsersAPI usersAPI) : IUsersRepository
 {
-    public class UsersRepository(IUsersAPI usersAPI) : IUsersRepository
+    public async Task<User> GetUser()
     {
-        public async Task<User> GetUser()
+        try
         {
-            try
-            {
-                return (await usersAPI.GetUser()).Data!;
-            }
-            catch (Exception)
-            {
-                // Log exception here...
-                throw; // Replace with a custom exception
-            }
+            return (await usersAPI.GetUser()).Data!;
         }
-
-        public async Task<bool> IsUsernameAvailable(string username)
+        catch (Exception ex)
         {
-            try
-            {
-                return (await usersAPI.IsUsernameAvailable(username)).Data!;
-            }
-            catch (Exception)
-            {
-                // Log exception here...
-                throw; // Replace with a custom exception
-            }
+            throw ApiServiceException.FromException(ex, "Failed to load user profile.");
         }
+    }
 
-        public async Task<List<User>> Search(string query)
+    public async Task<bool> IsUsernameAvailable(string username)
+    {
+        try
         {
-            try
-            {
-                return (await usersAPI.Search(query)).Data!;
-            }
-            catch (Exception)
-            {
-                // Log exception here...
-                throw; // Replace with a custom exception
-            }
+            return (await usersAPI.IsUsernameAvailable(username)).Data!;
         }
-
-        public async Task<User> UpdateUser(string userId, User updatedUser)
+        catch (Exception ex)
         {
-            try
-            {
-                return (await usersAPI.UpdateUser(userId, updatedUser)).Data!;
-            }
-            catch (Exception)
-            {
-                // Log exception here...
-                throw; // Replace with a custom exception
-            }
+            throw ApiServiceException.FromException(ex, "Failed to check username availability.");
+        }
+    }
+
+    public async Task<List<User>> Search(string query)
+    {
+        try
+        {
+            return (await usersAPI.Search(query)).Data!;
+        }
+        catch (Exception ex)
+        {
+            throw ApiServiceException.FromException(ex, "Failed to search users.");
+        }
+    }
+
+    public async Task<User> UpdateUser(string userId, User updatedUser)
+    {
+        try
+        {
+            return (await usersAPI.UpdateUser(userId, updatedUser)).Data!;
+        }
+        catch (Exception ex)
+        {
+            throw ApiServiceException.FromException(ex, "Failed to update user profile.");
         }
     }
 }

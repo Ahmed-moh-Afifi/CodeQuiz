@@ -4,70 +4,64 @@
              xmlns:controls="clr-namespace:CodeQuizDesktop.Controls"
              xmlns:views="clr-namespace:CodeQuizDesktop.Views"
              xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
-             x:Class="CodeQuizDesktop.MainPage"
-             BackgroundColor="#171717">
-    <!--222222
-    2e2e2e-->
-    <Grid ColumnDefinitions="1.2*, 6*">
-        <Grid RowDefinitions="Auto, Auto, *" RowSpacing="20" Padding="40,30">
-            <Border Margin="20" StrokeThickness="0" Background="Transparent" >
+             x:Class="CodeQuizDesktop.MainPage">
 
+    <Grid ColumnDefinitions="280,*">
+        <!-- Sidebar -->
+        <Grid RowDefinitions="Auto,*,Auto" BackgroundColor="{StaticResource BackgroundDark}" Padding="24,24,24,20">
+            
+            <!-- Logo -->
+            <Border Margin="12,0,12,20" StrokeThickness="0" Background="Transparent">
                 <Image Source="testlogo.png"/>
             </Border>
-            <BoxView HeightRequest="1" Color="#1e1e1e" Margin="0,0" VerticalOptions="End"/>
-            <VerticalStackLayout Spacing="10" Grid.Row="1" Margin="0, 0">
+            
+            <!-- Navigation Items -->
+            <VerticalStackLayout Grid.Row="1" Spacing="8">
+                <BoxView HeightRequest="1" Color="{StaticResource BorderDefault}" Margin="0,0,0,16"/>
                 <controls:NavItem Text="Dashboard" IsSelected="{Binding DashboardSelected, Mode=TwoWay}" Icon="layout_grid.png"/>
                 <controls:NavItem Text="Created Quizzes" IsSelected="{Binding CreatedSelected, Mode=TwoWay}" Icon="pencil.png"/>
                 <controls:NavItem Text="Joined Quizzes" IsSelected="{Binding JoinedSelected, Mode=TwoWay}" Icon="copy_check.png"/>
-
             </VerticalStackLayout>
-            <BoxView Grid.Row="2" HeightRequest="1" Color="#1e1e1e" Margin="20,0" VerticalOptions="Start"/>
-            <Border StrokeThickness="0.5" Grid.Row="2" VerticalOptions="End" StrokeShape="RoundRectangle 30" Margin="0,0" Stroke="#1e1e1e" Background="#171717">
+            
+            <!-- User Profile Card -->
+            <Border Grid.Row="2" StrokeThickness="1" Stroke="{StaticResource BorderDefault}" StrokeShape="RoundRectangle 16" BackgroundColor="{StaticResource SurfaceDark}">
                 <Border.Shadow>
-                    <Shadow Radius="2.5" Opacity="0.5" />
+                    <Shadow Brush="#000000" Opacity="0.2" Radius="12" Offset="0,4"/>
                 </Border.Shadow>
-                <VerticalStackLayout Spacing="0" >
-                    <Grid Padding="20,30" >
-                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 50" HeightRequest="100" WidthRequest="100" VerticalOptions="Center" HorizontalOptions="Center">
-                            <Border.Background>
-                                <LinearGradientBrush EndPoint="1,1">
-                                    <GradientStop Color="#70222a" Offset="0" />
-                                    <GradientStop Color="#591c21" Offset="1" />
-
-                                </LinearGradientBrush>
-                            </Border.Background>
-
-                            <Label Text="{Binding User.FirstCharInName}" FontSize="36" VerticalOptions="Center" HorizontalOptions="Center" TextColor="White" FontAttributes="Bold"/>
+                <VerticalStackLayout Spacing="0">
+                    <!-- Avatar -->
+                    <Grid Padding="20,24">
+                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 50" HeightRequest="80" WidthRequest="80" VerticalOptions="Center" HorizontalOptions="Center" Background="{StaticResource PrimaryGradient}">
+                            <Label Text="{Binding User.FirstCharInName}" FontSize="32" VerticalOptions="Center" HorizontalOptions="Center" FontAttributes="Bold"/>
                         </Border>
                     </Grid>
-
-
-                    <Grid Background="#1e1e1e" Padding="20,15" >
-                        <Label Text="{Binding User.FullName}" TextColor="White" FontSize="16" HorizontalOptions="Center">
-                        </Label>
-                    </Grid>
-
-                    <Border StrokeThickness="0">
+                    
+                    <!-- User Name -->
+                    <Border BackgroundColor="{StaticResource BackgroundDark}" Padding="16,12" StrokeThickness="0">
+                        <Label Text="{Binding User.FullName}" FontSize="15" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    </Border>
+                    
+                    <!-- Logout Button -->
+                    <Border StrokeThickness="0" Padding="12">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding LogoutCommand}"/>
                         </Border.GestureRecognizers>
-                        <HorizontalStackLayout HorizontalOptions="Center">
-                            <Image Source="logout.png" WidthRequest="22" HeightRequest="22" InputTransparent="True" Margin="10" VerticalOptions="Center">
+                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                            <Image Source="logout.png" WidthRequest="18" HeightRequest="18" VerticalOptions="Center">
                                 <Image.Behaviors>
-                                    <toolkit:IconTintColorBehavior TintColor="White" />
+                                    <toolkit:IconTintColorBehavior TintColor="{StaticResource TextMuted}"/>
                                 </Image.Behaviors>
                             </Image>
-                            <Label Text="Logout" HorizontalTextAlignment="Center" TextColor="White" VerticalOptions="Center"/>
+                            <Label Text="Logout" TextColor="{StaticResource TextMuted}" VerticalOptions="Center"/>
                         </HorizontalStackLayout>
                     </Border>
                 </VerticalStackLayout>
             </Border>
         </Grid>
-        <!--<BoxView WidthRequest="1.3" Color="#2a2a2a" Margin="0,0" HorizontalOptions="End" />-->
 
-        <Border Grid.Column="1" Padding="20" Background="#1e1e1e" StrokeThickness="0">
-
-            <Grid Grid.Column="1">
+        <!-- Main Content -->
+        <Border Grid.Column="1" BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="0">
+            <Grid>
                 <Grid IsVisible="{Binding DashboardSelected}">
                     <views:Dashboard x:Name="Dashboard"/>
                 </Grid>
@@ -77,10 +71,7 @@
                 <Grid IsVisible="{Binding JoinedSelected}">
                     <views:JoinedQuizzes x:Name="JoinedQuizzes"/>
                 </Grid>
-
-
             </Grid>
         </Border>
     </Grid>
-
 </ContentPage>

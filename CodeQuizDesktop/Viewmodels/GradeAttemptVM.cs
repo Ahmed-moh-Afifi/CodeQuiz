@@ -1,5 +1,6 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,11 +109,11 @@ namespace CodeQuizDesktop.Viewmodels
         }
 
         //Commands
-        public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }
+        public ICommand ReturnCommand { get => new Command(async () => await ReturnToPreviousPage()); }
         public ICommand NextQuestionCommand { get => new Command(NextQuestion); }
         public ICommand PreviousQuestionCommand { get => new Command(PreviousQuestion); }
         public ICommand SpecificQuestionCommand { get => new Command<Question>(SpecificQuestion); }
-        public ICommand RunCommand { get => new Command(Run); }
+        public ICommand RunCommand { get => new Command(async () => await Run()); }
 
         public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
@@ -129,13 +130,13 @@ namespace CodeQuizDesktop.Viewmodels
                 System.Diagnostics.Debug.WriteLine($"Quiz ID: {receivedQuiz.Id}");
             }
         }
-        private async void ReturnToPreviousPage()
+        public async Task ReturnToPreviousPage()
         {
             SaveSolution();
-            await Shell.Current.GoToAsync("..");
+            await _navigationService.GoToAsync("..");
         }
 
-        private void NextQuestion()
+        public void NextQuestion()
         {
             SaveSolution();
             if (SelectedQuestion!.Order + 1 <= Quiz!.Questions.Count)
@@ -145,7 +146,7 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        private void PreviousQuestion()
+        public void PreviousQuestion()
         {
             SaveSolution();
             if (SelectedQuestion!.Order - 1 > 0)
@@ -155,14 +156,14 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        private void SpecificQuestion(Question question)
+        public void SpecificQuestion(Question question)
         {
             SaveSolution();
             SelectedQuestion = question;
             Grade = Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.ReceivedGrade;
         }
 
-        private async void Run()
+        public async Task Run()
         {
             var runCodeRequest = new RunCodeRequest()
             {
@@ -205,7 +206,7 @@ namespace CodeQuizDesktop.Viewmodels
 
         }
 
-        private void SaveSolution()
+        public void SaveSolution()
         {
             Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.ReceivedGrade = Grade;
             _attemptsRepository.UpdateSolution(Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!);
@@ -213,10 +214,12 @@ namespace CodeQuizDesktop.Viewmodels
 
         private IExecutionRepository _executionRepository;
         private IAttemptsRepository _attemptsRepository;
-        public GradeAttemptVM(IExecutionRepository executionRepository, IAttemptsRepository attemptsRepository)
+        private INavigationService _navigationService;
+        public GradeAttemptVM(IExecutionRepository executionRepository, IAttemptsRepository attemptsRepository, INavigationService navigationService)
         {
             _executionRepository = executionRepository;
             _attemptsRepository = attemptsRepository;
+            _navigationService = navigationService;
         }
     }
 }

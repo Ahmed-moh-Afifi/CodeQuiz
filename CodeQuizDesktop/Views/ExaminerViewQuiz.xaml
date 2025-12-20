@@ -6,73 +6,92 @@
              xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
              x:Class="CodeQuizDesktop.Views.ExaminerViewQuiz"
              Title="ExaminerViewQuiz"
-             x:DataType="vm:ExaminerViewQuizVM"
-             BackgroundColor="#1e1e1e">
+             x:DataType="vm:ExaminerViewQuizVM">
 
-    <Grid RowDefinitions="Auto, *">
-        <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" Padding="20,20,20,20" BackgroundColor="#171717">
-            <Border  WidthRequest="30" HeightRequest="35" StrokeShape="RoundRectangle 10" StrokeThickness="1" Stroke="White">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding ReturnCommand}"/>
-                </Border.GestureRecognizers>
-                <Border.Shadow>
-                    <Shadow Opacity="0" Radius="0"/>
-                </Border.Shadow>
-                <Image Source="arrow_back_ios_new_rounded.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
-                    <Image.Behaviors>
-                        <toolkit:IconTintColorBehavior TintColor="White" />
-                    </Image.Behaviors>
+    <Grid RowDefinitions="Auto,*">
+        <!-- Header -->
+        <Border StrokeThickness="0" BackgroundColor="{StaticResource BackgroundDark}" Padding="24,16">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                <Border Style="{StaticResource BackButton}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ReturnCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Image Source="arrow_back_ios_new_rounded.png" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center">
+                        <Image.Behaviors>
+                            <toolkit:IconTintColorBehavior TintColor="{StaticResource TextPrimary}"/>
+                        </Image.Behaviors>
+                    </Image>
+                </Border>
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                    <Label Text="{Binding Quiz.Title}" Style="{StaticResource PageTitle}" FontSize="24"/>
+                    <Label Text="View and grade submissions" Style="{StaticResource CaptionText}"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
 
-                </Image>
-            </Border>
-            <Label Grid.Column="1" Text="{Binding Quiz.Title}" FontSize="30" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
-        </Grid>
-        <BoxView HeightRequest="1" Color="#3b3b3b" Margin="0,0" VerticalOptions="End"/>
-        <Grid Grid.Row="1" ColumnDefinitions="*,2*,*">
-            <Border  Grid.Column="1" StrokeShape="RoundRectangle 10" Background="#2e2e2e" StrokeThickness="0" Margin="0,20,0,0" >
+        <BoxView HeightRequest="1" Color="{StaticResource BorderDefault}" VerticalOptions="End"/>
+
+        <!-- Content -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,2.5*,*" Padding="24">
+
+            <!-- Submissions Table -->
+            <Border Grid.Column="1" Style="{StaticResource TableContainer}">
                 <Border.Shadow>
-                    <Shadow Radius="2.5" Opacity="0.5" />
+                    <Shadow Brush="#000000" Opacity="0.15" Radius="12" Offset="0,4"/>
                 </Border.Shadow>
+
                 <Grid RowDefinitions="Auto,*">
-
-
-                    <Grid Grid.Row="0" ColumnDefinitions="*,*,*,*" BackgroundColor="#212121" Padding="20, 10">
-
-
-                        <Label Text="PARTICIPANT" Grid.Column="0" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="SUBMITTED" Grid.Column="1" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="SCORE" Grid.Column="2" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="ACTIONS" Grid.Column="3" TextColor="#888888" VerticalOptions="Center"/>
+                    <!-- Table Header -->
+                    <Grid ColumnDefinitions="*,*,*,*" Style="{StaticResource TableHeaderBackground}">
+                        <Label Text="PARTICIPANT" Style="{StaticResource TableHeader}"/>
+                        <Label Grid.Column="1" Text="SUBMITTED" Style="{StaticResource TableHeader}"/>
+                        <Label Grid.Column="2" Text="SCORE" Style="{StaticResource TableHeader}"/>
+                        <Label Grid.Column="3" Text="ACTIONS" Style="{StaticResource TableHeader}"/>
                     </Grid>
 
-
+                    <!-- Table Body -->
                     <CollectionView Grid.Row="1" ItemsSource="{Binding Attempts}">
+                        <CollectionView.EmptyView>
+                            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="40">
+                                <Label Text="No submissions yet" TextColor="{StaticResource TextMuted}" FontSize="18" HorizontalOptions="Center"/>
+                                <Label Text="Participants haven't submitted their attempts" TextColor="{StaticResource TextDisabled}" FontSize="14" HorizontalOptions="Center" Margin="0,10,0,0"/>
+                            </VerticalStackLayout>
+                        </CollectionView.EmptyView>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:ExaminerAttempt">
+                                <VerticalStackLayout Spacing="8">
+                                    <BoxView Style="{StaticResource TableDivider}" Margin="10"/>
+                                    <Grid ColumnDefinitions="*,*,*,*" Padding="20,16">
 
-                                <Grid ColumnDefinitions="*,*,*,*" Padding="20">
-                                    <BoxView Grid.ColumnSpan="9" HeightRequest="1" Color="#2a2a2a" Margin="0,0" VerticalOptions="Start"/>
+                                        <Label Text="{Binding Examinee.FullName}" Style="{StaticResource ItemTitle}" VerticalOptions="Center"/>
+                                        <Label Grid.Column="1" Text="{Binding SubmissionTimeString}" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+                                        <Label Grid.Column="2" Text="{Binding Grade}" Style="{StaticResource ScoreText}" VerticalOptions="Center"/>
 
-                                    <Label Text="{Binding Examinee.FullName}" TextColor="White" Grid.Column="0" VerticalOptions="Center"/>
-                                    <Label Text="{Binding SubmissionTimeString}" TextColor="White" Grid.Column="1" VerticalOptions="Center"/>
-                                    <Label Text="{Binding Grade}" TextColor="White" Grid.Column="2" VerticalOptions="Center"/>
-                                    <Border Grid.Column="3" VerticalOptions="Center" HorizontalOptions="Start" Padding="10,5" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="#888888">
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:ExaminerViewQuizVM}}, Path=GoToGradeAttemptPageCommand}" CommandParameter="{Binding .}"/>
-                                        </Border.GestureRecognizers>
-                                        <Label Text="Grade" TextColor="White" />
-                                    </Border>
-                                    
-                                </Grid>
-
+                                        <Border Grid.Column="3" Style="{StaticResource ActionBadge}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ExaminerViewQuizVM}}, Path=GoToGradeAttemptPageCommand}" CommandParameter="{Binding .}"/>
+                                            </Border.GestureRecognizers>
+                                            <Label Text="Grade" Style="{StaticResource BadgeText}"/>
+                                        </Border>
+                                    </Grid>
+                                </VerticalStackLayout>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
-
-
                 </Grid>
+            </Border>
+
+            <!-- FAB Download Button -->
+            <Border Grid.Column="2" Style="{StaticResource FAB}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SaveGradesReportCommand}"/>
+                </Border.GestureRecognizers>
+                <Image Source="download.png" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Image.Behaviors>
+                        <toolkit:IconTintColorBehavior TintColor="{StaticResource TextPrimary}"/>
+                    </Image.Behaviors>
+                </Image>
             </Border>
         </Grid>
     </Grid>
-
 </ContentPage>

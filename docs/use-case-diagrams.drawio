@@ -1,0 +1,117 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="CodeQuiz Use Cases" id="use-case-main">
+    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- System Boundary -->
+        <mxCell id="system" value="CodeQuiz System" style="shape=umlFrame;whiteSpace=wrap;html=1;width=120;height=30;boundedLbl=1;verticalAlign=middle;align=left;spacingLeft=5;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="200" y="40" width="700" height="700" as="geometry" />
+        </mxCell>
+        
+        <!-- Actors -->
+        <mxCell id="examiner" value="Examiner" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="60" y="200" width="30" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="examinee" value="Examinee" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="60" y="450" width="30" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="system_actor" value="System" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="980" y="350" width="30" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Authentication Use Cases -->
+        <mxCell id="uc_register" value="Register" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="250" y="70" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_login" value="Login" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="380" y="70" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_logout" value="Logout" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="510" y="70" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_reset" value="Reset Password" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="640" y="70" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Quiz Management Use Cases -->
+        <mxCell id="uc_create" value="Create Quiz" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="250" y="160" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_addq" value="Add Questions" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="400" y="160" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_config" value="Configure Settings" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="550" y="160" width="110" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_viewq" value="View Quizzes" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="250" y="240" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_updateq" value="Update Quiz" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="380" y="240" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_deleteq" value="Delete Quiz" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="510" y="240" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_vattempts" value="View Attempts" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="640" y="240" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Quiz Participation Use Cases -->
+        <mxCell id="uc_join" value="Join Quiz" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="250" y="400" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_begin" value="Begin Attempt" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="400" y="400" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_answer" value="Answer Questions" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="550" y="400" width="110" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_run" value="Run Code" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="700" y="400" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_submit" value="Submit Attempt" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="250" y="480" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_history" value="View History" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="380" y="480" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_grades" value="View Grades" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="510" y="480" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Evaluation Use Cases -->
+        <mxCell id="uc_exec" value="Execute Code" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="550" y="580" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_eval" value="Evaluate Solutions" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="700" y="580" width="110" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc_auto" value="Auto-Submit on Timeout" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="700" y="660" width="130" height="50" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

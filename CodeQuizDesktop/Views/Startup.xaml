@@ -1,12 +1,90 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
              x:Class="CodeQuizDesktop.Views.Startup"
-             Title="Startup">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             x:DataType="vm:StartupViewModel"
+             Title="Startup"
+             BackgroundColor="#1e1e1e">
+    
+    <Grid RowDefinitions="*,Auto,*">
+        <!-- Background decorative text -->
+        <Label Margin="160,60" Grid.Row="0" Grid.RowSpan="3" VerticalOptions="Start" HorizontalOptions="Start" FontSize="60" Opacity="0.3">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span Text="while(" TextColor="#c586c0" FontFamily="SFMonoRegular"/>
+                    <Span Text="loading" TextColor="#9CDCFE" FontFamily="SFMonoRegular"/>
+                    <Span Text=")" TextColor="#c586c0" FontFamily="SFMonoRegular"/>
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+        
+        <Label Margin="100,100" Grid.Row="0" Grid.RowSpan="3" VerticalOptions="End" HorizontalOptions="End" FontSize="60" Opacity="0.3">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span Text="{}{ " TextColor="#D4D4D4" FontFamily="SFMonoRegular"/>
+                    <Span Text="wait" TextColor="#DCDCAA" FontFamily="SFMonoRegular"/>
+                    <Span Text="(); {}}" TextColor="#D4D4D4" FontFamily="SFMonoRegular"/>
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+
+        <!-- Main content -->
+        <VerticalStackLayout Grid.Row="1" 
+                             HorizontalOptions="Center" 
+                             VerticalOptions="Center" 
+                             Spacing="30">
+            
+            <!-- App Logo/Title -->
+            <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                <Label Text="{}{" FontFamily="SFMonoRegular" FontSize="40" TextColor="#D4D4D4" HorizontalOptions="Center"/>
+                <Label Text="CodeQuiz" 
+                       FontFamily="InterBlack" 
+                       FontSize="56" 
+                       TextColor="#D4D4D4" 
+                       HorizontalOptions="Center"/>
+                <Label Text="{}}" FontFamily="SFMonoRegular" FontSize="40" TextColor="#D4D4D4" HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+
+            <!-- Loading indicator section -->
+            <VerticalStackLayout Spacing="20" HorizontalOptions="Center">
+                <ActivityIndicator IsRunning="{Binding IsLoading}" 
+                                   Color="#591c21" 
+                                   WidthRequest="50" 
+                                   HeightRequest="50"
+                                   HorizontalOptions="Center"/>
+                
+                <Label Text="{Binding LoadingMessage}" 
+                       FontFamily="InterRegular" 
+                       FontSize="16" 
+                       TextColor="#888888" 
+                       HorizontalOptions="Center"
+                       IsVisible="{Binding IsLoading}"/>
+            </VerticalStackLayout>
+            
+            <!-- Tagline -->
+            <Label HorizontalOptions="Center" FontSize="18" Opacity="0.7">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="Test your " TextColor="#D4D4D4" FontFamily="InterRegular"/>
+                        <Span Text="code" TextColor="#569CD6" FontFamily="InterExtraBold"/>
+                        <Span Text=". Prove your " TextColor="#D4D4D4" FontFamily="InterRegular"/>
+                        <Span Text="skills" TextColor="#4EC9B0" FontFamily="InterExtraBold"/>
+                        <Span Text="." TextColor="#D4D4D4" FontFamily="InterRegular"/>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+        </VerticalStackLayout>
+
+        <!-- Footer -->
+        <Label Grid.Row="2" 
+               Text="// Initializing..." 
+               FontFamily="SFMonoRegular" 
+               FontSize="14" 
+               TextColor="#6A9955" 
+               HorizontalOptions="Center" 
+               VerticalOptions="End"
+               Margin="0,0,0,40"
+               Opacity="0.6"/>
+    </Grid>
 </ContentPage>

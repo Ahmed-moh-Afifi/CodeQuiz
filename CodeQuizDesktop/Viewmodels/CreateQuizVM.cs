@@ -1,21 +1,57 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Core.Extensions;
+using CommunityToolkit.Maui.Extensions;
 using Microsoft.Maui.Controls.Shapes;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
 {
-    public class CreateQuizVM : BaseViewModel
+    public class CreateQuizVM : BaseViewModel, IQueryAttributable
     {
         // UI properties
+        private NewQuizModel? quizModel;
+        public NewQuizModel? QuizModel
+        {
+            get => quizModel;
+            set
+            {
+                quizModel = value;
+                OnPropertyChanged();
+            }
+        }
+        private int? editedQuizId;
+        public int? EditedQuizId
+        {
+            get => editedQuizId;
+            set
+            {
+                editedQuizId = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsCreatingNew));
+            }
+        }
+
+        public bool IsCreatingNew => EditedQuizId == null;
+
+        private string header = "New Quiz";
+        public string Header
+        {
+            get
+            {
+                return header;
+            }
+            set
+            {
+                header = value;
+                OnPropertyChanged();
+            }
+        }
+
         private string? quizTitle;
         public string? QuizTitle
         {
@@ -109,8 +145,8 @@ namespace CodeQuizDesktop.Viewmodels
             }
             set
             {
-                OnPropertyChanged();
                 programmingLanguage = value;
+                OnPropertyChanged();
             }
         }
 
@@ -199,32 +235,7 @@ namespace CodeQuizDesktop.Viewmodels
 
         }
 
-        private ObservableCollection<NewQuestionModel> questionModels =
-        [
-            //new()
-            //{
-            //    Order = 1,
-            //    Points = 10,
-            //    Statement = "Write a program that prints \"Testing...\" to the console",
-            //    EditorCode = "// Write your code here",
-            //    QuestionConfiguration = new()
-            //    {
-            //        AllowExecution = true,
-            //        Language = "CSharp",
-            //        ShowError = true,
-            //        ShowOutput = true
-            //    },
-            //    TestCases =
-            //    [
-            //        new() 
-            //        {
-            //            Input = [""],
-            //            ExpectedOutput = "Testing...\n",
-            //            TestCaseNumber = 1
-            //        }
-            //    ]
-            //}
-        ];
+        private ObservableCollection<NewQuestionModel> questionModels = [];
         public ObservableCollection<NewQuestionModel> QuestionModels
         {
             get
@@ -233,14 +244,29 @@ namespace CodeQuizDesktop.Viewmodels
             }
             set
             {
+                if (questionModels != null)
+                {
+                    questionModels.CollectionChanged -= QuestionModels_CollectionChanged;
+                }
                 questionModels = value;
+                if (questionModels != null)
+                {
+                    questionModels.CollectionChanged += QuestionModels_CollectionChanged;
+                }
                 OnPropertyChanged();
             }
         }
 
+        private void QuestionModels_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            for (int i = 0; i < QuestionModels.Count; i++)
+            {
+                QuestionModels[i].Order = i + 1;
+            }
+        }
 
         // Data Sources
-        private List<string> programmingLanguages = ["CSharp"];
+        private List<string> programmingLanguages = ["Python"];
         public List<string> ProgrammingLanguages
         {
             get
@@ -284,51 +310,38 @@ namespace CodeQuizDesktop.Viewmodels
         }
 
         // Button Commands, mapped to viewmodel methods
-        public ICommand AddQuestionCommand { get => new Command(AddQuestion); }
-        public ICommand ReturnCommand { get => new Command(ReturnToPreviousPage); }
-        public ICommand PublishCommand { get => new Command(CreateAndPublishQuiz); }
+        public ICommand AddQuestionCommand { get => new Command(async () => await AddQuestion()); }
+        public ICommand ReturnCommand { get => new Command(async () => await ReturnToPreviousPage()); }
+        public ICommand PublishCommand { get => new Command(async () => await CreateAndPublishQuizAsync()); }
         public ICommand DeleteQuestionCommand { get => new Command<NewQuestionModel>(DeleteQuestion); }
+        public ICommand EditQuestionCommand { get => new Command<NewQuestionModel>(async (q) => await EditQuestion(q)); }
 
-        private readonly IPopupService popupService;
+        private readonly IQuizDialogService quizDialogService;
+        private readonly INavigationService navigationService;
         private readonly IAuthenticationRepository authenticationRepository;
         private readonly IQuizzesRepository quizzesRepository;
+        private readonly IExecutionRepository executionRepository;
+        private readonly IUIService uiService;
 
-        public CreateQuizVM(IPopupService popupService, IAuthenticationRepository authenticationRepository, IQuizzesRepository quizzesRepository)
+        public async Task LoadProgrammingLanguages()
         {
-            this.popupService = popupService;
-            this.authenticationRepository = authenticationRepository;
-            this.quizzesRepository = quizzesRepository;
-
-            QuestionModels.CollectionChanged += (item, e) =>
-            {
-                for(int i = 0; i < QuestionModels.Count; i++)
-                {
-                    QuestionModels[i].Order = i + 1;
-                }
-            };
+            var languages = await executionRepository.GetSupportedLanguages();
+            ProgrammingLanguages = languages.ToList();
         }
 
-        private async void ReturnToPreviousPage()
+        public async Task ReturnToPreviousPage()
         {
-            await Shell.Current.GoToAsync("///MainPage");
+            await navigationService.GoToAsync("..");
         }
 
-        public async void AddQuestion()
+        public async Task AddQuestion()
         {
-            var result = await popupService.ShowPopupAsync<AddQuestionDialog, NewQuestionModel?>(Shell.Current, new PopupOptions
-            {
-                Shape = new RoundRectangle
-                {
-                    CornerRadius = new CornerRadius(20),
-                    StrokeThickness = 0
-                }
-            });
+            var result = await quizDialogService.ShowAddQuestionDialogAsync();
 
-            if (result.Result != null)
+            if (result != null)
             {
-                QuestionModels.Add(result.Result);
+                QuestionModels.Add(result);
             }
-            //await Application.Current!.MainPage!.DisplayPromptAsync("Result", $"You selected: {result}", "OK");
         }
 
         public void DeleteQuestion(NewQuestionModel q)
@@ -336,51 +349,46 @@ namespace CodeQuizDesktop.Viewmodels
             QuestionModels.Remove(q);
         }
 
-        public async void EditQuestion()
+        public async Task EditQuestion(NewQuestionModel newQuestionModel)
         {
+            var result = await quizDialogService.ShowEditQuestionDialogAsync(newQuestionModel);
 
+            if (result is NewQuestionModel updatedModel)
+            {
+                System.Diagnostics.Debug.WriteLine($"Question updated successfully!");
+                int index = QuestionModels.IndexOf(newQuestionModel);
+                if (index >= 0)
+                {
+                    QuestionModels[index] = updatedModel;
+                }
+            }
         }
 
-        /// <summary>
-        /// Validates the current user input for quiz configuration and returns a list of error messages describing any
-        /// validation failures.
-        /// </summary>
-        /// <remarks>Validation checks include ensuring the quiz title and programming language are
-        /// specified, the duration is a valid number, the availability period is valid, and the quiz duration does not
-        /// exceed the availability window. This method does not throw exceptions for invalid input; all issues are
-        /// reported in the returned list.</remarks>
-        /// <returns>A list of strings containing error messages for each validation issue found. The list is empty if all user
-        /// input is valid.</returns>
         public List<string> ValidateUserInput()
         {
             List<string> errorMessages = [];
             if (string.IsNullOrEmpty(QuizTitle?.Trim()))
             {
-                // Title required error
                 errorMessages.Add("Quiz title cannot be empty");
             }
 
             if (!int.TryParse(QuizDurationInMinutes!, out _))
             {
-                // Invalid duration error (not numeric)
                 errorMessages.Add("Invalid duration value");
             }
 
             if (AvailableToDateTime <= AvailableFromDateTime)
             {
-                // Quiz closes before it opens error
                 errorMessages.Add("Quiz cannot be closed before it is opened (check availability values)");
             }
 
             if (int.TryParse(QuizDurationInMinutes!, out int minsDuration) && AvailableToDateTime.Subtract(AvailableFromDateTime).TotalMinutes < minsDuration)
             {
-                // Quiz availability period cannot be shorter than its duration error
                 errorMessages.Add("Quiz availability period cannot be shorter than its duration");
             }
 
             if (string.IsNullOrEmpty(ProgrammingLanguage?.Trim()))
             {
-                // Programming language not selected error
                 errorMessages.Add("Programming language not selected");
             }
 
@@ -392,38 +400,88 @@ namespace CodeQuizDesktop.Viewmodels
             return errorMessages;
         }
 
-        public async void CreateAndPublishQuiz()
+        public async Task CreateAndPublishQuizAsync()
         {
             var errors = ValidateUserInput();
             if (errors.Count > 0)
             {
-                // Errors exist...
                 System.Diagnostics.Debug.WriteLine("Missing or invalid input");
+                await uiService.ShowErrorAsync(string.Join("\n", errors), "Invalid Input");
                 return;
             }
 
-            var minsDuration = int.Parse(QuizDurationInMinutes!);
-            var newQuizModel = new NewQuizModel()
-            {
-                Title = QuizTitle!,
-                Duration = TimeSpan.FromMinutes(minsDuration),
-                StartDate = AvailableFromDateTime,
-                EndDate = AvailableToDateTime,
-                AllowMultipleAttempts = AllowMultipleAttempts,
-                ExaminerId = authenticationRepository.LoggedInUser!.Id,
-                GlobalQuestionConfiguration = new()
-                {
-                    Language = ProgrammingLanguage!,
-                    AllowExecution = AllowExecution,
-                    ShowError = ShowErrors,
-                    ShowOutput = ShowOutput
-                },
-                Questions = QuestionModels.ToList()
-            };
+            var loadingMessage = QuizModel == null && EditedQuizId == null ? "Publishing quiz..." : "Updating quiz...";
 
-            var quiz = await quizzesRepository.CreateQuiz(newQuizModel);
-            ReturnToPreviousPage();
+            await ExecuteAsync(async () =>
+            {
+                var minsDuration = int.Parse(QuizDurationInMinutes!);
+                var newQuizModel = new NewQuizModel()
+                {
+                    Title = QuizTitle!,
+                    Duration = TimeSpan.FromMinutes(minsDuration),
+                    StartDate = AvailableFromDateTime,
+                    EndDate = AvailableToDateTime,
+                    AllowMultipleAttempts = AllowMultipleAttempts,
+                    ExaminerId = authenticationRepository.LoggedInUser!.Id,
+                    GlobalQuestionConfiguration = new()
+                    {
+                        Language = ProgrammingLanguage!,
+                        AllowExecution = AllowExecution,
+                        ShowError = ShowErrors,
+                        ShowOutput = ShowOutput,
+                        AllowIntellisense = AllowIntellisense,
+                        AllowSignatureHelp = AllowSignatureHelp
+                    },
+                    Questions = QuestionModels.ToList()
+                };
+
+                if (QuizModel == null && EditedQuizId == null)
+                {
+                    var quiz = await quizzesRepository.CreateQuiz(newQuizModel);
+                }
+                else if (QuizModel != null && EditedQuizId != null)
+                {
+                    var quiz = await quizzesRepository.UpdateQuiz((int)EditedQuizId, newQuizModel);
+                }
+
+                ReturnToPreviousPage();
+            }, loadingMessage);
+        }
+
+        public void ApplyQueryAttributes(IDictionary<string, object> query)
+        {
+            if (query.ContainsKey("quizModel") && query["quizModel"] is NewQuizModel receivedQuizModel && query.ContainsKey("id") && query["id"] is int id)
+            {
+                EditedQuizId = id;
+                QuizModel = receivedQuizModel;
+                Header = "Edit Quiz";
+                QuizTitle = receivedQuizModel.Title;
+                AllowMultipleAttempts = receivedQuizModel.AllowMultipleAttempts;
+                QuizDurationInMinutes = ((int)receivedQuizModel.Duration.TotalMinutes).ToString();
+                AvailableFromDate = receivedQuizModel.StartDate;
+                AvailableFromTime = new TimeSpan(receivedQuizModel.StartDate.Hour, receivedQuizModel.StartDate.Minute, receivedQuizModel.StartDate.Second);
+                AvailableToDate = receivedQuizModel.EndDate;
+                AvailableToTime = new TimeSpan(receivedQuizModel.EndDate.Hour, receivedQuizModel.EndDate.Minute, receivedQuizModel.EndDate.Second);
+                ProgrammingLanguage = receivedQuizModel.GlobalQuestionConfiguration.Language;
+                AllowExecution = receivedQuizModel.GlobalQuestionConfiguration.AllowExecution;
+                ShowOutput = receivedQuizModel.GlobalQuestionConfiguration.ShowOutput;
+                ShowErrors = receivedQuizModel.GlobalQuestionConfiguration.ShowError;
+                QuestionModels = new ObservableCollection<NewQuestionModel>(receivedQuizModel.Questions);
+                AllowIntellisense = receivedQuizModel.GlobalQuestionConfiguration.AllowIntellisense;
+                allowSignatureHelp = receivedQuizModel.GlobalQuestionConfiguration.AllowSignatureHelp;
+            }
+        }
+
+        public CreateQuizVM(IQuizDialogService quizDialogService, INavigationService navigationService, IAuthenticationRepository authenticationRepository, IQuizzesRepository quizzesRepository, IExecutionRepository executionRepository, IUIService uiService)
+        {
+            this.quizDialogService = quizDialogService;
+            this.navigationService = navigationService;
+            this.authenticationRepository = authenticationRepository;
+            this.quizzesRepository = quizzesRepository;
+            this.executionRepository = executionRepository;
+            this.uiService = uiService;
+            QuestionModels = [];
+            _ = LoadProgrammingLanguages();
         }
     }
-    
 }

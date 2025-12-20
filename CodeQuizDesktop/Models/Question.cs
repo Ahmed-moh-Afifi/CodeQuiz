@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CodeQuizDesktop.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,5 +27,21 @@ namespace CodeQuizDesktop.Models
             }
         }
         public required float Points { get; set; }
+
+        public NewQuestionModel QuestionToModel
+        {
+            get
+            {
+                return new NewQuestionModel
+                {
+                    Statement = this.Statement,
+                    EditorCode = this.EditorCode,
+                    QuestionConfiguration = this.QuestionConfiguration,
+                    TestCases = this.TestCases,
+                    Order = this.Order,
+                    Points = this.Points
+                };
+            }
+        }
     }
 }

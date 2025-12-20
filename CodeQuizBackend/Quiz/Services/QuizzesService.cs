@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeQuizBackend.Quiz.Services
 {
-    public class QuizzesService(IQuizzesRepository quizzesRepository, ApplicationDbContext dbContext, QuizCodeGenerator quizCodeGenerator, IHubContext<QuizzesHub> quizzesHubContext, IAppLogger<QuizzesService> logger) : IQuizzesService
+    public class QuizzesService(IQuizzesRepository quizzesRepository, ApplicationDbContext dbContext, IQuizCodeGenerator quizCodeGenerator, IHubContext<QuizzesHub> quizzesHubContext, IAppLogger<QuizzesService> logger) : IQuizzesService
     {
         private static readonly SemaphoreSlim _quizCreationLock = new(1, 1);
 
@@ -48,7 +48,7 @@ namespace CodeQuizBackend.Quiz.Services
 
         public async Task<List<ExaminerQuiz>> GetUserQuizzes(string userId)
         {
-            var quizzesStatistics  = await dbContext.Quizzes
+            var quizzesStatistics = await dbContext.Quizzes
                 .Where(q => q.ExaminerId == userId)
                 .Include(q => q.Questions)
                 .Include(q => q.Attempts)
@@ -74,7 +74,7 @@ namespace CodeQuizBackend.Quiz.Services
                 .Include(q => q.Attempts)
                 .ThenInclude(a => a.Solutions)
                 .FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found. It may have been deleted.");
-            
+
             var newCode = quizEntity.Code;
             if (quizEntity.EndDate <= DateTime.Now && newQuizModel.EndDate > DateTime.Now)
             {
@@ -96,7 +96,7 @@ namespace CodeQuizBackend.Quiz.Services
             };
 
             var updatedQuiz = await quizzesRepository.UpdateQuizAsync(quizEntity2);
-            var statistics = await dbContext.Quizzes.Where(q => q.Id == updatedQuiz.Id).Select(q => new 
+            var statistics = await dbContext.Quizzes.Where(q => q.Id == updatedQuiz.Id).Select(q => new
             {
                 AttemptsCount = q.Attempts.Count,
                 SubmittedAttemptsCount = q.Attempts.Count(a => a.EndTime != null),

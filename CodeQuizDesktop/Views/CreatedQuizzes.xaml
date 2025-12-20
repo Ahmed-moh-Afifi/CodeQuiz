@@ -4,154 +4,147 @@
              xmlns:models="clr-namespace:CodeQuizDesktop.Models"
              xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
              x:Class="CodeQuizDesktop.Views.CreatedQuizzes"
+             x:DataType="vm:CreatedQuizzesVM"
              xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui">
 
+    <Grid RowDefinitions="Auto,*" RowSpacing="24" Padding="32,24">
 
-    <Grid RowDefinitions="Auto, *" RowSpacing="30">
+        <!-- Header Section -->
+        <Grid ColumnDefinitions="*,Auto">
+            <VerticalStackLayout VerticalOptions="Center" Spacing="6">
+                <Label Text="Created Quizzes" Style="{StaticResource PageTitle}"/>
+                <Label Text="Manage and monitor your quizzes" Style="{StaticResource CaptionText}"/>
+            </VerticalStackLayout>
 
-        <Border Grid.Row="0" StrokeThickness="0">
-            <Grid>
-                <VerticalStackLayout VerticalOptions="Center" Spacing="10">
-                    <Label Text="Created Quizzes" FontSize="28" FontAttributes="Bold" TextColor="White"/>
-                    <!--<Label Text="Tuesday, November 18, 2025" TextColor="#717e81"/>-->
-                </VerticalStackLayout>
-                <HorizontalStackLayout HorizontalOptions="End" VerticalOptions="Center" Spacing="10">
+            <Button Grid.Column="1" Text="Create Quiz" Style="{StaticResource PrimaryButton}" Command="{Binding CreateQuizCommand}" VerticalOptions="Center"/>
+        </Grid>
 
-                    <Button Text="Create New Quiz" CornerRadius="20" HeightRequest="25" HorizontalOptions="End" VerticalOptions="Start" BackgroundColor="#591c21" Command="{Binding CreateQuizCommand}"/>
-                </HorizontalStackLayout>
+        <!-- Content Section -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="16">
 
-            </Grid>
-        </Border>
-
-
-        <Grid Grid.Row="1" RowDefinitions="Auto,*">
-
-            <Grid RowDefinitions="*,*" ColumnDefinitions="200,Auto,Auto,*" ColumnSpacing="10" RowSpacing="5" Grid.Row="0">
-
-                <!--<Label Text="Status" TextColor="White" VerticalOptions="End"/>-->
-                <!--<Label Grid.Column="1" Text="Date" TextColor="White" VerticalOptions="End"/>-->
-                <Border Grid.Row="1" HeightRequest="45" StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e">
-                    <Picker Title="" TextColor="White"/>
+            <!-- Filters Row --><!--
+            <Grid ColumnDefinitions="180,*,250" ColumnSpacing="16">
+                <Border Style="{StaticResource InputBorder}">
+                    <Picker Title="All Status"/>
                 </Border>
-                <!--<Border Grid.Row="1" Grid.Column="1" HeightRequest="45" Stroke="#3b3b3b" StrokeThickness="0.8" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e">
-                <DatePicker TextColor="White"/>
-            </Border>
-            <Button Grid.Row="1" Grid.Column="2" Text="Clear Filters" BorderWidth="1" BorderColor="White" TextColor="White" BackgroundColor="Transparent" CornerRadius="20" VerticalOptions="Center"/>-->
-                <Border Grid.Row="1" Grid.Column="3" WidthRequest="250" HeightRequest="45" HorizontalOptions="End" VerticalOptions="Center" StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="#2e2e2e">
-                    <SearchBar Placeholder="Search quizzes..." TextColor="White"/>
+                <Border Grid.Column="2" Style="{StaticResource InputBorder}" HorizontalOptions="End" WidthRequest="250">
+                    <SearchBar Placeholder="Search quizzes..."/>
                 </Border>
-            </Grid>
+            </Grid>-->
 
-            <!--TABLE-->
-            <Border Grid.Row="1" StrokeShape="RoundRectangle 10" Background="#2e2e2e" StrokeThickness="0" Margin="0,20,0,0">
-                <Border.Shadow>
-                    <Shadow Radius="2.5" Opacity="0.5" />
-                </Border.Shadow>
+            <!-- Data Table -->
+            <Border Grid.Row="1" Style="{StaticResource TableContainer}">
                 <Grid RowDefinitions="Auto,*">
-
-
-                    <Grid Grid.Row="0" ColumnDefinitions="1.5*, *, 1.5*, *, *, *, *, *, *" BackgroundColor="#212121" Padding="20, 10">
-
-
-                        <Label Text="QUIZ TITLE" Grid.Column="0" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="STATUS" Grid.Column="1" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="SCHEDULE" Grid.Column="2" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="DURATION" Grid.Column="3" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="QUESTIONS" Grid.Column="4" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="PARTICIPANTS" Grid.Column="5" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="SUBMITTED" Grid.Column="6" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="AVG SCORE" Grid.Column="7" TextColor="#888888" VerticalOptions="Center"/>
-                        <Label Text="ACTIONS" Grid.Column="8" TextColor="#888888" VerticalOptions="Center"/>
+                    <!-- Table Header -->
+                    <Grid ColumnDefinitions="1.5*,*,1.5*,*,*,*,*,*,*" Style="{StaticResource TableHeaderBackground}">
+                        <Label Text="QUIZ TITLE" Style="{StaticResource TableHeader}"/>
+                        <Label Grid.Column="1" Text="STATUS" Style="{StaticResource TableHeader}"/>
+                        <Label Grid.Column="2" Text="SCHEDULE" Style="{StaticResource TableHeader}"/>
+                        <Label Grid.Column="3" Text="DURATION" Style="{StaticResource TableHeader}"/>
+                        <Label Grid.Column="4" Text="QUESTIONS" Style="{StaticResource TableHeader}"/>
+                        <Label Grid.Column="5" Text="PARTICIPANTS" Style="{StaticResource TableHeader}"/>
+                        <Label Grid.Column="6" Text="SUBMITTED" Style="{StaticResource TableHeader}"/>
+                        <Label Grid.Column="7" Text="AVG SCORE" Style="{StaticResource TableHeader}"/>
+                        <Label Grid.Column="8" Text="ACTIONS" Style="{StaticResource TableHeader}"/>
                     </Grid>
 
-
+                    <!-- Table Body -->
                     <CollectionView Grid.Row="1" ItemsSource="{Binding AllExaminerQuizzes}">
+                        <CollectionView.EmptyView>
+                            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="40">
+                                <Label Text="No quizzes created yet" TextColor="{StaticResource TextMuted}" FontSize="18" HorizontalOptions="Center"/>
+                                <Label Text="Click the button above to create your first quiz" TextColor="{StaticResource TextDisabled}" FontSize="14" HorizontalOptions="Center" Margin="0,10,0,0"/>
+                            </VerticalStackLayout>
+                        </CollectionView.EmptyView>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:ExaminerQuiz">
+                                <VerticalStackLayout Spacing="8">
+                                    <BoxView Style="{StaticResource TableDivider}" Margin="10"/>
+                                    <Grid ColumnDefinitions="1.5*,*,1.5*,*,*,*,*,*,*" Padding="20,16">
+                                        <!-- Quiz Title & Code -->
+                                        <VerticalStackLayout VerticalOptions="Center" Spacing="10">
+                                            <Label Text="{Binding Title}" Style="{StaticResource ItemTitle}"/>
+                                            <Border Style="{StaticResource StatusBadge}">
+                                                <Label Text="{Binding Code}" FontFamily="SFMonoRegular" FontSize="11" FontAttributes="Bold" TextColor="White"/>
+                                            </Border>
+                                        </VerticalStackLayout>
 
-
-
-                                <Grid ColumnDefinitions="1.5*, *, 1.5*, *, *, *, *, *, *" Padding="20">
-                                    <BoxView Grid.ColumnSpan="9" HeightRequest="1" Color="#2a2a2a" Margin="0,0" VerticalOptions="Start"/>
-                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="10">
-                                        <Label Text="{Binding Title}" TextColor="White" VerticalOptions="Center"/>
-                                        <Border VerticalOptions="Center" HorizontalOptions="Start" Padding="10,5" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="#888888">
-                                            <Label Text="{Binding Code}" TextColor="White" />
+                                        <!-- Status Badge -->
+                                        <Border Grid.Column="1" Style="{StaticResource LiveBadge}" IsVisible="{Binding IsRunning}">
+                                            <Label Text="Running" Style="{StaticResource BadgeText}"/>
                                         </Border>
-                                    </VerticalStackLayout>
-                                    <Border Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Start" Padding="10,5" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="#888888">
-                                        <Label Text="{Binding Status}" TextColor="White" />
-                                    </Border>
-                                    <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" Spacing="5">
-                                        <Label Text="Start:" TextColor="#888888" />
-                                        <Label Text="{Binding StartDateString}" TextColor="White" />
-                                        <Label Text="End:" TextColor="#888888"  />
-                                        <Label Text="{Binding EndDateString}" TextColor="White"  />
+                                        <Border Grid.Column="1" Style="{StaticResource SuccessBadge}" IsVisible="{Binding IsEnded}">
+                                            <Label Text="Ended" Style="{StaticResource BadgeText}"/>
+                                        </Border>
+                                        <Border Grid.Column="1" Style="{StaticResource WarningBadge}" IsVisible="{Binding IsUpcoming}">
+                                            <Label Text="Upcoming" Style="{StaticResource BadgeText}"/>
+                                        </Border>
 
-                                    </VerticalStackLayout>
+                                        <!-- Schedule -->
+                                        <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" Spacing="4">
+                                            <HorizontalStackLayout Spacing="6">
+                                                <Label Text="Start:" Style="{StaticResource CaptionText}" FontSize="13"/>
+                                                <Label Text="{Binding StartDateString}" Style="{StaticResource BodyText}" FontSize="13"/>
+                                            </HorizontalStackLayout>
+                                            <HorizontalStackLayout Spacing="6">
+                                                <Label Text="End:" Style="{StaticResource CaptionText}" FontSize="13"/>
+                                                <Label Text="{Binding EndDateString}" Style="{StaticResource BodyText}" FontSize="13"/>
+                                            </HorizontalStackLayout>
+                                        </VerticalStackLayout>
 
-                                    <Label Text="{Binding DurationString}" TextColor="White" Grid.Column="3" VerticalOptions="Center"/>
-                                    <Label Text="{Binding QustionsCount}" TextColor="White" Grid.Column="4" VerticalOptions="Center"/>
-                                    <Label Text="{Binding AttemptsCount}" TextColor="White" Grid.Column="5" VerticalOptions="Center"/>
-                                    <Label TextColor="White" Grid.Column="6" VerticalOptions="Center">
-                                        <Label.Text>
-                                            <MultiBinding StringFormat="{}{0}/{1}">
-                                                <Binding Path="SubmittedAttemptsCount" />
-                                                <Binding Path="AttemptsCount" />
-                                            </MultiBinding>
-                                        </Label.Text>
-                                    </Label>
-                                    <Label Text="{Binding AverageAttemptScore}" TextColor="White" Grid.Column="7" VerticalOptions="Center"/>
-                                    <Grid Grid.Column="8">
-                                        <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
-                                            <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" >
+                                        <Label Grid.Column="3" Text="{Binding DurationString}" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+                                        <Label Grid.Column="4" Text="{Binding QustionsCount}" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+                                        <Label Grid.Column="5" Text="{Binding AttemptsCount}" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+
+                                        <Label Grid.Column="6" Style="{StaticResource BodyText}" VerticalOptions="Center">
+                                            <Label.Text>
+                                                <MultiBinding StringFormat="{}{0}/{1}">
+                                                    <Binding Path="SubmittedAttemptsCount"/>
+                                                    <Binding Path="AttemptsCount"/>
+                                                </MultiBinding>
+                                            </Label.Text>
+                                        </Label>
+
+                                        <Label Grid.Column="7" Text="{Binding AverageAttemptScore, StringFormat='{0:F1}%'}" Style="{StaticResource SuccessText}" VerticalOptions="Center"/>
+
+                                        <!-- Action Buttons -->
+                                        <HorizontalStackLayout Grid.Column="8" Spacing="10" VerticalOptions="Center">
+                                            <Border Style="{StaticResource IconButton}">
                                                 <Border.GestureRecognizers>
-                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:CreatedQuizzesVM}}, Path=ViewQuizCommand}" CommandParameter="{Binding .}" />
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreatedQuizzesVM}}, Path=ViewQuizCommand}" CommandParameter="{Binding .}"/>
                                                 </Border.GestureRecognizers>
-                                                <Border.Shadow>
-                                                    <Shadow Opacity="0" Radius="0"/>
-                                                </Border.Shadow>
-                                                <Image Source="eye.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                                <Image Source="eye.png" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center">
                                                     <Image.Behaviors>
-                                                        <toolkit:IconTintColorBehavior TintColor="White" />
+                                                        <toolkit:IconTintColorBehavior TintColor="{StaticResource TextSecondary}"/>
                                                     </Image.Behaviors>
                                                 </Image>
                                             </Border>
-                                            <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" >
+                                            <Border Style="{StaticResource OutlinedIconButton}">
                                                 <Border.GestureRecognizers>
-                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:CreatedQuizzesVM}}, Path=EditQuizCommand}" CommandParameter="{Binding .}"/>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreatedQuizzesVM}}, Path=EditQuizCommand}" CommandParameter="{Binding .}"/>
                                                 </Border.GestureRecognizers>
-                                                <Border.Shadow>
-                                                    <Shadow Opacity="0" Radius="0"/>
-                                                </Border.Shadow>
-                                                <Image Source="pencil.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                                <Image Source="pencil.png" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center">
                                                     <Image.Behaviors>
-                                                        <toolkit:IconTintColorBehavior TintColor="White" />
+                                                        <toolkit:IconTintColorBehavior TintColor="{StaticResource Primary}"/>
                                                     </Image.Behaviors>
                                                 </Image>
                                             </Border>
-                                            <Border WidthRequest="33" HeightRequest="33" StrokeShape="RoundRectangle 20" Background="#888888" StrokeThickness="0" HorizontalOptions="End">
+                                            <Border Style="{StaticResource DangerIconButton}">
                                                 <Border.GestureRecognizers>
-                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource Mode=FindAncestorBindingContext, AncestorType={x:Type vm:CreatedQuizzesVM}}, Path=DeleteQuizCommand}" CommandParameter="{Binding .}"/>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreatedQuizzesVM}}, Path=DeleteQuizCommand}" CommandParameter="{Binding .}"/>
                                                 </Border.GestureRecognizers>
-                                                <Border.Shadow>
-                                                    <Shadow Opacity="0" Radius="0"/>
-                                                </Border.Shadow>
-                                                <Image Source="trash.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center">
+                                                <Image Source="trash.png" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center">
                                                     <Image.Behaviors>
-                                                        <toolkit:IconTintColorBehavior TintColor="White" />
+                                                        <toolkit:IconTintColorBehavior TintColor="{StaticResource Error}"/>
                                                     </Image.Behaviors>
                                                 </Image>
                                             </Border>
                                         </HorizontalStackLayout>
-
                                     </Grid>
-                                </Grid>
-
+                                </VerticalStackLayout>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
-
                 </Grid>
             </Border>
         </Grid>

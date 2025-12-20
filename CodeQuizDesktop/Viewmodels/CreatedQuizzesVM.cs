@@ -1,22 +1,19 @@
 ﻿using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Services;
 using CodeQuizDesktop.Views;
 using CommunityToolkit.Maui.Core.Extensions;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace CodeQuizDesktop.Viewmodels
 {
     public class CreatedQuizzesVM : BaseViewModel
     {
-        private IQuizzesRepository _quizzesRepository;
+        private readonly IQuizzesRepository _quizzesRepository;
+        private readonly INavigationService _navigationService;
 
-        private ObservableCollection<ExaminerQuiz> allExaminerQuizzes;
+        private ObservableCollection<ExaminerQuiz> allExaminerQuizzes = [];
 
         public ObservableCollection<ExaminerQuiz> AllExaminerQuizzes
         {
@@ -27,43 +24,53 @@ namespace CodeQuizDesktop.Viewmodels
                 OnPropertyChanged();
             }
         }
-        public ICommand CreateQuizCommand { get => new Command(OnCreateQuizPage); }
-        public ICommand EditQuizCommand { get => new Command<ExaminerQuiz>(OnEditQuiz); }
-        public ICommand DeleteQuizCommand { get => new Command<ExaminerQuiz>(OnDeleteQuiz); }
-        public ICommand ViewQuizCommand { get => new Command<ExaminerQuiz>(OnViewQuiz); }
 
-        private async void OnCreateQuizPage()
+        public ICommand CreateQuizCommand { get => new Command(async () => await OnCreateQuizPage()); }
+        public ICommand EditQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await OnEditQuiz(q)); }
+        public ICommand DeleteQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await OnDeleteQuizAsync(q)); }
+        public ICommand ViewQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await OnViewQuiz(q)); }
+
+        public async Task OnCreateQuizPage()
         {
-            await Shell.Current.GoToAsync("///CreateQuizPage");
+            await _navigationService.GoToAsync(nameof(CreateQuiz));
         }
 
-        private async void OnEditQuiz(ExaminerQuiz examinerQuiz)
+        public async Task OnEditQuiz(ExaminerQuiz examinerQuiz)
         {
-            await Shell.Current.GoToAsync(nameof(EditQuiz), new Dictionary<string, object>
+            await _navigationService.GoToAsync(nameof(CreateQuiz), new Dictionary<string, object>
             {
-                { "quiz", examinerQuiz }
+                { "quizModel", examinerQuiz.QuizToModel },
+                { "id", examinerQuiz.Id }
             });
         }
 
-        private async void OnDeleteQuiz(ExaminerQuiz examinerQuiz)
+        public async Task OnDeleteQuizAsync(ExaminerQuiz examinerQuiz)
         {
-            await _quizzesRepository.DeleteQuiz(examinerQuiz.Id);
+            await ExecuteAsync(async () =>
+            {
+                await _quizzesRepository.DeleteQuiz(examinerQuiz.Id);
+            }, "Deleting quiz...");
         }
-        private async void OnViewQuiz(ExaminerQuiz examinerQuiz)
-        {
-            await Shell.Current.GoToAsync($"///ExaminerViewQuizPage", new Dictionary<string, object> { { "quiz", examinerQuiz } });
-        }
-        
-        private async void Intialize()
-        {
-            var response = await _quizzesRepository.GetUserQuizzes();
-            AllExaminerQuizzes = response.ToObservableCollection();
 
+        public async Task OnViewQuiz(ExaminerQuiz examinerQuiz)
+        {
+            await _navigationService.GoToAsync(nameof(ExaminerViewQuiz), new Dictionary<string, object> { { "quiz", examinerQuiz } });
         }
-        public CreatedQuizzesVM(IQuizzesRepository quizzesRepository)
+
+        public async Task InitializeAsync()
+        {
+            await ExecuteAsync(async () =>
+            {
+                var response = await _quizzesRepository.GetUserQuizzes();
+                AllExaminerQuizzes = response.ToObservableCollection();
+            }, "Loading quizzes...");
+        }
+
+        public CreatedQuizzesVM(IQuizzesRepository quizzesRepository, INavigationService navigationService)
         {
             _quizzesRepository = quizzesRepository;
-            Intialize();
+            _navigationService = navigationService;
+
             _quizzesRepository.SubscribeCreate<ExaminerQuiz>(q =>
             {
                 if (AllExaminerQuizzes.FirstOrDefault(qu => qu.Id == q.Id) == null)

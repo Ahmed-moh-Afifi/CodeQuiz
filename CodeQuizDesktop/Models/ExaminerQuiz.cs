@@ -48,11 +48,32 @@ namespace CodeQuizDesktop.Models
             get
             {
                 if (StartDate > DateTime.Now)
-                    return "Not Started";
+                    return "Upcoming";
                 else if (EndDate < DateTime.Now)
                     return "Ended";
                 else
                     return "Running";
+            }
+        }
+        public bool IsUpcoming { get => Status == "Upcoming"; }
+        public bool IsEnded { get => Status == "Ended"; }
+        public bool IsRunning { get => Status == "Running"; }
+
+        public NewQuizModel QuizToModel
+        {
+            get
+            {
+                return new NewQuizModel
+                {
+                    Title = this.Title,
+                    StartDate = this.StartDate,
+                    EndDate = this.EndDate,
+                    Duration = this.Duration,
+                    ExaminerId = this.ExaminerId,
+                    GlobalQuestionConfiguration = this.GlobalQuestionConfiguration,
+                    AllowMultipleAttempts = this.AllowMultipleAttempts,
+                    Questions = this.Questions.Select(q => q.QuestionToModel).ToList() 
+                };
             }
         }
 
