@@ -50,22 +50,22 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             # 2. Re-create the .env file from secrets (keeps it safe)
-            echo "${{ secrets.ENV_FILE }}" > /home/ubuntu/.env
+            echo "${{ secrets.ENV_FILE }}" > /home/ubuntu/app/.env
 
             # 3. Pull the new image
-            docker pull ghcr.io/${{ env.IMAGE_NAME }}:latest
+            sudo docker pull ghcr.io/${{ env.IMAGE_NAME }}:latest
 
             # 4. Stop and Remove the old container
-            docker stop my-api || true
-            docker rm my-api || true
+            sudo docker stop my-api || true
+            sudo docker rm my-api || true
 
             # 5. Run the new container (The Critical Command)
-            docker run --name my-api \
+            sudo docker run --name my-api \
               -p 80:8080 \
-              --network codequiz-net \
-              --env-file /home/ubuntu/.env \
+              --env-file /home/ubuntu/app/.env \
               -v /var/run/docker.sock:/var/run/docker.sock \
               -v /tmp/code:/tmp/code \
+              --link db:db \
               -d \
               --restart unless-stopped \
               ghcr.io/${{ env.IMAGE_NAME }}:latest
