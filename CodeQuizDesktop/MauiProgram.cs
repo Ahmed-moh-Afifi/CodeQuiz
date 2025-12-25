@@ -1,6 +1,7 @@
 ﻿using CodeQuizDesktop.APIs;
 using CodeQuizDesktop.Logging;
 using CodeQuizDesktop.Repositories;
+using CodeQuizDesktop.Resources;
 using CodeQuizDesktop.Services;
 using CodeQuizDesktop.Viewmodels;
 using CodeQuizDesktop.Views;
@@ -87,7 +88,7 @@ namespace CodeQuizDesktop
             builder.Services.AddSingleton<GlobalExceptionHandler>();
 
             // APIs
-            var uri = "http://129.151.234.105/api";
+            var uri = Config.API;
             builder.Services.AddRefitClient<IAuthAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<LoggingHandler>();
             builder.Services.AddRefitClient<IAttemptsAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<LoggingHandler>();
             builder.Services.AddRefitClient<IQuizzesAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<LoggingHandler>();
