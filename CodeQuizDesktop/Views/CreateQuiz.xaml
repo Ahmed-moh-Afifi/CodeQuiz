@@ -36,7 +36,7 @@
         </Border>
 
         <!-- Content -->
-        <Grid Grid.Row="1" ColumnDefinitions="1.2*,2*" Padding="24" ColumnSpacing="24">
+        <Grid Grid.Row="1" ColumnDefinitions="1.33*,2*" Padding="24" ColumnSpacing="24">
             <!-- Quiz Configuration Sidebar -->
             <Border Style="{StaticResource Card}">
                 <ScrollView>
@@ -88,12 +88,12 @@
                                                     <VerticalStackLayout Spacing="4">
                                                         <Label Text="Date" Style="{StaticResource CaptionText}" FontSize="12"/>
                                                         <Border Style="{StaticResource InputBorder}" StrokeShape="RoundRectangle 12">
-                                                            <DatePicker Date="{Binding AvailableFromDate}" HorizontalOptions="Fill" FontSize="14"/>
+                                                            <DatePicker Date="{Binding AvailableFromDate}" HorizontalOptions="Center" FontSize="14"/>
                                                         </Border>
                                                     </VerticalStackLayout>
                                                     <VerticalStackLayout Spacing="4">
                                                         <Label Text="Time" Style="{StaticResource CaptionText}" FontSize="12"/>
-                                                        <Border Style="{StaticResource InputBorder}" StrokeShape="RoundRectangle 12">
+                                                        <Border Style="{StaticResource InputBorder}" StrokeShape="RoundRectangle 12" Padding="0">
                                                             <TimePicker Time="{Binding AvailableFromTime}" FontSize="14"/>
                                                         </Border>
                                                     </VerticalStackLayout>
@@ -108,12 +108,12 @@
                                                     <VerticalStackLayout Spacing="4">
                                                         <Label Text="Date" Style="{StaticResource CaptionText}" FontSize="12"/>
                                                         <Border Style="{StaticResource InputBorder}" StrokeShape="RoundRectangle 12">
-                                                            <DatePicker Date="{Binding AvailableToDate}" HorizontalOptions="Fill" FontSize="14"/>
+                                                            <DatePicker Date="{Binding AvailableToDate}" HorizontalOptions="Center" FontSize="14"/>
                                                         </Border>
                                                     </VerticalStackLayout>
                                                     <VerticalStackLayout Spacing="4">
                                                         <Label Text="Time" Style="{StaticResource CaptionText}" FontSize="12"/>
-                                                        <Border Style="{StaticResource InputBorder}" StrokeShape="RoundRectangle 12">
+                                                        <Border Style="{StaticResource InputBorder}" StrokeShape="RoundRectangle 12" Padding="0">
                                                             <TimePicker Time="{Binding AvailableToTime}" FontSize="14"/>
                                                         </Border>
                                                     </VerticalStackLayout>

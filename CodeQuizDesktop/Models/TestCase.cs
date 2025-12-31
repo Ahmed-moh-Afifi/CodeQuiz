@@ -25,7 +25,7 @@ namespace CodeQuizDesktop.Models
         public string InputInOneString
         {
             get => string.Join('\n', Input);
-            set => Input = value.Split('\n').ToList();
+            set => Input = value.Split(['\n', ' ', '\r']).ToList();
         }
     }
 }
