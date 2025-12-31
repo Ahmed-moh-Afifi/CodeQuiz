@@ -130,7 +130,7 @@ public partial class CodeEditor : ContentView
 
     // Code input and output properties
     public string RawInput { get; set; } = "";
-    public List<string> Input { get => RawInput.Split('\n').ToList(); }
+    public List<string> Input { get => RawInput.Split(['\n', ' ', '\r']).ToList(); }
     private string output = "";
     public string Output
     {

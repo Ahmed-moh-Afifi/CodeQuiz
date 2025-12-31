@@ -22,7 +22,8 @@ namespace CodeQuizBackend.Quiz.Services
                 .ThenInclude(q => q.Examiner)
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Questions)
-                .Include(q => q.Solutions)
+                .Include(a => a.Solutions)
+                .Include(a => a.Examinee)
                 .FirstOrDefaultAsync();
 
             if (attempt == null)
@@ -106,6 +107,7 @@ namespace CodeQuizBackend.Quiz.Services
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Questions)
                 .Include(a => a.Solutions)
+                .Include(a => a.Examinee)
                 .FirstOrDefaultAsync()
                 ?? throw new ResourceNotFoundException("Attempt not found.");
 
@@ -135,6 +137,8 @@ namespace CodeQuizBackend.Quiz.Services
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Questions)
                 .Include(a => a.Solutions)
+                .Include(a => a.Quiz)
+                .ThenInclude(q => q.Examiner)
                 .FirstOrDefaultAsync()
                 ?? throw new ResourceNotFoundException("Attempt not found.");
 

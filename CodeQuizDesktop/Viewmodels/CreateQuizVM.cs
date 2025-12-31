@@ -412,29 +412,28 @@ namespace CodeQuizDesktop.Viewmodels
 
             var loadingMessage = QuizModel == null && EditedQuizId == null ? "Publishing quiz..." : "Updating quiz...";
 
+            var minsDuration = int.Parse(QuizDurationInMinutes!);
+            var newQuizModel = new NewQuizModel()
+            {
+                Title = QuizTitle!,
+                Duration = TimeSpan.FromMinutes(minsDuration),
+                StartDate = AvailableFromDateTime,
+                EndDate = AvailableToDateTime,
+                AllowMultipleAttempts = AllowMultipleAttempts,
+                ExaminerId = authenticationRepository.LoggedInUser!.Id,
+                GlobalQuestionConfiguration = new()
+                {
+                    Language = ProgrammingLanguage!,
+                    AllowExecution = AllowExecution,
+                    ShowError = ShowErrors,
+                    ShowOutput = ShowOutput,
+                    AllowIntellisense = AllowIntellisense,
+                    AllowSignatureHelp = AllowSignatureHelp
+                },
+                Questions = QuestionModels.ToList()
+            };
             await ExecuteAsync(async () =>
             {
-                var minsDuration = int.Parse(QuizDurationInMinutes!);
-                var newQuizModel = new NewQuizModel()
-                {
-                    Title = QuizTitle!,
-                    Duration = TimeSpan.FromMinutes(minsDuration),
-                    StartDate = AvailableFromDateTime,
-                    EndDate = AvailableToDateTime,
-                    AllowMultipleAttempts = AllowMultipleAttempts,
-                    ExaminerId = authenticationRepository.LoggedInUser!.Id,
-                    GlobalQuestionConfiguration = new()
-                    {
-                        Language = ProgrammingLanguage!,
-                        AllowExecution = AllowExecution,
-                        ShowError = ShowErrors,
-                        ShowOutput = ShowOutput,
-                        AllowIntellisense = AllowIntellisense,
-                        AllowSignatureHelp = AllowSignatureHelp
-                    },
-                    Questions = QuestionModels.ToList()
-                };
-
                 if (QuizModel == null && EditedQuizId == null)
                 {
                     var quiz = await quizzesRepository.CreateQuiz(newQuizModel);
