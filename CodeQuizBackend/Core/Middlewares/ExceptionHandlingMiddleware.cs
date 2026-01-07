@@ -61,12 +61,12 @@ namespace CodeQuizBackend.Core.Middlewares
             }
             catch (CodeRunnerException ex)
             {
-                logger.LogWarning(ex, "Code runner exception");
+                logger.LogError(ex, "Code runner exception");
                 await HandleExceptionAsync(context, StatusCodes.Status400BadRequest, ex.Message);
             }
             catch (ServiceUnavailableException ex)
             {
-                logger.LogWarning(ex, "Service unavailable");
+                logger.LogError(ex, "Service unavailable");
                 await HandleExceptionAsync(context, StatusCodes.Status503ServiceUnavailable, ex.Message);
             }
             catch (Exception ex)

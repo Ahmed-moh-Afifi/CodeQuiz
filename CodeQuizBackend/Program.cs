@@ -187,6 +187,13 @@ builder.Services.AddHostedService<AttemptTimerService>();
 
 builder.Services.AddSignalR();
 
+builder.WebHost.UseSentry(o =>
+{
+    o.Dsn = builder.Configuration["SentryDsn"];
+    o.Debug = true;
+    o.TracesSampleRate = 1.0;
+});
+
 var app = builder.Build();
 
 // Apply database migrations automatically
