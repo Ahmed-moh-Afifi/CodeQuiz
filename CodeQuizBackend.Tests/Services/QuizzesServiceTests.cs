@@ -93,11 +93,43 @@ namespace CodeQuizBackend.Tests.Services
         {
             // Arrange
             var quizId = 1;
+            var examinerId = "examiner1";
+            var quiz = new CodeQuizBackend.Quiz.Models.Quiz
+            {
+                Id = quizId,
+                Title = "Test Quiz",
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(1),
+                Duration = TimeSpan.FromMinutes(60),
+                Code = "TESTCODE",
+                ExaminerId = examinerId,
+                GlobalQuestionConfiguration = new QuestionConfiguration
+                {
+                    Language = "csharp",
+                    AllowExecution = true,
+                    ShowOutput = true,
+                    ShowError = true
+                },
+                AllowMultipleAttempts = false,
+                Questions = new List<Question>(),
+                Examiner = new CodeQuizBackend.Authentication.Models.User
+                {
+                    Id = examinerId,
+                    FirstName = "John",
+                    LastName = "Doe",
+                    UserName = "johndoe",
+                    Email = "john@example.com"
+                }
+            };
+            _dbContext.Quizzes.Add(quiz);
+            await _dbContext.SaveChangesAsync();
+
             var clientsMock = new Mock<IHubClients>();
             var clientProxyMock = new Mock<IClientProxy>();
 
             _quizzesHubContextMock.Setup(x => x.Clients).Returns(clientsMock.Object);
             clientsMock.Setup(x => x.All).Returns(clientProxyMock.Object);
+            clientsMock.Setup(x => x.Group(It.IsAny<string>())).Returns(clientProxyMock.Object);
 
             // Act
             await _quizzesService.DeleteQuiz(quizId);

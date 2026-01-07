@@ -66,7 +66,8 @@ namespace CodeQuizDesktop.Tests.Viewmodels
                     LastName = "One",
                     Email = "user1@example.com",
                     JoinDate = DateTime.Now
-                }
+                },
+                TotalPoints = 100
             };
         }
 

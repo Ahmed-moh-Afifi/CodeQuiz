@@ -37,6 +37,7 @@ namespace CodeQuizBackend.Tests.Services
             var clientProxyMock = new Mock<IClientProxy>();
             _attemptsHubContextMock.Setup(x => x.Clients).Returns(clientsMock.Object);
             clientsMock.Setup(x => x.All).Returns(clientProxyMock.Object);
+            clientsMock.Setup(x => x.Group(It.IsAny<string>())).Returns(clientProxyMock.Object);
 
             _mailServiceMock = new Mock<IMailService>();
 
