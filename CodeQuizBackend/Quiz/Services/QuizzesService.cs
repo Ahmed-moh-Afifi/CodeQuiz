@@ -36,8 +36,18 @@ namespace CodeQuizBackend.Quiz.Services
 
         public async Task DeleteQuiz(int id)
         {
+            // Get the quiz to find the examiner before deleting
+            var quiz = await dbContext.Quizzes.FindAsync(id);
+            var examinerId = quiz?.ExaminerId;
+            
             await quizzesRepository.DeleteQuizAsync(id);
-            await quizzesHubContext.Clients.All.SendAsync("QuizDeleted", id);
+            
+            // Only notify the examiner who owns the quiz
+            if (examinerId != null)
+            {
+                await quizzesHubContext.Clients.Group($"examiner_{examinerId}")
+                    .SendAsync("QuizDeleted", id);
+            }
         }
 
         public async Task<ExamineeQuiz> GetQuizByCode(string code)
@@ -76,7 +86,8 @@ namespace CodeQuizBackend.Quiz.Services
                 .FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found. It may have been deleted.");
 
             var newCode = quizEntity.Code;
-            if (quizEntity.EndDate <= DateTime.Now && newQuizModel.EndDate > DateTime.Now)
+            // Use UTC time for quiz status check
+            if (quizEntity.EndDate <= DateTime.UtcNow && newQuizModel.EndDate > DateTime.UtcNow)
             {
                 newCode = await quizCodeGenerator.GenerateUniqueQuizCode();
             }
@@ -104,7 +115,11 @@ namespace CodeQuizBackend.Quiz.Services
             }).FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found.");
             var updatedExaminerQuiz = updatedQuiz.ToExaminerQuiz(statistics.AttemptsCount, statistics.SubmittedAttemptsCount, statistics.AverageAttemptScore);
             var updatedExamineeQuiz = updatedQuiz.ToExamineeQuiz();
-            await quizzesHubContext.Clients.All.SendAsync("QuizUpdated", updatedExaminerQuiz, updatedExamineeQuiz);
+            
+            // Only notify the examiner who owns the quiz
+            await quizzesHubContext.Clients.Group($"examiner_{updatedQuiz.ExaminerId}")
+                .SendAsync("QuizUpdated", updatedExaminerQuiz, updatedExamineeQuiz);
+                
             return updatedExaminerQuiz;
         }
 

@@ -23,8 +23,10 @@ namespace CodeQuizDesktop.Models
         public required int SubmittedAttemptsCount { get; set; }
         public required float AverageAttemptScore { get; set; }
         public required float TotalPoints { get; set; }
-        public string StartDateString { get => StartDate.ToShortDateString() + " - " + StartDate.ToShortTimeString(); }
-        public string EndDateString { get => EndDate.ToShortDateString() + " - " + EndDate.ToShortTimeString(); }
+        
+        // Convert UTC dates to local time for display
+        public string StartDateString { get => StartDate.ToLocalTime().ToShortDateString() + " - " + StartDate.ToLocalTime().ToShortTimeString(); }
+        public string EndDateString { get => EndDate.ToLocalTime().ToShortDateString() + " - " + EndDate.ToLocalTime().ToShortTimeString(); }
         public string DurationString
         {
             get
@@ -47,9 +49,11 @@ namespace CodeQuizDesktop.Models
         {
             get
             {
-                if (StartDate > DateTime.Now)
+                // Compare UTC times with current UTC time for accurate status
+                var nowUtc = DateTime.UtcNow;
+                if (StartDate > nowUtc)
                     return "Upcoming";
-                else if (EndDate < DateTime.Now)
+                else if (EndDate < nowUtc)
                     return "Ended";
                 else
                     return "Running";
@@ -66,8 +70,9 @@ namespace CodeQuizDesktop.Models
                 return new NewQuizModel
                 {
                     Title = this.Title,
-                    StartDate = this.StartDate,
-                    EndDate = this.EndDate,
+                    // Convert UTC to local time for editing in UI
+                    StartDate = this.StartDate.ToLocalTime(),
+                    EndDate = this.EndDate.ToLocalTime(),
                     Duration = this.Duration,
                     ExaminerId = this.ExaminerId,
                     GlobalQuestionConfiguration = this.GlobalQuestionConfiguration,

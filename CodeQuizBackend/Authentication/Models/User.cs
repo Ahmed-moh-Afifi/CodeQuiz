@@ -7,7 +7,7 @@ namespace CodeQuizBackend.Authentication.Models
     {
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
-        public DateTime JoinDate { get; set; } = DateTime.Now;
+        public DateTime JoinDate { get; set; } = DateTime.UtcNow;
         public string? ProfilePicture { get; set; }
 
         public static User FromRegisterModel(RegisterModel model)

@@ -180,39 +180,49 @@ public partial class CodeEditor : ContentView
     {
         if (IsRunning) return;
 
-        IsRunning = true;
-        var response = await executionRepository.RunCode(new()
+        try
         {
-            Code = Code,
-            ContainError = ShowError,
-            ContainOutput = ShowOutput,
-            Language = Language,
-            Input = Input,
-        });
+            IsRunning = true;
+            var response = await executionRepository.RunCode(new()
+            {
+                Code = Code,
+                ContainError = ShowError,
+                ContainOutput = ShowOutput,
+                Language = Language,
+                Input = Input,
+            });
 
-        if (response.Success)
-        {
-            if (ShowOutput)
+            if (response.Success)
             {
-                Output = response.Output!;
+                if (ShowOutput)
+                {
+                    Output = response.Output!;
+                }
+                else
+                {
+                    Output = "Code executed successfully";
+                }
             }
             else
             {
-                Output = "Code executed successfully";
+                if (ShowError)
+                {
+                    Output = response.Error!;
+                }
+                else
+                {
+                    Output = "Code execution failed";
+                }
             }
         }
-        else
+        catch (Exception ex)
         {
-            if (ShowError)
-            {
-                Output = response.Error!;
-            }
-            else
-            {
-                Output = "Code execution failed";
-            }
+            Output = $"Error: {ex.Message}";
         }
-        IsRunning = false;
+        finally
+        {
+            IsRunning = false;
+        }
     }
 
     public void ResetCode()

@@ -42,12 +42,15 @@ namespace CodeQuizBackend.Quiz.Services
                     throw new ResourceNotFoundException("Quiz not found. Please check the code and try again.");
                 }
 
-                if (DateTime.Now < quiz.StartDate)
+                // Use UTC time for all quiz availability checks
+                var now = DateTime.UtcNow;
+                
+                if (now < quiz.StartDate)
                 {
                     throw new QuizNotActiveException("This quiz has not started yet. Please wait until the scheduled start time.");
                 }
 
-                if (DateTime.Now > quiz.EndDate)
+                if (now > quiz.EndDate)
                 {
                     throw new QuizNotActiveException("This quiz has ended and is no longer accepting new attempts.");
                 }
@@ -63,7 +66,7 @@ namespace CodeQuizBackend.Quiz.Services
                 attempt = new()
                 {
                     Id = 0,
-                    StartTime = DateTime.Now,
+                    StartTime = DateTime.UtcNow, // Use UTC for consistent time tracking
                     QuizId = quiz.Id,
                     ExamineeId = examineeId,
                     Examinee = examinee,
@@ -78,7 +81,18 @@ namespace CodeQuizBackend.Quiz.Services
                 };
                 dbContext.Attempts.Add(attempt);
                 await dbContext.SaveChangesAsync();
-                await attemptsHubContext.Clients.All.SendAsync("AttemptCreated", attempt.ToExaminerAttempt(), attempt.ToExamineeAttempt());
+                
+                // Send to specific groups instead of all clients
+                var examinerAttempt = attempt.ToExaminerAttempt();
+                var examineeAttempt = attempt.ToExamineeAttempt();
+                
+                // Notify the examinee (user who started the attempt)
+                await attemptsHubContext.Clients.Group($"user_{examineeId}")
+                    .SendAsync("AttemptCreated", examinerAttempt, examineeAttempt);
+                    
+                // Notify the examiner (quiz creator)
+                await attemptsHubContext.Clients.Group($"examiner_{quiz.ExaminerId}")
+                    .SendAsync("AttemptCreated", examinerAttempt, examineeAttempt);
             }
 
             return attempt.ToExamineeAttempt();
@@ -111,11 +125,23 @@ namespace CodeQuizBackend.Quiz.Services
                 .FirstOrDefaultAsync()
                 ?? throw new ResourceNotFoundException("Attempt not found.");
 
-            attempt.EndTime ??= DateTime.Now;
+            attempt.EndTime ??= DateTime.UtcNow; // Use UTC for consistent time tracking
             await dbContext.SaveChangesAsync();
-            await attemptsHubContext.Clients.All.SendAsync("AttemptUpdated", attempt.ToExaminerAttempt(), attempt.ToExamineeAttempt());
+            
+            // Send to specific groups instead of all clients
+            var examinerAttempt = attempt.ToExaminerAttempt();
+            var examineeAttempt = attempt.ToExamineeAttempt();
+            
+            // Notify the examinee
+            await attemptsHubContext.Clients.Group($"user_{attempt.ExamineeId}")
+                .SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
+                
+            // Notify the examiner
+            await attemptsHubContext.Clients.Group($"examiner_{attempt.Quiz.ExaminerId}")
+                .SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
+                
             await EvaluateAttempt(attempt.Id);
-            return attempt.ToExamineeAttempt();
+            return examineeAttempt;
         }
 
         public async Task<SolutionDTO> UpdateSolution(SolutionDTO solution)
@@ -151,8 +177,16 @@ namespace CodeQuizBackend.Quiz.Services
             await dbContext.SaveChangesAsync();
             var examineeAttempt = attempt.ToExamineeAttempt();
             var examinerAttempt = attempt.ToExaminerAttempt();
-            if (evaluated) await mailService.SendAttemptFeedbackAsync(attempt.Examinee.Email!, attempt.Examinee.FirstName, attempt.Quiz.Title, (float)examineeAttempt.Grade!, attempt.Quiz.ToExamineeQuiz().TotalPoints, attempt.StartTime, DateTime.Now);
-            await attemptsHubContext.Clients.All.SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
+            if (evaluated) await mailService.SendAttemptFeedbackAsync(attempt.Examinee.Email!, attempt.Examinee.FirstName, attempt.Quiz.Title, (float)examineeAttempt.Grade!, attempt.Quiz.ToExamineeQuiz().TotalPoints, attempt.StartTime, DateTime.UtcNow);
+            
+            // Send to specific groups instead of all clients
+            // Notify the examinee
+            await attemptsHubContext.Clients.Group($"user_{attempt.ExamineeId}")
+                .SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
+                
+            // Notify the examiner
+            await attemptsHubContext.Clients.Group($"examiner_{attempt.Quiz.ExaminerId}")
+                .SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
         }
 
         private bool GradeAttemptSolutions(Attempt attempt)

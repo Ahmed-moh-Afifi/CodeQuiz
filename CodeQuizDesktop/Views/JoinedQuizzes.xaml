@@ -84,10 +84,10 @@
                                         </Border>
 
                                         <!-- Started Time -->
-                                        <Label Grid.Column="2" Text="{Binding StartTime, StringFormat='{0:MMM dd, yyyy HH:mm}'}" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+                                        <Label Grid.Column="2" Text="{Binding StartTimeLocal, StringFormat='{0:MMM dd, yyyy HH:mm}'}" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
 
                                         <!-- Submission Time -->
-                                        <Label Grid.Column="3" Text="{Binding EndTime, StringFormat='{0:MMM dd, yyyy HH:mm}'}" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+                                        <Label Grid.Column="3" Text="{Binding EndTimeLocal, StringFormat='{0:MMM dd, yyyy HH:mm}'}" Style="{StaticResource BodyText}" VerticalOptions="Center"/>
 
                                         <!-- Duration -->
                                         <Label Grid.Column="4" Text="{Binding DurationString}" Style="{StaticResource BodyText}" VerticalOptions="Center"/>

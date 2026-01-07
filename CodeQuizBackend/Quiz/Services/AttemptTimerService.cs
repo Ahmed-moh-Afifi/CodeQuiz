@@ -38,22 +38,36 @@ namespace CodeQuizBackend.Quiz.Services
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var attemptsService = scope.ServiceProvider.GetRequiredService<IAttemptsService>();
 
-            var now = DateTime.Now;
+            // Use UTC time consistently for all comparisons
+            var now = DateTime.UtcNow;
 
-            var expiredAttempts = await dbContext.Attempts
+            // First, load all active attempts with their quiz data
+            var activeAttempts = await dbContext.Attempts
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Examiner)
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Questions)
                 .Include(q => q.Solutions)
-                .Where(a => a.EndTime == null && 
-                           (now - a.StartTime > a.Quiz.Duration
-                            || a.Quiz.EndDate < now))
+                .Where(a => a.EndTime == null)
                 .ToListAsync();
+
+            // Filter expired attempts in memory to ensure consistent DateTime comparison
+            // This avoids issues with EF Core translating DateTime arithmetic differently
+            var expiredAttempts = activeAttempts
+                .Where(a =>
+                {
+                    var durationEndTime = a.StartTime.Add(a.Quiz.Duration);
+                    var quizEndTime = a.Quiz.EndDate;
+                    var maxEndTime = durationEndTime < quizEndTime ? durationEndTime : quizEndTime;
+                    
+                    // Only mark as expired if the max end time has truly passed
+                    return maxEndTime <= now;
+                })
+                .ToList();
 
             if (expiredAttempts.Any())
             {
-                logger.LogInfo($"Found {expiredAttempts.Count} expired attempts to auto-submit.");
+                logger.LogInfo($"Found {expiredAttempts.Count} expired attempts to auto-submit. Current UTC time: {now:yyyy-MM-dd HH:mm:ss}");
 
                 foreach (var attempt in expiredAttempts)
                 {
@@ -61,12 +75,26 @@ namespace CodeQuizBackend.Quiz.Services
                     var quizEndTime = attempt.Quiz.EndDate;
                     
                     attempt.EndTime = durationEndTime < quizEndTime ? durationEndTime : quizEndTime;
-                    await attemptsHubContext.Clients.All.SendAsync("AttemptAutoSubmitted", attempt.ToExamineeAttempt());
-                    await attemptsService.EvaluateAttempt(attempt.Id);
-
+                    
                     logger.LogInfo(
-                        $"Auto-submitted attempt {attempt.Id} for quiz {attempt.QuizId}. " +
-                        $"EndTime set to {attempt.EndTime:yyyy-MM-dd HH:mm:ss}");
+                        $"Auto-submitting attempt {attempt.Id} for quiz {attempt.QuizId}. " +
+                        $"StartTime: {attempt.StartTime:yyyy-MM-dd HH:mm:ss}, " +
+                        $"Duration: {attempt.Quiz.Duration}, " +
+                        $"QuizEndDate: {quizEndTime:yyyy-MM-dd HH:mm:ss}, " +
+                        $"EndTime set to: {attempt.EndTime:yyyy-MM-dd HH:mm:ss}");
+                    
+                    var examineeAttempt = attempt.ToExamineeAttempt();
+                    
+                    // Send to specific groups instead of all clients
+                    // Notify the examinee who owns the attempt
+                    await attemptsHubContext.Clients.Group($"user_{attempt.ExamineeId}")
+                        .SendAsync("AttemptAutoSubmitted", examineeAttempt);
+                        
+                    // Notify the examiner who owns the quiz
+                    await attemptsHubContext.Clients.Group($"examiner_{attempt.Quiz.ExaminerId}")
+                        .SendAsync("AttemptAutoSubmitted", examineeAttempt);
+                    
+                    await attemptsService.EvaluateAttempt(attempt.Id);
                 }
 
                 await dbContext.SaveChangesAsync();

@@ -24,5 +24,14 @@ namespace CodeQuizDesktop.Models
             get { return FirstName[0]; }
         }
 
+        /// <summary>
+        /// JoinDate converted to local time for UI display
+        /// </summary>
+        public DateTime JoinDateLocal => JoinDate.ToLocalTime();
+
+        /// <summary>
+        /// JoinDate as formatted string in local time
+        /// </summary>
+        public string JoinDateString => JoinDate.ToLocalTime().ToShortDateString();
     }
 }

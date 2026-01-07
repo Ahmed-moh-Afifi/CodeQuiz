@@ -6,20 +6,102 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace CodeQuizDesktop.Repositories;
 
-public class QuizzesRepository(IQuizzesAPI quizzesAPI) : BaseTwoTypesObservableRepository<ExaminerQuiz, ExamineeQuiz>, IQuizzesRepository
+public class QuizzesRepository : BaseTwoTypesObservableRepository<ExaminerQuiz, ExamineeQuiz>, IQuizzesRepository
 {
-    public async void Initialize()
+    private readonly IQuizzesAPI quizzesAPI;
+    private readonly IAuthenticationRepository _authRepository;
+    private HubConnection? _connection;
+    private bool _isInitialized = false;
+    private readonly SemaphoreSlim _initLock = new(1, 1);
+    private string? _currentUserId;
+
+    public QuizzesRepository(IQuizzesAPI quizzesAPI, IAuthenticationRepository authRepository)
     {
-        var connection = new HubConnectionBuilder().WithUrl($"{Config.HUB}/Attempts").WithAutomaticReconnect().Build();
-        connection.On<ExaminerQuiz, ExamineeQuiz>("QuizCreated", (erq, eeq) => NotifyCreate(eeq));
-        connection.On<ExaminerQuiz, ExamineeQuiz>("QuizUpdated", (erq, eeq) => NotifyUpdate(eeq));
-        await connection.StartAsync();
+        this.quizzesAPI = quizzesAPI;
+        this._authRepository = authRepository;
+    }
+
+    private async Task EnsureInitializedAsync()
+    {
+        var userId = _authRepository.LoggedInUser?.Id;
+        
+        // If user changed or not connected, reinitialize
+        if (_currentUserId != userId || _connection?.State != HubConnectionState.Connected)
+        {
+            await _initLock.WaitAsync();
+            try
+            {
+                // Double-check after acquiring lock
+                if (_currentUserId == userId && _connection?.State == HubConnectionState.Connected)
+                {
+                    return;
+                }
+
+                // Clean up old connection
+                if (_connection != null)
+                {
+                    // Leave old groups if we were in them
+                    if (_currentUserId != null && _connection.State == HubConnectionState.Connected)
+                    {
+                        try
+                        {
+                            await _connection.InvokeAsync("LeaveExaminerGroup", _currentUserId);
+                        }
+                        catch { /* Ignore errors when leaving groups */ }
+                    }
+                    await _connection.DisposeAsync();
+                }
+
+                _connection = new HubConnectionBuilder()
+                    .WithUrl($"{Config.HUB}/Quizzes")
+                    .WithAutomaticReconnect()
+                    .Build();
+                    
+                _connection.On<ExaminerQuiz, ExamineeQuiz>("QuizCreated", (erq, eeq) => 
+                {
+                    NotifyCreate(erq);
+                    NotifyCreate(eeq);
+                });
+                _connection.On<ExaminerQuiz, ExamineeQuiz>("QuizUpdated", (erq, eeq) => 
+                {
+                    NotifyUpdate(erq);
+                    NotifyUpdate(eeq);
+                });
+                _connection.On<int>("QuizDeleted", id =>
+                {
+                    NotifyDelete<ExaminerQuiz>(id);
+                    NotifyDelete<ExamineeQuiz>(id);
+                });
+                
+                await _connection.StartAsync();
+                
+                // Join examiner group for the logged-in user
+                // This ensures they only receive updates for their own quizzes
+                if (userId != null)
+                {
+                    await _connection.InvokeAsync("JoinExaminerGroup", userId);
+                    _currentUserId = userId;
+                }
+                
+                _isInitialized = true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to initialize SignalR connection: {ex.Message}");
+                // Don't throw - allow operations to continue without real-time updates
+            }
+            finally
+            {
+                _initLock.Release();
+            }
+        }
     }
 
     public async Task<ExaminerQuiz> CreateQuiz(NewQuizModel newQuizModel)
     {
         try
         {
+            await EnsureInitializedAsync();
             var quiz = (await quizzesAPI.CreateQuiz(newQuizModel)).Data!;
             NotifyCreate(quiz!);
             return quiz;
@@ -34,6 +116,7 @@ public class QuizzesRepository(IQuizzesAPI quizzesAPI) : BaseTwoTypesObservableR
     {
         try
         {
+            await EnsureInitializedAsync();
             await quizzesAPI.DeleteQuiz(quizId);
             NotifyDelete<ExaminerQuiz>(quizId);
             NotifyDelete<ExamineeQuiz>(quizId);
@@ -48,6 +131,7 @@ public class QuizzesRepository(IQuizzesAPI quizzesAPI) : BaseTwoTypesObservableR
     {
         try
         {
+            await EnsureInitializedAsync();
             return (await quizzesAPI.GetQuizByCode(code)).Data!;
         }
         catch (Exception ex)
@@ -60,6 +144,7 @@ public class QuizzesRepository(IQuizzesAPI quizzesAPI) : BaseTwoTypesObservableR
     {
         try
         {
+            await EnsureInitializedAsync();
             return (await quizzesAPI.GetUserQuizzes()).Data!;
         }
         catch (Exception ex)
@@ -72,6 +157,7 @@ public class QuizzesRepository(IQuizzesAPI quizzesAPI) : BaseTwoTypesObservableR
     {
         try
         {
+            await EnsureInitializedAsync();
             return (await quizzesAPI.GetUserQuizzes(userId)).Data!;
         }
         catch (Exception ex)
@@ -84,6 +170,7 @@ public class QuizzesRepository(IQuizzesAPI quizzesAPI) : BaseTwoTypesObservableR
     {
         try
         {
+            await EnsureInitializedAsync();
             var qz = (await quizzesAPI.UpdateQuiz(quizId, newQuizModel)).Data!;
             // Get ExamineeQuiz counterpart and notify update
             var examineeQuiz = (await quizzesAPI.GetQuizByCode(qz.Code)).Data!;
@@ -104,6 +191,7 @@ public class QuizzesRepository(IQuizzesAPI quizzesAPI) : BaseTwoTypesObservableR
     {
         try
         {
+            await EnsureInitializedAsync();
             return (await quizzesAPI.GetQuizAttempts(quizId)).Data!;
         }
         catch (Exception ex)

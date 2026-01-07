@@ -61,7 +61,7 @@
                                             <!-- Running: Show time started -->
                                             <HorizontalStackLayout Grid.Row="2" Spacing="6" IsVisible="{Binding IsRunning}">
                                                 <Label Text="Started:" Style="{StaticResource CaptionText}"/>
-                                                <Label Text="{Binding StartTime, StringFormat='{0:MMM dd, HH:mm}'}" Style="{StaticResource ScoreText}"/>
+                                                <Label Text="{Binding StartTimeLocal, StringFormat='{0:MMM dd, HH:mm}'}" Style="{StaticResource ScoreText}"/>
                                             </HorizontalStackLayout>
                                             
                                             <!-- Completed: Show score -->

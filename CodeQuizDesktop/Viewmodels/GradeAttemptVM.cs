@@ -47,6 +47,8 @@ namespace CodeQuizDesktop.Viewmodels
                 selectedQuestion = value;
                 HasTestCases = SelectedQuestion!.TestCases.Count != 0;
                 CodeInEditor = Attempt!.Solutions[value!.Order - 1].Code;
+                // Update Grade when question changes
+                Grade = Attempt!.Solutions.Find(s => s.QuestionId == value.Id)?.ReceivedGrade;
 
                 OnPropertyChanged();
             }
@@ -120,16 +122,16 @@ namespace CodeQuizDesktop.Viewmodels
             if (query.ContainsKey("attempt") && query["attempt"] is ExaminerAttempt receivedAttempt)
             {
                 Attempt = receivedAttempt;
-                //System.Diagnostics.Debug.WriteLine($"Attempt ID: {receivedAttempt.Id}");
             }
             if (query.ContainsKey("quiz") && query["quiz"] is ExaminerQuiz receivedQuiz)
             {
                 Quiz = receivedQuiz;
                 SelectedQuestion = Quiz!.Questions.Find(q => q.Order == 1);
-                Grade = Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.ReceivedGrade;
+                // Grade is now set inside SelectedQuestion setter
                 System.Diagnostics.Debug.WriteLine($"Quiz ID: {receivedQuiz.Id}");
             }
         }
+        
         public async Task ReturnToPreviousPage()
         {
             SaveSolution();
@@ -142,7 +144,7 @@ namespace CodeQuizDesktop.Viewmodels
             if (SelectedQuestion!.Order + 1 <= Quiz!.Questions.Count)
             {
                 SelectedQuestion = Quiz!.Questions.Find(q => q.Order == SelectedQuestion!.Order + 1);
-                Grade = Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.ReceivedGrade;
+                // Grade is now set inside SelectedQuestion setter
             }
         }
 
@@ -152,7 +154,7 @@ namespace CodeQuizDesktop.Viewmodels
             if (SelectedQuestion!.Order - 1 > 0)
             {
                 SelectedQuestion = Quiz!.Questions.Find(q => q.Order == SelectedQuestion!.Order - 1);
-                Grade = Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.ReceivedGrade;
+                // Grade is now set inside SelectedQuestion setter
             }
         }
 
@@ -160,7 +162,7 @@ namespace CodeQuizDesktop.Viewmodels
         {
             SaveSolution();
             SelectedQuestion = question;
-            Grade = Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.ReceivedGrade;
+            // Grade is now set inside SelectedQuestion setter
         }
 
         public async Task Run()

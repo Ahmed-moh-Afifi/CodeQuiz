@@ -21,5 +21,44 @@ namespace CodeQuizDesktop.Models
         public required User Examiner { get; set; }
         public required int QustionsCount { get; set; }
         public required float TotalPoints { get; set; }
+
+        /// <summary>
+        /// StartDate converted to local time for UI display
+        /// </summary>
+        public DateTime StartDateLocal => StartDate.ToLocalTime();
+
+        /// <summary>
+        /// EndDate converted to local time for UI display
+        /// </summary>
+        public DateTime EndDateLocal => EndDate.ToLocalTime();
+
+        /// <summary>
+        /// StartDate as formatted string in local time
+        /// </summary>
+        public string StartDateString => StartDate.ToLocalTime().ToShortDateString() + " - " + StartDate.ToLocalTime().ToShortTimeString();
+
+        /// <summary>
+        /// EndDate as formatted string in local time
+        /// </summary>
+        public string EndDateString => EndDate.ToLocalTime().ToShortDateString() + " - " + EndDate.ToLocalTime().ToShortTimeString();
+
+        public string DurationString
+        {
+            get
+            {
+                if (Duration.TotalHours >= 1)
+                {
+                    return $"{(int)Duration.TotalHours}h {(int)Duration.Minutes}m {(int)Duration.Seconds}s";
+                }
+                else if (Duration.TotalMinutes >= 1)
+                {
+                    return $"{(int)Duration.TotalMinutes}m {(int)Duration.Seconds}s";
+                }
+                else
+                {
+                    return $"{(int)Duration.Seconds}s";
+                }
+            }
+        }
     }
 }

@@ -20,7 +20,7 @@ namespace CodeQuizBackend.Authentication.Services
                 Issuer = configuration["Issuer"],
                 Audience = configuration["Audience"],
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddMinutes(double.Parse(configuration["JWTExpiresInMinutes"]!)),
+                Expires = DateTime.UtcNow.AddMinutes(double.Parse(configuration["JWTExpiresInMinutes"]!)),
                 SigningCredentials = creds
             };
 

@@ -35,6 +35,8 @@ namespace CodeQuizDesktop.Viewmodels
                 selectedQuestion = value;
                 HasTestCases = SelectedQuestion!.TestCases.Count != 0;
                 CodeInEditor = Attempt!.Solutions[value!.Order - 1].Code;
+                // Update Grade when question changes
+                Grade = Attempt!.Solutions.Find(s => s.QuestionId == value.Id)?.ReceivedGrade;
 
                 OnPropertyChanged();
             }
@@ -108,6 +110,7 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 Attempt = receivedAttempt;
                 SelectedQuestion = Attempt!.Quiz.Questions.Find(q => q.Order == 1);
+                // Grade is now set inside SelectedQuestion setter
                 System.Diagnostics.Debug.WriteLine($"Clicked: {Attempt.Quiz.Title}");
             }
         }

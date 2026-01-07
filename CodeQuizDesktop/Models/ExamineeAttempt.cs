@@ -55,14 +55,41 @@ namespace CodeQuizDesktop.Models
                 return "-";
             }
         }
+
+        /// <summary>
+        /// StartTime converted to local time for UI display
+        /// </summary>
+        public DateTime StartTimeLocal => StartTime.ToLocalTime();
+
+        /// <summary>
+        /// EndTime converted to local time for UI display
+        /// </summary>
+        public DateTime? EndTimeLocal => EndTime?.ToLocalTime();
+
+        /// <summary>
+        /// StartTime as formatted string in local time
+        /// </summary>
+        public string StartTimeString
+        {
+            get
+            {
+                var localStartTime = StartTime.ToLocalTime();
+                return localStartTime.ToShortDateString() + " - " + localStartTime.ToShortTimeString();
+            }
+        }
         
+        /// <summary>
+        /// EndTime as formatted string in local time
+        /// </summary>
         public string SubmissionTimeString
         {
             get
             {
                 if (EndTime.HasValue)
                 {
-                    return EndTime.Value.ToShortDateString() + " - " + EndTime.Value.ToShortTimeString();
+                    // Convert UTC time to local time for display
+                    var localEndTime = EndTime.Value.ToLocalTime();
+                    return localEndTime.ToShortDateString() + " - " + localEndTime.ToShortTimeString();
                 }
                 return "-";
             }

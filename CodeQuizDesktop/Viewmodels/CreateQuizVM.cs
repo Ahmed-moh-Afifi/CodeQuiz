@@ -413,12 +413,14 @@ namespace CodeQuizDesktop.Viewmodels
             var loadingMessage = QuizModel == null && EditedQuizId == null ? "Publishing quiz..." : "Updating quiz...";
 
             var minsDuration = int.Parse(QuizDurationInMinutes!);
+            
+            // Convert local times to UTC before sending to backend
             var newQuizModel = new NewQuizModel()
             {
                 Title = QuizTitle!,
                 Duration = TimeSpan.FromMinutes(minsDuration),
-                StartDate = AvailableFromDateTime,
-                EndDate = AvailableToDateTime,
+                StartDate = AvailableFromDateTime.ToUniversalTime(),
+                EndDate = AvailableToDateTime.ToUniversalTime(),
                 AllowMultipleAttempts = AllowMultipleAttempts,
                 ExaminerId = authenticationRepository.LoggedInUser!.Id,
                 GlobalQuestionConfiguration = new()

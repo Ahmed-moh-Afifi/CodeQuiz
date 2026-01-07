@@ -158,8 +158,8 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 Attempt = receivedAttempt;
                 _attemptsRepository.SubscribeUpdate(CheckAndUpdate);
-                CalculateRemainingTime();
                 SelectedQuestion = Attempt.Quiz.Questions.Find(q => q.Order == 1);
+                CalculateRemainingTime();
             }
         }
 
@@ -191,7 +191,8 @@ namespace CodeQuizDesktop.Viewmodels
                 dispatcherTimer.Start();
             }
 
-            var tmpRemainingTime = Attempt!.MaxEndTime.Subtract(DateTime.Now);
+            // MaxEndTime is in UTC (from backend), compare with current UTC time
+            var tmpRemainingTime = Attempt!.MaxEndTime.Subtract(DateTime.UtcNow);
             RemainingTime = tmpRemainingTime.TotalSeconds > 0 ? tmpRemainingTime : TimeSpan.Zero;
         }
 
