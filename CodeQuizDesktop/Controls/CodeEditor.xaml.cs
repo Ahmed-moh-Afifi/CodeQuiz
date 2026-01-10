@@ -16,6 +16,16 @@ public partial class CodeEditor : ContentView
     private bool _isSettingCodeFromWebView = false;
     private string? _initialCode;
     private bool _isInitialCodeSet = false;
+    
+    // Debounce timer for auto-save functionality
+    private CancellationTokenSource? _debounceCts;
+    private readonly TimeSpan _debounceDelay = TimeSpan.FromSeconds(2);
+    
+    /// <summary>
+    /// Event fired when the user stops typing for the debounce period (2 seconds).
+    /// Used to trigger auto-save functionality in parent components.
+    /// </summary>
+    public event EventHandler? CodeChangedDebounced;
 
     #region Bindable Properties
 
@@ -126,6 +136,21 @@ public partial class CodeEditor : ContentView
     {
         get => (string)GetValue(CodeProperty);
         set => SetValue(CodeProperty, value);
+    }
+    
+    /// <summary>
+    /// Whether auto-save on typing pause is enabled
+    /// </summary>
+    public static readonly BindableProperty EnableAutoSaveProperty = BindableProperty.Create(
+        nameof(EnableAutoSave),
+        typeof(bool),
+        typeof(CodeEditor),
+        false);
+
+    public bool EnableAutoSave
+    {
+        get => (bool)GetValue(EnableAutoSaveProperty);
+        set => SetValue(EnableAutoSaveProperty, value);
     }
 
     // Code input and output properties
@@ -284,6 +309,12 @@ private async void OnWebMessageReceived(Microsoft.UI.Xaml.Controls.WebView2 send
                 _isSettingCodeFromWebView = true;
                 Code = code;
                 _isSettingCodeFromWebView = false;
+                
+                // Trigger debounced auto-save if enabled
+                if (EnableAutoSave)
+                {
+                    TriggerDebouncedAutoSave();
+                }
             }
         }
         // 2. Handle "ready" signal (Monaco loaded)
@@ -313,6 +344,51 @@ private async void OnWebMessageReceived(Microsoft.UI.Xaml.Controls.WebView2 send
     }
 }
 #endif
+
+    /// <summary>
+    /// Triggers the debounced auto-save mechanism. Cancels any pending debounce
+    /// and starts a new timer. When the timer expires (user stopped typing),
+    /// the CodeChangedDebounced event is fired.
+    /// </summary>
+    private void TriggerDebouncedAutoSave()
+    {
+        // Cancel any existing debounce timer
+        _debounceCts?.Cancel();
+        _debounceCts = new CancellationTokenSource();
+        var token = _debounceCts.Token;
+        
+        // Start a new debounce timer
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(_debounceDelay, token);
+                
+                // If we weren't cancelled, fire the event on the main thread
+                if (!token.IsCancellationRequested)
+                {
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        CodeChangedDebounced?.Invoke(this, EventArgs.Empty);
+                    });
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // Debounce was cancelled by new typing, this is expected
+            }
+        }, token);
+    }
+    
+    /// <summary>
+    /// Cancels any pending debounce timer. Call this when disposing or
+    /// when you want to prevent the auto-save from firing.
+    /// </summary>
+    public void CancelPendingAutoSave()
+    {
+        _debounceCts?.Cancel();
+        _debounceCts = null;
+    }
 
     private static void OnLanguageChanged(BindableObject bindable, object oldValue, object newValue)
     {

@@ -31,9 +31,41 @@ public class GlobalExceptionHandler
 #endif
     }
 
+    /// <summary>
+    /// Checks if the exception is a known LiveCharts2 issue that can be safely ignored.
+    /// This is a known bug in LiveCharts2 when charts are disposed during MAUI navigation.
+    /// </summary>
+    private static bool IsKnownLiveChartsException(Exception? exception)
+    {
+        if (exception == null) return false;
+        
+        // Check for the ContentPanel cast exception from LiveCharts2
+        if (exception.Message.Contains("Unable to cast to ContentPanel") &&
+            exception.StackTrace?.Contains("LiveChartsCore") == true)
+        {
+            return true;
+        }
+        
+        // Check inner exceptions for AggregateException
+        if (exception is AggregateException aggregateException)
+        {
+            return aggregateException.InnerExceptions.Any(IsKnownLiveChartsException);
+        }
+        
+        return exception.InnerException != null && IsKnownLiveChartsException(exception.InnerException);
+    }
+
 #if WINDOWS
     private void OnWindowsUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
+        // Filter out known LiveCharts2 disposal exceptions
+        if (IsKnownLiveChartsException(e.Exception))
+        {
+            _logger.LogWarning("Suppressed known LiveCharts2 disposal exception");
+            e.Handled = true;
+            return;
+        }
+        
         _logger.LogError("Windows unhandled exception", e.Exception);
         e.Handled = true;
 
@@ -47,6 +79,14 @@ public class GlobalExceptionHandler
 #if ANDROID
     private void OnAndroidUnhandledException(object? sender, Android.Runtime.RaiseThrowableEventArgs e)
     {
+        // Filter out known LiveCharts2 disposal exceptions
+        if (IsKnownLiveChartsException(e.Exception))
+        {
+            _logger.LogWarning("Suppressed known LiveCharts2 disposal exception");
+            e.Handled = true;
+            return;
+        }
+        
         _logger.LogError("Android unhandled exception", e.Exception);
         e.Handled = true;
 
@@ -60,6 +100,14 @@ public class GlobalExceptionHandler
 #if IOS || MACCATALYST
     private void OnAppleUnhandledException(object? sender, ObjCRuntime.MarshalManagedExceptionEventArgs e)
     {
+        // Filter out known LiveCharts2 disposal exceptions
+        if (IsKnownLiveChartsException(e.Exception))
+        {
+            _logger.LogWarning("Suppressed known LiveCharts2 disposal exception");
+            e.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
+            return;
+        }
+        
         _logger.LogError("Apple platform unhandled exception", e.Exception);
         e.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
 
@@ -74,6 +122,13 @@ public class GlobalExceptionHandler
     {
         if (e.ExceptionObject is Exception exception)
         {
+            // Filter out known LiveCharts2 disposal exceptions
+            if (IsKnownLiveChartsException(exception))
+            {
+                _logger.LogWarning("Suppressed known LiveCharts2 disposal exception");
+                return;
+            }
+            
             _logger.LogError("Unhandled exception occurred", exception);
             MainThread.BeginInvokeOnMainThread(async () =>
             {
@@ -84,6 +139,14 @@ public class GlobalExceptionHandler
 
     private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
+        // Filter out known LiveCharts2 disposal exceptions
+        if (IsKnownLiveChartsException(e.Exception))
+        {
+            _logger.LogWarning("Suppressed known LiveCharts2 disposal exception");
+            e.SetObserved();
+            return;
+        }
+        
         _logger.LogError("Unobserved task exception", e.Exception);
         e.SetObserved(); // Prevent the app from crashing
         

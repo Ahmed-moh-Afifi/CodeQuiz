@@ -19,7 +19,7 @@
             <!-- Join Quiz Input -->
             <HorizontalStackLayout Grid.Column="1" Spacing="12" VerticalOptions="Center">
                 <Border Style="{StaticResource InputBorder}" WidthRequest="200">
-                    <Entry Text="{Binding QuizCode}" Placeholder="Enter quiz code..."/>
+                    <Entry Text="{Binding QuizCode}" Placeholder="Enter quiz code..." />
                 </Border>
                 <Button Text="Join Quiz" Style="{StaticResource PrimaryButton}" Padding="16,10" FontSize="13" Command="{Binding JoinQuizCommand}"/>
             </HorizontalStackLayout>

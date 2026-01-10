@@ -313,7 +313,7 @@ namespace CodeQuizDesktop.Viewmodels
         public ICommand AddQuestionCommand { get => new Command(async () => await AddQuestion()); }
         public ICommand ReturnCommand { get => new Command(async () => await ReturnToPreviousPage()); }
         public ICommand PublishCommand { get => new Command(async () => await CreateAndPublishQuizAsync()); }
-        public ICommand DeleteQuestionCommand { get => new Command<NewQuestionModel>(DeleteQuestion); }
+        public ICommand DeleteQuestionCommand { get => new Command<NewQuestionModel>(async (q) => await DeleteQuestionAsync(q)); }
         public ICommand EditQuestionCommand { get => new Command<NewQuestionModel>(async (q) => await EditQuestion(q)); }
 
         private readonly IQuizDialogService quizDialogService;
@@ -331,6 +331,19 @@ namespace CodeQuizDesktop.Viewmodels
 
         public async Task ReturnToPreviousPage()
         {
+            // Show confirmation if there are unsaved changes
+            if (QuestionModels.Count > 0 || !string.IsNullOrEmpty(QuizTitle))
+            {
+                var confirmed = await uiService.ShowConfirmationAsync(
+                    "Discard Changes?",
+                    "You have unsaved changes. Are you sure you want to go back?",
+                    "Discard",
+                    "Stay");
+
+                if (!confirmed)
+                    return;
+            }
+
             await navigationService.GoToAsync("..");
         }
 
@@ -344,9 +357,19 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        public void DeleteQuestion(NewQuestionModel q)
+        public async Task DeleteQuestionAsync(NewQuestionModel q)
         {
-            QuestionModels.Remove(q);
+            // Show confirmation dialog before deleting
+            var confirmed = await uiService.ShowDestructiveConfirmationAsync(
+                "Delete Question",
+                $"Are you sure you want to delete Question {q.Order}? This action cannot be undone.",
+                "Delete",
+                "Cancel");
+
+            if (confirmed)
+            {
+                QuestionModels.Remove(q);
+            }
         }
 
         public async Task EditQuestion(NewQuestionModel newQuestionModel)

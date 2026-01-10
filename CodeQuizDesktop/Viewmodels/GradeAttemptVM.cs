@@ -109,6 +109,8 @@ namespace CodeQuizDesktop.Viewmodels
                 OnPropertyChanged();
             }
         }
+        
+        private Action<ExaminerAttempt>? _attemptUpdatedHandler;
 
         //Commands
         public ICommand ReturnCommand { get => new Command(async () => await ReturnToPreviousPage()); }
@@ -122,6 +124,7 @@ namespace CodeQuizDesktop.Viewmodels
             if (query.ContainsKey("attempt") && query["attempt"] is ExaminerAttempt receivedAttempt)
             {
                 Attempt = receivedAttempt;
+                SubscribeToRealTimeUpdates();
             }
             if (query.ContainsKey("quiz") && query["quiz"] is ExaminerQuiz receivedQuiz)
             {
@@ -132,15 +135,62 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
         
+        /// <summary>
+        /// Subscribe to real-time attempt updates for the current attempt
+        /// </summary>
+        private void SubscribeToRealTimeUpdates()
+        {
+            if (Attempt == null) return;
+            
+            _attemptUpdatedHandler = (updatedAttempt) =>
+            {
+                // Only process if this is our attempt
+                if (updatedAttempt.Id != Attempt.Id) return;
+                
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    // Update the attempt with new data
+                    Attempt = updatedAttempt;
+                    
+                    // Update the grade for the currently selected question if it changed
+                    if (SelectedQuestion != null)
+                    {
+                        var solution = Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion.Id);
+                        if (solution != null && Grade != solution.ReceivedGrade)
+                        {
+                            Grade = solution.ReceivedGrade;
+                        }
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine($"Real-time: Attempt {Attempt.Id} updated with new grade data");
+                });
+            };
+            
+            _attemptsRepository.SubscribeUpdate(_attemptUpdatedHandler);
+        }
+        
+        /// <summary>
+        /// Unsubscribe from real-time updates when leaving the view
+        /// </summary>
+        private void UnsubscribeFromUpdates()
+        {
+            if (_attemptUpdatedHandler != null)
+            {
+                _attemptsRepository.UnsubscribeUpdate(_attemptUpdatedHandler);
+                _attemptUpdatedHandler = null;
+            }
+        }
+        
         public async Task ReturnToPreviousPage()
         {
-            SaveSolution();
+            await SaveSolutionGradeAsync();
+            UnsubscribeFromUpdates();
             await _navigationService.GoToAsync("..");
         }
 
-        public void NextQuestion()
+        public async void NextQuestion()
         {
-            SaveSolution();
+            await SaveSolutionGradeAsync();
             if (SelectedQuestion!.Order + 1 <= Quiz!.Questions.Count)
             {
                 SelectedQuestion = Quiz!.Questions.Find(q => q.Order == SelectedQuestion!.Order + 1);
@@ -148,9 +198,9 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        public void PreviousQuestion()
+        public async void PreviousQuestion()
         {
-            SaveSolution();
+            await SaveSolutionGradeAsync();
             if (SelectedQuestion!.Order - 1 > 0)
             {
                 SelectedQuestion = Quiz!.Questions.Find(q => q.Order == SelectedQuestion!.Order - 1);
@@ -158,9 +208,9 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
-        public void SpecificQuestion(Question question)
+        public async void SpecificQuestion(Question question)
         {
-            SaveSolution();
+            await SaveSolutionGradeAsync();
             SelectedQuestion = question;
             // Grade is now set inside SelectedQuestion setter
         }
@@ -208,20 +258,53 @@ namespace CodeQuizDesktop.Viewmodels
 
         }
 
+        /// <summary>
+        /// Saves the grade for the current solution using the dedicated grading endpoint.
+        /// </summary>
+        private async Task SaveSolutionGradeAsync()
+        {
+            if (Grade.HasValue)
+            {
+                var solution = Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!;
+                var request = new UpdateSolutionGradeRequest
+                {
+                    SolutionId = solution.Id,
+                    ReceivedGrade = Grade.Value,
+                    EvaluatedBy = _authRepository.LoggedInUser?.FullName ?? "Instructor"
+                };
+                
+                try
+                {
+                    await _attemptsRepository.UpdateSolutionGrade(request);
+                    // Update local state
+                    solution.ReceivedGrade = Grade.Value;
+                    solution.EvaluatedBy = request.EvaluatedBy;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to save grade: {ex.Message}");
+                }
+            }
+        }
+
+        [Obsolete("Use SaveSolutionGradeAsync instead - grades should be saved via the dedicated grading endpoint")]
         public void SaveSolution()
         {
-            Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.ReceivedGrade = Grade;
-            _attemptsRepository.UpdateSolution(Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!);
+            // Keep for backward compatibility but should not be used for grading
+            _ = SaveSolutionGradeAsync();
         }
 
         private IExecutionRepository _executionRepository;
         private IAttemptsRepository _attemptsRepository;
         private INavigationService _navigationService;
-        public GradeAttemptVM(IExecutionRepository executionRepository, IAttemptsRepository attemptsRepository, INavigationService navigationService)
+        private IAuthenticationRepository _authRepository;
+        
+        public GradeAttemptVM(IExecutionRepository executionRepository, IAttemptsRepository attemptsRepository, INavigationService navigationService, IAuthenticationRepository authRepository)
         {
             _executionRepository = executionRepository;
             _attemptsRepository = attemptsRepository;
             _navigationService = navigationService;
+            _authRepository = authRepository;
         }
     }
 }

@@ -16,5 +16,16 @@ namespace CodeQuizDesktop.Repositories
         public Task<List<ExaminerQuiz>> GetUserQuizzes(string userId);
         public Task<ExamineeQuiz> GetQuizByCode(string code);
         public Task<List<ExaminerAttempt>> GetQuizAttempts(int quizId);
+        
+        /// <summary>
+        /// Join a quiz-specific SignalR group to receive real-time updates for a quiz.
+        /// Used by examinees participating in a specific quiz.
+        /// </summary>
+        Task JoinQuizGroupAsync(int quizId);
+        
+        /// <summary>
+        /// Leave a quiz-specific SignalR group when no longer participating in that quiz.
+        /// </summary>
+        Task LeaveQuizGroupAsync(int quizId);
     }
 }

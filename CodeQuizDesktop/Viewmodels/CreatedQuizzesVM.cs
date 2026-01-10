@@ -12,6 +12,7 @@ namespace CodeQuizDesktop.Viewmodels
     {
         private readonly IQuizzesRepository _quizzesRepository;
         private readonly INavigationService _navigationService;
+        private readonly IUIService _uiService;
 
         private ObservableCollection<ExaminerQuiz> allExaminerQuizzes = [];
 
@@ -46,6 +47,16 @@ namespace CodeQuizDesktop.Viewmodels
 
         public async Task OnDeleteQuizAsync(ExaminerQuiz examinerQuiz)
         {
+            // Show confirmation dialog before deleting
+            var confirmed = await _uiService.ShowDestructiveConfirmationAsync(
+                "Delete Quiz",
+                $"Are you sure you want to delete \"{examinerQuiz.Title}\"? This action cannot be undone and will remove all associated attempts and grades.",
+                "Delete",
+                "Cancel");
+
+            if (!confirmed)
+                return;
+
             await ExecuteAsync(async () =>
             {
                 await _quizzesRepository.DeleteQuiz(examinerQuiz.Id);
@@ -66,28 +77,43 @@ namespace CodeQuizDesktop.Viewmodels
             }, "Loading quizzes...");
         }
 
-        public CreatedQuizzesVM(IQuizzesRepository quizzesRepository, INavigationService navigationService)
+        public CreatedQuizzesVM(IQuizzesRepository quizzesRepository, INavigationService navigationService, IUIService uiService)
         {
             _quizzesRepository = quizzesRepository;
             _navigationService = navigationService;
+            _uiService = uiService;
 
             _quizzesRepository.SubscribeCreate<ExaminerQuiz>(q =>
             {
-                if (AllExaminerQuizzes.FirstOrDefault(qu => qu.Id == q.Id) == null)
-                    AllExaminerQuizzes.Add(q);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    if (AllExaminerQuizzes.FirstOrDefault(qu => qu.Id == q.Id) == null)
+                        AllExaminerQuizzes.Add(q);
+                });
             });
             _quizzesRepository.SubscribeUpdate<ExaminerQuiz>(q =>
             {
-                var element = AllExaminerQuizzes.First(qu => qu.Id == q.Id);
-                var idx = AllExaminerQuizzes.IndexOf(element);
-                AllExaminerQuizzes.Remove(element);
-                AllExaminerQuizzes.Insert(idx, q);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    var element = AllExaminerQuizzes.FirstOrDefault(qu => qu.Id == q.Id);
+                    if (element != null)
+                    {
+                        var idx = AllExaminerQuizzes.IndexOf(element);
+                        AllExaminerQuizzes.Remove(element);
+                        AllExaminerQuizzes.Insert(idx, q);
+                    }
+                });
             });
-            _quizzesRepository.SubscribeDetele<ExaminerQuiz>(q =>
+            _quizzesRepository.SubscribeDetele<ExaminerQuiz>(id =>
             {
-                var element = AllExaminerQuizzes.First(qu => qu.Id == q);
-                var idx = AllExaminerQuizzes.IndexOf(element);
-                AllExaminerQuizzes.Remove(element);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    var element = AllExaminerQuizzes.FirstOrDefault(qu => qu.Id == id);
+                    if (element != null)
+                    {
+                        AllExaminerQuizzes.Remove(element);
+                    }
+                });
             });
         }
     }

@@ -21,6 +21,7 @@ namespace CodeQuizBackend.Tests.Services
         private readonly ApplicationDbContext _dbContext;
         private readonly Mock<IEvaluator> _evaluatorMock;
         private readonly Mock<IHubContext<AttemptsHub>> _attemptsHubContextMock;
+        private readonly Mock<IHubContext<QuizzesHub>> _quizzesHubContextMock;
         private readonly Mock<IMailService> _mailServiceMock;
         private readonly AttemptsService _attemptsService;
 
@@ -32,12 +33,20 @@ namespace CodeQuizBackend.Tests.Services
             _dbContext = new ApplicationDbContext(options);
 
             _evaluatorMock = new Mock<IEvaluator>();
+            
             _attemptsHubContextMock = new Mock<IHubContext<AttemptsHub>>();
-            var clientsMock = new Mock<IHubClients>();
-            var clientProxyMock = new Mock<IClientProxy>();
-            _attemptsHubContextMock.Setup(x => x.Clients).Returns(clientsMock.Object);
-            clientsMock.Setup(x => x.All).Returns(clientProxyMock.Object);
-            clientsMock.Setup(x => x.Group(It.IsAny<string>())).Returns(clientProxyMock.Object);
+            var attemptsClientsMock = new Mock<IHubClients>();
+            var attemptsClientProxyMock = new Mock<IClientProxy>();
+            _attemptsHubContextMock.Setup(x => x.Clients).Returns(attemptsClientsMock.Object);
+            attemptsClientsMock.Setup(x => x.All).Returns(attemptsClientProxyMock.Object);
+            attemptsClientsMock.Setup(x => x.Group(It.IsAny<string>())).Returns(attemptsClientProxyMock.Object);
+
+            _quizzesHubContextMock = new Mock<IHubContext<QuizzesHub>>();
+            var quizzesClientsMock = new Mock<IHubClients>();
+            var quizzesClientProxyMock = new Mock<IClientProxy>();
+            _quizzesHubContextMock.Setup(x => x.Clients).Returns(quizzesClientsMock.Object);
+            quizzesClientsMock.Setup(x => x.All).Returns(quizzesClientProxyMock.Object);
+            quizzesClientsMock.Setup(x => x.Group(It.IsAny<string>())).Returns(quizzesClientProxyMock.Object);
 
             _mailServiceMock = new Mock<IMailService>();
 
@@ -45,6 +54,7 @@ namespace CodeQuizBackend.Tests.Services
                 _dbContext,
                 _evaluatorMock.Object,
                 _attemptsHubContextMock.Object,
+                _quizzesHubContextMock.Object,
                 _mailServiceMock.Object
             );
         }

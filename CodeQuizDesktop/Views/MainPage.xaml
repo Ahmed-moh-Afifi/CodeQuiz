@@ -4,6 +4,7 @@
              xmlns:controls="clr-namespace:CodeQuizDesktop.Controls"
              xmlns:views="clr-namespace:CodeQuizDesktop.Views"
              xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
+             xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
              x:Class="CodeQuizDesktop.MainPage">
 
     <Grid ColumnDefinitions="280,*">

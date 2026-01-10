@@ -76,17 +76,26 @@ namespace CodeQuizDesktop.Viewmodels
             _attemptsRepository = attemptsRepository;
             _navigationService = navigationService;
 
-            _attemptsRepository.SubscribeCreate(a =>
+            _attemptsRepository.SubscribeCreate<ExamineeAttempt>(a =>
             {
-                if (AllExamineeAttempts.FirstOrDefault(at => at.Id == a.Id) == null)
-                    AllExamineeAttempts.Add(a);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    if (AllExamineeAttempts.FirstOrDefault(at => at.Id == a.Id) == null)
+                        AllExamineeAttempts.Add(a);
+                });
             });
-            _attemptsRepository.SubscribeUpdate(a =>
+            _attemptsRepository.SubscribeUpdate<ExamineeAttempt>(a =>
             {
-                var element = AllExamineeAttempts.First(at => at.Id == a.Id);
-                var idx = AllExamineeAttempts.IndexOf(element);
-                AllExamineeAttempts.Remove(element);
-                AllExamineeAttempts.Insert(idx, a);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    var element = AllExamineeAttempts.FirstOrDefault(at => at.Id == a.Id);
+                    if (element != null)
+                    {
+                        var idx = AllExamineeAttempts.IndexOf(element);
+                        AllExamineeAttempts.Remove(element);
+                        AllExamineeAttempts.Insert(idx, a);
+                    }
+                });
             });
         }
     }

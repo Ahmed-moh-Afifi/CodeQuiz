@@ -15,6 +15,76 @@
                 <Label Text="Welcome back! Here's an overview of your activity." Style="{StaticResource CaptionText}"/>
             </VerticalStackLayout>
 
+            <!-- Hero Section - Dynamic based on context -->
+            <Border Style="{StaticResource ElevatedCard}" Padding="0" StrokeShape="RoundRectangle 20">
+                <Grid ColumnDefinitions="*,Auto">
+                    <!-- Left: Content -->
+                    <VerticalStackLayout Padding="28" Spacing="16" VerticalOptions="Start">
+                        <!-- When there are running attempts -->
+                        <VerticalStackLayout Spacing="16" IsVisible="{Binding HasRunningAttempts}">
+                            <HorizontalStackLayout Spacing="10">
+                                <Border BackgroundColor="{StaticResource Running}" StrokeThickness="0" StrokeShape="RoundRectangle 6" Padding="8,4">
+                                    <Label Text="● IN PROGRESS" FontSize="11" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}"/>
+                                </Border>
+                            </HorizontalStackLayout>
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="You have an active quiz!" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}"/>
+                                <Label Text="Don't forget to complete your attempt before time runs out." Style="{StaticResource BodyText}" TextColor="{StaticResource TextSecondary}" HorizontalOptions="Start"/>
+                            </VerticalStackLayout>
+                            <Button Text="Continue Quiz →" Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" Margin="0,8,0,0"
+                                    Command="{Binding ContinueFirstRunningCommand}"/>
+                        </VerticalStackLayout>
+                        
+                        <!-- When no running attempts - Show quick join -->
+                        <VerticalStackLayout Spacing="16" IsVisible="{Binding HasRunningAttempts, Converter={StaticResource InverseBoolConverter}}">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Ready to test your skills?" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}"/>
+                                <Label Text="Join a quiz with a code or create your own challenge for others." Style="{StaticResource BodyText}" TextColor="{StaticResource TextSecondary}" MaximumWidthRequest="400" HorizontalOptions="Start"/>
+                            </VerticalStackLayout>
+                            <HorizontalStackLayout Spacing="12" Margin="0,8,0,0">
+                                <Button Text="Join Quiz" Style="{StaticResource PrimaryButton}" Command="{Binding ViewAllJoinedCommand}"/>
+                                <Button Text="Create Quiz" Style="{StaticResource SecondaryButton}" Command="{Binding ViewAllCreatedCommand}"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                    
+                    <!-- Right: Decorative Code Block (JSON style like VSCode) -->
+                    <Border Grid.Column="1" BackgroundColor="{StaticResource BackgroundDark}" StrokeThickness="0" 
+                            Padding="24" Margin="0" WidthRequest="300"
+                            StrokeShape="RoundRectangle 0,20,0,20">
+                        <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                            <Label Text="{}{" FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource TextPrimary}"/>
+                            <HorizontalStackLayout Spacing="0" Margin="16,0,0,0">
+                                <Label Text="&quot;joined&quot;" FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource CodeKeyword}"/>
+                                <Label Text=": " FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource TextPrimary}"/>
+                                <Label Text="{Binding JoinedAttempts.Count}" FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource CodeString}"/>
+                                <Label Text="," FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource TextPrimary}"/>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="0" Margin="16,0,0,0">
+                                <Label Text="&quot;created&quot;" FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource CodeKeyword}"/>
+                                <Label Text=": " FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource TextPrimary}"/>
+                                <Label Text="{Binding CreatedQuizzes.Count}" FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource CodeString}"/>
+                                <Label Text="," FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource TextPrimary}"/>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="0" Margin="16,0,0,0">
+                                <Label Text="&quot;active&quot;" FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource CodeKeyword}"/>
+                                <Label Text=": " FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource TextPrimary}"/>
+                                <Label Text="{Binding UpcomingQuizzes.Count}" FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource CodeString}"/>
+                                <Label Text="," FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource TextPrimary}"/>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="0" Margin="16,0,0,0">
+                                <Label Text="&quot;status&quot;" FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource CodeKeyword}"/>
+                                <Label Text=": " FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource TextPrimary}"/>
+                                <Label Text="&quot;ready&quot;" FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource CodeString}"/>
+                            </HorizontalStackLayout>
+                            <Label Text="}" FontFamily="SFMonoRegular" FontSize="13" TextColor="{StaticResource TextPrimary}"/>
+                            <BoxView HeightRequest="1" Color="{StaticResource BorderDefault}" Margin="0,8"/>
+                            <Label Text="//Keep challenging, Keep coding!" FontFamily="SFMonoRegular" FontSize="12" TextColor="{StaticResource TextMuted}"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+            </Border>
+
             <!-- Cards Grid -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="24">
                 
@@ -23,7 +93,16 @@
                     <VerticalStackLayout Spacing="20">
                         <!-- Card Header -->
                         <Grid ColumnDefinitions="*,Auto">
-                            <Label Text="Joined Quizzes" Style="{StaticResource SectionHeader}"/>
+                            <HorizontalStackLayout Spacing="12">
+                                <Border BackgroundColor="{StaticResource PrimaryTransparent}" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="8">
+                                    <Image Source="quiz.png" WidthRequest="18" HeightRequest="18">
+                                        <Image.Behaviors>
+                                            <toolkit:IconTintColorBehavior TintColor="{StaticResource Primary}"/>
+                                        </Image.Behaviors>
+                                    </Image>
+                                </Border>
+                                <Label Text="Joined Quizzes" Style="{StaticResource SectionHeader}" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
                             <Border Grid.Column="1" BackgroundColor="Transparent" StrokeThickness="0">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ViewAllJoinedCommand}"/>
@@ -34,11 +113,25 @@
 
                         <!-- Joined Quizzes List -->
                         <CollectionView ItemsSource="{Binding JoinedAttempts}" MaximumHeightRequest="400">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
+                            </CollectionView.ItemsLayout>
                             <CollectionView.EmptyView>
-                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="20">
-                                    <Label Text="No quizzes joined yet" TextColor="{StaticResource TextMuted}" FontSize="15" HorizontalOptions="Center"/>
-                                    <Label Text="Join a quiz to see it here" TextColor="{StaticResource TextDisabled}" FontSize="13" HorizontalOptions="Center" Margin="0,6,0,0"/>
-                                </VerticalStackLayout>
+                                <Border Style="{StaticResource InnerCard}" Padding="24">
+                                    <HorizontalStackLayout Spacing="16" HorizontalOptions="Center">
+                                        <Border BackgroundColor="{StaticResource Secondary}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="12">
+                                            <Image Source="question.svg" WidthRequest="24" HeightRequest="24">
+                                                <Image.Behaviors>
+                                                    <toolkit:IconTintColorBehavior TintColor="{StaticResource TextMuted}"/>
+                                                </Image.Behaviors>
+                                            </Image>
+                                        </Border>
+                                        <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                                            <Label Text="No quizzes joined yet" TextColor="{StaticResource TextSecondary}" FontSize="15" FontAttributes="Bold"/>
+                                            <Label Text="Join one using a quiz code" TextColor="{StaticResource TextMuted}" FontSize="13"/>
+                                        </VerticalStackLayout>
+                                    </HorizontalStackLayout>
+                                </Border>
                             </CollectionView.EmptyView>
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="models:ExamineeAttempt">
@@ -92,7 +185,16 @@
                     <VerticalStackLayout Spacing="20">
                         <!-- Card Header -->
                         <Grid ColumnDefinitions="*,Auto">
-                            <Label Text="Created Quizzes" Style="{StaticResource SectionHeader}"/>
+                            <HorizontalStackLayout Spacing="12">
+                                <Border BackgroundColor="{StaticResource SuccessTransparent}" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="8">
+                                    <Image Source="teacher.png" WidthRequest="18" HeightRequest="18">
+                                        <Image.Behaviors>
+                                            <toolkit:IconTintColorBehavior TintColor="{StaticResource Success}"/>
+                                        </Image.Behaviors>
+                                    </Image>
+                                </Border>
+                                <Label Text="Created Quizzes" Style="{StaticResource SectionHeader}" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
                             <Border Grid.Column="1" BackgroundColor="Transparent" StrokeThickness="0">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ViewAllCreatedCommand}"/>
@@ -103,11 +205,24 @@
 
                         <!-- Created Quizzes List -->
                         <CollectionView ItemsSource="{Binding CreatedQuizzes}" MaximumHeightRequest="400">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
+                            </CollectionView.ItemsLayout>
                             <CollectionView.EmptyView>
-                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="20">
-                                    <Label Text="No quizzes created yet" TextColor="{StaticResource TextMuted}" FontSize="15" HorizontalOptions="Center"/>
-                                    <Label Text="Create a quiz to see it here" TextColor="{StaticResource TextDisabled}" FontSize="13" HorizontalOptions="Center" Margin="0,6,0,0"/>
-                                </VerticalStackLayout>
+                                <Border Style="{StaticResource InnerCard}" Padding="24">
+                                    <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                                        <Border BackgroundColor="{StaticResource Secondary}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="12" HorizontalOptions="Center">
+                                            <Image Source="pencil.svg" WidthRequest="24" HeightRequest="24">
+                                                <Image.Behaviors>
+                                                    <toolkit:IconTintColorBehavior TintColor="{StaticResource TextMuted}"/>
+                                                </Image.Behaviors>
+                                            </Image>
+                                        </Border>
+                                        <Label Text="No quizzes created yet" TextColor="{StaticResource TextSecondary}" FontSize="15" FontAttributes="Bold" HorizontalOptions="Center"/>
+                                        <Label Text="Create your first quiz to get started" TextColor="{StaticResource TextMuted}" FontSize="13" HorizontalOptions="Center"/>
+                                        <Button Text="+ New Quiz" Style="{StaticResource OutlinedButton}" Margin="0,4,0,0" Command="{Binding ViewAllCreatedCommand}"/>
+                                    </VerticalStackLayout>
+                                </Border>
                             </CollectionView.EmptyView>
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="models:ExaminerQuiz">
@@ -127,7 +242,21 @@
                                                 </Border>
                                             </Grid>
                                             
-                                            <Label Grid.Row="1" Text="{Binding QustionsCount, StringFormat='{0} Questions'}" Style="{StaticResource CaptionText}"/>
+                                            <!-- Stats Row -->
+                                            <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                                <VerticalStackLayout Spacing="2">
+                                                    <Label Text="{Binding QustionsCount}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}"/>
+                                                    <Label Text="Questions" Style="{StaticResource CaptionText}" FontSize="11"/>
+                                                </VerticalStackLayout>
+                                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                                    <Label Text="{Binding AttemptsCount}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}"/>
+                                                    <Label Text="Participants" Style="{StaticResource CaptionText}" FontSize="11"/>
+                                                </VerticalStackLayout>
+                                                <VerticalStackLayout Grid.Column="2" Spacing="2">
+                                                    <Label Text="{Binding AverageAttemptScore, StringFormat='{0:F0}%'}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Success}"/>
+                                                    <Label Text="Avg Score" Style="{StaticResource CaptionText}" FontSize="11"/>
+                                                </VerticalStackLayout>
+                                            </Grid>
                                             
                                             <!-- Quiz Code -->
                                             <Border Grid.Row="2" Style="{StaticResource StatusBadge}" Padding="12,10">

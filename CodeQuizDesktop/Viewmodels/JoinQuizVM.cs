@@ -9,6 +9,7 @@ namespace CodeQuizDesktop.Viewmodels
     public class JoinQuizVM : BaseViewModel, IQueryAttributable
     {
         private readonly INavigationService _navigationService;
+        private readonly IUIService _uiService;
         private ExamineeAttempt? attempt;
         public ExamineeAttempt? Attempt
         {
@@ -17,6 +18,7 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 attempt = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(QuizProgress));
             }
         }
 
@@ -27,27 +29,104 @@ namespace CodeQuizDesktop.Viewmodels
             set
             {
                 remainingTime = new TimeSpan(value.Hours, value.Minutes, value.Seconds);
-                if (value.Hours == 0 && value.Minutes == 0 && value.Seconds == 0)
+                if (value.TotalMilliseconds == 0)
                 {
-                    WaitingForAutoSubmission = true;
-                    SaveSolution();
+                    // Time's up - trigger the async submission sequence
+                    _ = HandleTimeExpiredAsync();
                 }
                 OnPropertyChanged();
             }
         }
 
-        private bool waitingForAutoSubmission = false;
-        public bool WaitingForAutoSubmission
+        private bool submitting = false;
+        public bool Submitting
         {
-            get { return waitingForAutoSubmission; }
+            get { return submitting; }
             set
             {
-                waitingForAutoSubmission = value;
+                submitting = value;
                 if (value)
                 {
-                    System.Diagnostics.Debug.WriteLine("WaitingForAutoSubmission Set to TRUE");
+                    System.Diagnostics.Debug.WriteLine("Submitting Set to TRUE");
                 }
                 OnPropertyChanged();
+            }
+        }
+
+        private bool isSavingManually = false;
+        /// <summary>
+        /// Indicates if a manual save operation is in progress (triggered by navigation)
+        /// </summary>
+        public bool IsSavingManually
+        {
+            get { return isSavingManually; }
+            set
+            {
+                isSavingManually = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool isAutoSaving = false;
+        /// <summary>
+        /// Indicates if an auto-save operation is in progress
+        /// </summary>
+        public bool IsAutoSaving
+        {
+            get { return isAutoSaving; }
+            set
+            {
+                isAutoSaving = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private DateTime? lastSavedTime;
+        /// <summary>
+        /// The last time the solution was saved
+        /// </summary>
+        public DateTime? LastSavedTime
+        {
+            get { return lastSavedTime; }
+            set
+            {
+                lastSavedTime = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(LastSavedText));
+            }
+        }
+
+        /// <summary>
+        /// Formatted text for the last saved time
+        /// </summary>
+        public string LastSavedText
+        {
+            get
+            {
+                if (LastSavedTime == null)
+                    return "Not saved yet";
+                
+                var timeSince = DateTime.Now - LastSavedTime.Value;
+                if (timeSince.TotalSeconds < 5)
+                    return "Just now";
+                if (timeSince.TotalSeconds < 60)
+                    return $"{(int)timeSince.TotalSeconds}s ago";
+                if (timeSince.TotalMinutes < 60)
+                    return $"{(int)timeSince.TotalMinutes}m ago";
+                return LastSavedTime.Value.ToString("HH:mm");
+            }
+        }
+
+        /// <summary>
+        /// Progress through the quiz (0.0 to 1.0) based on current question
+        /// </summary>
+        public double QuizProgress
+        {
+            get
+            {
+                if (Attempt?.Quiz?.Questions == null || Attempt.Quiz.Questions.Count == 0 || SelectedQuestion == null)
+                    return 0;
+                return (double)SelectedQuestion.Order / Attempt.Quiz.Questions.Count;
             }
         }
 
@@ -81,6 +160,7 @@ namespace CodeQuizDesktop.Viewmodels
                 }
 
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(QuizProgress));
             }
         }
 
@@ -138,15 +218,25 @@ namespace CodeQuizDesktop.Viewmodels
                 OnPropertyChanged();
             }
         }
+        
+        /// <summary>
+        /// Flag to prevent multiple simultaneous auto-save operations
+        /// </summary>
+        private bool _isAutoSaving = false;
+        
+        /// <summary>
+        /// Flag to prevent multiple simultaneous submission operations
+        /// </summary>
+        private bool _isSubmitting = false;
 
         public EditorType EditorTypeValue { get; set; }
 
         // Commands
         public ICommand ReturnCommand { get => new Command(async () => await ReturnToPreviousPageAsync()); }
         public ICommand SubmitQuizCommand { get => new Command(async () => await SubmitQuizAsync()); }
-        public ICommand NextQuestionCommand { get => new Command(NextQuestion); }
-        public ICommand PreviousQuestionCommand { get => new Command(PreviousQuestion); }
-        public ICommand SpecificQuestionCommand { get => new Command<Question>(SpecificQuestion); }
+        public ICommand NextQuestionCommand { get => new Command(async () => await NextQuestionAsync()); }
+        public ICommand PreviousQuestionCommand { get => new Command(async () => await PreviousQuestionAsync()); }
+        public ICommand SpecificQuestionCommand { get => new Command<Question>(async (q) => await SpecificQuestionAsync(q)); }
         public ICommand RunCommand { get => new Command(async () => await RunAsync()); }
 
         // Remaining Time Timer
@@ -157,7 +247,7 @@ namespace CodeQuizDesktop.Viewmodels
             if (query.ContainsKey("attempt") && query["attempt"] is ExamineeAttempt receivedAttempt)
             {
                 Attempt = receivedAttempt;
-                _attemptsRepository.SubscribeUpdate(CheckAndUpdate);
+                //_attemptsRepository.SubscribeUpdate(CheckAndUpdate);
                 SelectedQuestion = Attempt.Quiz.Questions.Find(q => q.Order == 1);
                 CalculateRemainingTime();
             }
@@ -174,7 +264,8 @@ namespace CodeQuizDesktop.Viewmodels
                     {
                         dispatcherTimer?.Stop();
                         dispatcherTimer = null;
-                        WaitingForAutoSubmission = false;
+                        Submitting = false;
+                        _isSubmitting = false;
                         await ReturnToPreviousPageAsync();
                     });
                 }
@@ -200,45 +291,223 @@ namespace CodeQuizDesktop.Viewmodels
         {
             await _navigationService.GoToAsync("///MainPage");
         }
-
-        private void SaveSolution()
+        
+        /// <summary>
+        /// Saves the current solution asynchronously and waits for the operation to complete.
+        /// Returns true if save was successful, false otherwise.
+        /// </summary>
+        private async Task<bool> SaveSolutionAsync()
         {
-            Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.Code = CodeInEditor;
-            _attemptsRepository.UpdateSolution(Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!);
+            try
+            {
+                Attempt!.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!.Code = CodeInEditor;
+                await _attemptsRepository.UpdateSolution(Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion!.Id)!);
+                System.Diagnostics.Debug.WriteLine("Solution saved successfully");
+                LastSavedTime = DateTime.Now;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to save solution: {ex.Message}");
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// Handles the debounced auto-save event from the CodeEditor.
+        /// Saves the current solution when the user stops typing for 2 seconds.
+        /// </summary>
+        public async void OnAutoSaveTriggered(object? sender, EventArgs e)
+        {
+            // Prevent multiple simultaneous saves
+            if (_isAutoSaving || Submitting || IsSavingManually || _isSubmitting)
+                return;
+                
+            try
+            {
+                _isAutoSaving = true;
+                IsAutoSaving = true;
+                System.Diagnostics.Debug.WriteLine("Auto-save triggered (user stopped typing)");
+                await SaveSolutionAsync();
+            }
+            finally
+            {
+                _isAutoSaving = false;
+                IsAutoSaving = false;
+            }
+        }
+        
+        /// <summary>
+        /// Handles the time expiration sequence using "Frontend-First" submission strategy.
+        /// When the timer reaches zero:
+        /// 1. Immediately lock the UI
+        /// 2. Save any pending changes
+        /// 3. Call SubmitAttempt directly (frontend is the primary submission actor)
+        /// </summary>
+        private async Task HandleTimeExpiredAsync()
+        {
+            // Prevent duplicate submission
+            if (_isSubmitting)
+            {
+                System.Diagnostics.Debug.WriteLine("HandleTimeExpiredAsync: Already submitting, skipping");
+                return;
+            }
+            
+            _isSubmitting = true;
+            
+            // 1. Immediately lock the UI
+            Submitting = true;
+            
+            // Stop the timer to prevent further ticks
+            dispatcherTimer?.Stop();
+            
+            try
+            {
+                // 2. Save any pending changes (best effort - don't fail if this fails)
+                System.Diagnostics.Debug.WriteLine("Time expired - saving final solution before submit");
+                await SaveSolutionAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log but don't prevent submission - data loss is acceptable if save fails at deadline
+                System.Diagnostics.Debug.WriteLine($"Failed to save final solution: {ex.Message}");
+            }
+            
+            try
+            {
+                // 3. Frontend-First: Submit the attempt directly from the client
+                System.Diagnostics.Debug.WriteLine("Submitting attempt from frontend (Frontend-First strategy)");
+                await _attemptsRepository.SubmitAttempt(Attempt!.Id);
+                
+                Submitting = false;
+                await ReturnToPreviousPageAsync();
+            }
+            catch (Exception ex)
+            {
+                // If submission fails, the backend's AttemptTimerService will eventually auto-submit
+                System.Diagnostics.Debug.WriteLine($"Frontend submission failed, backend will handle: {ex.Message}");
+                Submitting = false;
+                await ReturnToPreviousPageAsync();
+            }
+            finally
+            {
+                _isSubmitting = false;
+            }
         }
 
         private async Task SubmitQuizAsync()
         {
-            await ExecuteAsync(async () =>
+            // Prevent duplicate submission
+            if (_isSubmitting || Submitting)
             {
-                SaveSolution();
-                var response = await _attemptsRepository.SubmitAttempt(Attempt!.Id);
-            }, "Submitting quiz...");
-            await ReturnToPreviousPageAsync();
-        }
+                System.Diagnostics.Debug.WriteLine("SubmitQuizAsync: Already submitting, skipping");
+                return;
+            }
 
-        private void NextQuestion()
-        {
-            SaveSolution();
-            if (SelectedQuestion!.Order + 1 <= Attempt!.Quiz.Questions.Count)
+            // Show confirmation dialog before submitting
+            var confirmed = await _uiService.ShowConfirmationAsync(
+                "Submit Quiz",
+                "Are you sure you want to submit your quiz? You won't be able to make any more changes after submission.",
+                "Submit",
+                "Cancel");
+
+            if (!confirmed)
+                return;
+
+            // Set flags BEFORE showing loading indicator to prevent race conditions
+            _isSubmitting = true;
+            //Submitting = true;
+            
+            // Stop the timer to prevent time-based submission during manual submission
+            dispatcherTimer?.Stop();
+
+            try
             {
-                SelectedQuestion = Attempt!.Quiz.Questions.Find(q => q.Order == SelectedQuestion!.Order + 1);
+                // Show loading indicator manually instead of using ExecuteAsync to avoid double loading
+                if (UIService != null)
+                    await UIService.ShowLoadingAsync("Submitting quiz...");
+                    
+                // Await save to ensure changes are persisted before submit
+                await SaveSolutionAsync();
+                await _attemptsRepository.SubmitAttempt(Attempt!.Id);
+                
+                if (UIService != null)
+                    await UIService.HideLoadingAsync();
+                    
+                await ReturnToPreviousPageAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SubmitQuizAsync failed: {ex.Message}");
+                if (UIService != null)
+                    await UIService.HideLoadingAsync();
+                    
+                await _uiService.ShowErrorAsync($"Failed to submit quiz: {ex.Message}");
+            }
+            finally
+            {
+                _isSubmitting = false;
+                Submitting = false;
             }
         }
 
-        private void PreviousQuestion()
+        private async Task NextQuestionAsync()
         {
-            SaveSolution();
-            if (SelectedQuestion!.Order - 1 > 0)
+            if (IsSavingManually || Submitting || _isSubmitting)
+                return;
+                
+            try
             {
-                SelectedQuestion = Attempt!.Quiz.Questions.Find(q => q.Order == SelectedQuestion!.Order - 1);
+                IsSavingManually = true;
+                await SaveSolutionAsync();
+                
+                if (SelectedQuestion!.Order + 1 <= Attempt!.Quiz.Questions.Count)
+                {
+                    SelectedQuestion = Attempt!.Quiz.Questions.Find(q => q.Order == SelectedQuestion!.Order + 1);
+                }
+            }
+            finally
+            {
+                IsSavingManually = false;
             }
         }
 
-        private void SpecificQuestion(Question question)
+        private async Task PreviousQuestionAsync()
         {
-            SaveSolution();
-            SelectedQuestion = question;
+            if (IsSavingManually || Submitting || _isSubmitting)
+                return;
+                
+            try
+            {
+                IsSavingManually = true;
+                await SaveSolutionAsync();
+                
+                if (SelectedQuestion!.Order - 1 > 0)
+                {
+                    SelectedQuestion = Attempt!.Quiz.Questions.Find(q => q.Order == SelectedQuestion!.Order - 1);
+                }
+            }
+            finally
+            {
+                IsSavingManually = false;
+            }
+        }
+
+        private async Task SpecificQuestionAsync(Question question)
+        {
+            if (IsSavingManually || Submitting || _isSubmitting)
+                return;
+                
+            try
+            {
+                IsSavingManually = true;
+                await SaveSolutionAsync();
+                SelectedQuestion = question;
+            }
+            finally
+            {
+                IsSavingManually = false;
+            }
         }
 
         private async Task RunAsync()
@@ -296,12 +565,13 @@ namespace CodeQuizDesktop.Viewmodels
         private readonly IAttemptsRepository _attemptsRepository;
         private readonly IExecutionRepository _executionRepository;
 
-        public JoinQuizVM(IAttemptsRepository attemptsRepository, IExecutionRepository executionRepository, INavigationService navigationService)
+        public JoinQuizVM(IAttemptsRepository attemptsRepository, IExecutionRepository executionRepository, INavigationService navigationService, IUIService uiService)
         {
             _attemptsRepository = attemptsRepository;
             _executionRepository = executionRepository;
             _navigationService = navigationService;
-            _attemptsRepository.SubscribeUpdate(a => Attempt = a);
+            _uiService = uiService;
+            _attemptsRepository.SubscribeUpdate<ExamineeAttempt>(a => Attempt = a);
         }
     }
 }

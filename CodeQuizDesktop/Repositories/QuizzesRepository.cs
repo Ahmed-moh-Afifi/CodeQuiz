@@ -14,6 +14,7 @@ public class QuizzesRepository : BaseTwoTypesObservableRepository<ExaminerQuiz, 
     private bool _isInitialized = false;
     private readonly SemaphoreSlim _initLock = new(1, 1);
     private string? _currentUserId;
+    private readonly HashSet<int> _joinedQuizGroups = new();
 
     public QuizzesRepository(IQuizzesAPI quizzesAPI, IAuthenticationRepository authRepository)
     {
@@ -46,16 +47,26 @@ public class QuizzesRepository : BaseTwoTypesObservableRepository<ExaminerQuiz, 
                         try
                         {
                             await _connection.InvokeAsync("LeaveExaminerGroup", _currentUserId);
+                            
+                            // Leave all joined quiz groups
+                            foreach (var quizId in _joinedQuizGroups)
+                            {
+                                await _connection.InvokeAsync("LeaveQuizGroup", quizId);
+                            }
                         }
                         catch { /* Ignore errors when leaving groups */ }
                     }
                     await _connection.DisposeAsync();
+                    _joinedQuizGroups.Clear();
                 }
 
                 _connection = new HubConnectionBuilder()
                     .WithUrl($"{Config.HUB}/Quizzes")
                     .WithAutomaticReconnect()
                     .Build();
+                
+                // Handle reconnection to re-join groups
+                _connection.Reconnected += OnReconnectedAsync;
                     
                 _connection.On<ExaminerQuiz, ExamineeQuiz>("QuizCreated", (erq, eeq) => 
                 {
@@ -93,6 +104,75 @@ public class QuizzesRepository : BaseTwoTypesObservableRepository<ExaminerQuiz, 
             finally
             {
                 _initLock.Release();
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Handles reconnection by re-joining all groups
+    /// </summary>
+    private async Task OnReconnectedAsync(string? connectionId)
+    {
+        System.Diagnostics.Debug.WriteLine($"SignalR (Quizzes) reconnected with connection ID: {connectionId}");
+        
+        try
+        {
+            if (_currentUserId != null)
+            {
+                await _connection!.InvokeAsync("JoinExaminerGroup", _currentUserId);
+                
+                // Re-join all quiz groups
+                foreach (var quizId in _joinedQuizGroups)
+                {
+                    await _connection!.InvokeAsync("JoinQuizGroup", quizId);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to re-join groups after reconnection: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Join a quiz-specific SignalR group to receive real-time updates for a quiz.
+    /// Used by examinees participating in a specific quiz.
+    /// </summary>
+    public async Task JoinQuizGroupAsync(int quizId)
+    {
+        await EnsureInitializedAsync();
+        
+        if (_connection?.State == HubConnectionState.Connected && !_joinedQuizGroups.Contains(quizId))
+        {
+            try
+            {
+                await _connection.InvokeAsync("JoinQuizGroup", quizId);
+                _joinedQuizGroups.Add(quizId);
+                System.Diagnostics.Debug.WriteLine($"Joined quiz group: quiz_{quizId}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to join quiz group {quizId}: {ex.Message}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Leave a quiz-specific SignalR group when no longer participating in that quiz.
+    /// </summary>
+    public async Task LeaveQuizGroupAsync(int quizId)
+    {
+        if (_connection?.State == HubConnectionState.Connected && _joinedQuizGroups.Contains(quizId))
+        {
+            try
+            {
+                await _connection.InvokeAsync("LeaveQuizGroup", quizId);
+                _joinedQuizGroups.Remove(quizId);
+                System.Diagnostics.Debug.WriteLine($"Left quiz group: quiz_{quizId}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to leave quiz group {quizId}: {ex.Message}");
             }
         }
     }

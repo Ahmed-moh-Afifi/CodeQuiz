@@ -12,6 +12,7 @@ namespace CodeQuizDesktop.Tests.Viewmodels
         private readonly Mock<IAttemptsRepository> _attemptsRepoMock;
         private readonly Mock<IExecutionRepository> _executionRepoMock;
         private readonly Mock<INavigationService> _navServiceMock;
+        private readonly Mock<IUIService> _uiServiceMock;
         private readonly JoinQuizVM _viewModel;
 
         public JoinQuizVMTests()
@@ -19,8 +20,9 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             _attemptsRepoMock = new Mock<IAttemptsRepository>();
             _executionRepoMock = new Mock<IExecutionRepository>();
             _navServiceMock = new Mock<INavigationService>();
+            _uiServiceMock = new Mock<IUIService>();
 
-            _viewModel = new JoinQuizVM(_attemptsRepoMock.Object, _executionRepoMock.Object, _navServiceMock.Object);
+            _viewModel = new JoinQuizVM(_attemptsRepoMock.Object, _executionRepoMock.Object, _navServiceMock.Object, _uiServiceMock.Object);
         }
 
         [Fact]

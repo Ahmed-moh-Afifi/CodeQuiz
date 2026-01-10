@@ -10,6 +10,7 @@ using CommunityToolkit.Maui.Services;
 using Microsoft.Extensions.Logging;
 using Refit;
 using Sharpnado.MaterialFrame;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace CodeQuizDesktop
 {
@@ -26,6 +27,7 @@ namespace CodeQuizDesktop
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
+                .UseSkiaSharp()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -36,6 +38,31 @@ namespace CodeQuizDesktop
                     fonts.AddFont("Inter-Black.otf", "InterBlack");
                 });
 
+            // Apply the "RemoveBorder" logic to all relevant controls
+            Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveBorder(h.PlatformView));
+            Microsoft.Maui.Handlers.EditorHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveBorder(h.PlatformView));
+            Microsoft.Maui.Handlers.PickerHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveBorder(h.PlatformView));
+            Microsoft.Maui.Handlers.DatePickerHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveBorder(h.PlatformView));
+            Microsoft.Maui.Handlers.TimePickerHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveBorder(h.PlatformView));
+
+            // Helper method to modify the Windows Native Control
+            static void RemoveBorder(object platformView)
+            {
+#if WINDOWS
+    if (platformView is Microsoft.UI.Xaml.Controls.Control nativeControl)
+    {
+        // 1. Remove the main border
+        nativeControl.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+        
+        // 2. Remove the "Focus Ring" (The separate border that appears when focused)
+        nativeControl.FocusVisualPrimaryThickness = new Microsoft.UI.Xaml.Thickness(0);
+        nativeControl.FocusVisualSecondaryThickness = new Microsoft.UI.Xaml.Thickness(0);
+        
+        // 3. Optional: Force the border brush to transparent just in case
+        // nativeControl.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+    }
+#endif
+            }
 
 #if DEBUG
             builder.Logging.AddDebug();

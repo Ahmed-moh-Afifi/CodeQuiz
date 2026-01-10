@@ -4,10 +4,18 @@
              xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              xmlns:models="clr-namespace:CodeQuizDesktop.Models"
              xmlns:controls="clr-namespace:CodeQuizDesktop.Controls"
+             xmlns:converters="clr-namespace:CodeQuizDesktop.Converters"
              xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
              x:Class="CodeQuizDesktop.Views.JoinQuiz"
              Title="JoinQuiz"
              x:DataType="vm:JoinQuizVM">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:SelectedQuestionBackgroundConverter x:Key="SelectedQuestionBackgroundConverter"/>
+            <converters:SelectedQuestionBorderConverter x:Key="SelectedQuestionBorderConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*">
         <!-- Header -->
@@ -50,14 +58,26 @@
         <Grid Grid.Row="1" ColumnDefinitions="1*,4.3*">
             <!-- Sidebar -->
             <Border StrokeThickness="0" BackgroundColor="{StaticResource BackgroundDark}">
-                <Grid RowDefinitions="Auto,Auto">
+                <Grid RowDefinitions="*,Auto,Auto">
                     <VerticalStackLayout Padding="24" Spacing="20">
                         <Label Text="Questions" Style="{StaticResource SectionHeader}" FontSize="16"/>
 
                         <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="Start" AlignItems="Center" AlignContent="Start" BindableLayout.ItemsSource="{Binding Attempt.Quiz.Questions}">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="models:Question">
-                                    <Border StrokeShape="RoundRectangle 8" BackgroundColor="{StaticResource SurfaceDark}" Padding="18,14" Stroke="{StaticResource BorderDefault}" StrokeThickness="1" Margin="3">
+                                    <Border StrokeShape="RoundRectangle 8" Padding="18,14" StrokeThickness="1" Margin="3">
+                                        <Border.BackgroundColor>
+                                            <MultiBinding Converter="{StaticResource SelectedQuestionBackgroundConverter}">
+                                                <Binding Path="Order"/>
+                                                <Binding Path="SelectedQuestion" Source="{RelativeSource AncestorType={x:Type vm:JoinQuizVM}}"/>
+                                            </MultiBinding>
+                                        </Border.BackgroundColor>
+                                        <Border.Stroke>
+                                            <MultiBinding Converter="{StaticResource SelectedQuestionBorderConverter}">
+                                                <Binding Path="Order"/>
+                                                <Binding Path="SelectedQuestion" Source="{RelativeSource AncestorType={x:Type vm:JoinQuizVM}}"/>
+                                            </MultiBinding>
+                                        </Border.Stroke>
                                         <Border.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JoinQuizVM}}, Path=SpecificQuestionCommand}" CommandParameter="{Binding .}"/>
                                         </Border.GestureRecognizers>
@@ -66,22 +86,68 @@
                                                 <VisualState x:Name="Normal"/>
                                                 <VisualState x:Name="PointerOver">
                                                     <VisualState.Setters>
-                                                        <Setter Property="BackgroundColor" Value="{StaticResource Secondary}"/>
+                                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryHover}"/>
                                                     </VisualState.Setters>
                                                 </VisualState>
                                             </VisualStateGroup>
                                         </VisualStateManager.VisualStateGroups>
-                                        <Label Text="{Binding Order}" FontSize="16" FontAttributes="Bold"/>
+                                        <Label Text="{Binding Order}" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}"/>
                                     </Border>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </FlexLayout>
 
-                        <ProgressBar Progress="0.3"/>
+                        <!-- Quiz Progress -->
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Progress" Style="{StaticResource CaptionText}"/>
+                                <Label Grid.Column="1" Style="{StaticResource CaptionText}">
+                                    <Label.Text>
+                                        <MultiBinding StringFormat="{}{0} / {1}">
+                                            <Binding Path="SelectedQuestion.Order"/>
+                                            <Binding Path="Attempt.Quiz.Questions.Count"/>
+                                        </MultiBinding>
+                                    </Label.Text>
+                                </Label>
+                            </Grid>
+                            <ProgressBar Progress="{Binding QuizProgress}" HeightRequest="6"/>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
 
+                    <!-- Save Status Section -->
+                    <Border Grid.Row="1" BackgroundColor="{StaticResource SurfaceDark}" Padding="16,12" StrokeThickness="0" Margin="16,0,16,12">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10"/>
+                        </Border.StrokeShape>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <!-- Save Icon (using checkmark for saved state) -->
+                            <Border WidthRequest="32" HeightRequest="32" BackgroundColor="{StaticResource BackgroundDark}" StrokeThickness="0" Padding="5">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8"/>
+                                </Border.StrokeShape>
+                                <Image Source="save.png">
+                                    <Image.Behaviors>
+                                        <toolkit:IconTintColorBehavior TintColor="{StaticResource Primary}"/>
+                                    </Image.Behaviors>
+                                </Image>
+                            </Border>
+                            
+                            <!-- Last Saved Status -->
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Text="Last saved" Style="{StaticResource CaptionText}" FontSize="11"/>
+                                <Label Text="{Binding LastSavedText}" Style="{StaticResource BodyText}" FontSize="13"/>
+                            </VerticalStackLayout>
+                            
+                            <!-- Auto-Save Indicator -->
+                            <HorizontalStackLayout Grid.Column="2" Spacing="6" IsVisible="{Binding IsAutoSaving}" VerticalOptions="Center">
+                                <ActivityIndicator IsRunning="{Binding IsAutoSaving}" WidthRequest="14" HeightRequest="14" Color="{StaticResource Success}"/>
+                                <Label Text="Saving..." Style="{StaticResource CaptionText}" FontSize="11" TextColor="{StaticResource Success}" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
+
                     <!-- Navigation Buttons -->
-                    <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,16">
+                    <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,16">
                         <Button Text="Previous" Style="{StaticResource SecondaryButton}" Command="{Binding PreviousQuestionCommand}" ImageSource="arrow_back_ios_new_rounded.png" HeightRequest="40">
                             <Button.Behaviors>
                                 <toolkit:IconTintColorBehavior TintColor="White"/>
@@ -146,22 +212,34 @@
 
                     <!-- Code Editor -->
                     <controls:CodeEditor 
+                        x:Name="codeEditor"
                         ShowError="{Binding SelectedQuestion.QuestionConfiguration.ShowError}"
                         ShowOutput="{Binding SelectedQuestion.QuestionConfiguration.ShowOutput}"
                         AllowExecution="{Binding SelectedQuestion.QuestionConfiguration.AllowExecution}"
                         Language="{Binding SelectedQuestion.QuestionConfiguration.Language}"
                         Code="{Binding CodeInEditor}"
                         EditorType="{Binding EditorTypeValue}"
+                        EnableAutoSave="True"
                         HeightRequest="800"/>
                 </VerticalStackLayout>
             </ScrollView>
         </Grid>
 
+        <!-- Manual Save Progress Overlay -->
+        <Grid Grid.RowSpan="2" BackgroundColor="#99121212" IsVisible="{Binding IsSavingManually}">
+            <Border Style="{StaticResource Card}" WidthRequest="280" HeightRequest="120" HorizontalOptions="Center" VerticalOptions="Center">
+                <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16">
+                    <ActivityIndicator IsRunning="{Binding IsSavingManually}" WidthRequest="32" HeightRequest="32"/>
+                    <Label Text="Saving progress..." Style="{StaticResource BodyText}" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </Border>
+        </Grid>
+
         <!-- Auto Submission Overlay -->
-        <Grid Grid.RowSpan="2" BackgroundColor="#E6121212" IsVisible="{Binding WaitingForAutoSubmission}">
+        <Grid Grid.RowSpan="2" BackgroundColor="#E6121212" IsVisible="{Binding Submitting}">
             <Border Style="{StaticResource Card}" WidthRequest="400" HeightRequest="250" HorizontalOptions="Center" VerticalOptions="Center">
                 <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="24">
-                    <ActivityIndicator IsRunning="{Binding WaitingForAutoSubmission}" WidthRequest="60" HeightRequest="60"/>
+                    <ActivityIndicator IsRunning="{Binding Submitting}" WidthRequest="60" HeightRequest="60"/>
                     <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
                         <Label Text="Time's up!" Style="{StaticResource PageTitle}" FontSize="28" HorizontalOptions="Center"/>
                         <Label Text="Auto-submitting your answers..." Style="{StaticResource CaptionText}" HorizontalOptions="Center"/>

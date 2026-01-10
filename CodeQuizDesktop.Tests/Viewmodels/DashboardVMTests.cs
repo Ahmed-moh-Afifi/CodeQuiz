@@ -13,6 +13,7 @@ namespace CodeQuizDesktop.Tests.Viewmodels
         private readonly Mock<IAttemptsRepository> _attemptsRepoMock;
         private readonly Mock<IQuizzesRepository> _quizzesRepoMock;
         private readonly Mock<INavigationService> _navServiceMock;
+        private readonly Mock<IUIService> _uiServiceMock;
         private readonly DashboardVM _viewModel;
 
         public DashboardVMTests()
@@ -20,12 +21,13 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             _attemptsRepoMock = new Mock<IAttemptsRepository>();
             _quizzesRepoMock = new Mock<IQuizzesRepository>();
             _navServiceMock = new Mock<INavigationService>();
+            _uiServiceMock = new Mock<IUIService>();
 
             // Setup default returns for Initialize
             _attemptsRepoMock.Setup(x => x.GetUserAttempts()).ReturnsAsync(new List<ExamineeAttempt>());
             _quizzesRepoMock.Setup(x => x.GetUserQuizzes()).ReturnsAsync(new List<ExaminerQuiz>());
 
-            _viewModel = new DashboardVM(_attemptsRepoMock.Object, _quizzesRepoMock.Object, _navServiceMock.Object);
+            _viewModel = new DashboardVM(_attemptsRepoMock.Object, _quizzesRepoMock.Object, _navServiceMock.Object, _uiServiceMock.Object);
         }
 
         [Fact]
@@ -194,7 +196,8 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             };
             _viewModel.CreatedQuizzes.Add(quiz);
 
-            _navServiceMock.Setup(x => x.DisplayAlert(It.IsAny<string>(), It.IsAny<string>(), "Delete", "Cancel"))
+            _uiServiceMock.Setup(x => x.ShowDestructiveConfirmationAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
 
             // Act
@@ -235,7 +238,8 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             };
             _viewModel.CreatedQuizzes.Add(quiz);
 
-            _navServiceMock.Setup(x => x.DisplayAlert(It.IsAny<string>(), It.IsAny<string>(), "Delete", "Cancel"))
+            _uiServiceMock.Setup(x => x.ShowDestructiveConfirmationAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(false);
 
             // Act

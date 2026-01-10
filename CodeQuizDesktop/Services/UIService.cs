@@ -1,18 +1,21 @@
 using CodeQuizDesktop.Exceptions;
 using CodeQuizDesktop.Logging;
 using CodeQuizDesktop.Models;
+using CodeQuizDesktop.Views;
 using System.Text.Json;
 
 namespace CodeQuizDesktop.Services;
 
 /// <summary>
 /// Service for handling UI operations including alerts and loading indicators.
+/// Uses custom themed dialogs instead of default MAUI alerts.
 /// </summary>
 public class UIService(IAppLogger<UIService> logger) : IUIService
 {
     private bool _isLoading;
     private Grid? _loadingOverlay;
     private readonly SemaphoreSlim _loadingSemaphore = new(1, 1);
+    private readonly SemaphoreSlim _dialogSemaphore = new(1, 1);
 
     public bool IsLoading => _isLoading;
 
@@ -20,27 +23,93 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
 
     public async Task ShowAlertAsync(string title, string message, string cancel = "OK")
     {
-        if (Application.Current?.Windows.Count > 0)
+        await _dialogSemaphore.WaitAsync();
+        try
         {
-            var mainPage = Application.Current.Windows[0].Page;
-            if (mainPage != null)
+            await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                await mainPage.DisplayAlert(title, message, cancel);
-            }
+                var rootPage = GetRootPage();
+                if (rootPage == null) return;
+
+                var dialog = new ErrorDialog();
+                var dialogTask = dialog.ShowAsync(title, message, cancel);
+
+                // Add dialog to page
+                AddDialogToPage(rootPage, dialog);
+
+                await dialogTask;
+
+                // Remove dialog from page
+                RemoveDialogFromPage(rootPage, dialog);
+            });
+        }
+        finally
+        {
+            _dialogSemaphore.Release();
         }
     }
 
     public async Task<bool> ShowConfirmationAsync(string title, string message, string accept = "Yes", string cancel = "No")
     {
-        if (Application.Current?.Windows.Count > 0)
+        await _dialogSemaphore.WaitAsync();
+        try
         {
-            var mainPage = Application.Current.Windows[0].Page;
-            if (mainPage != null)
+            return await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                return await mainPage.DisplayAlert(title, message, accept, cancel);
-            }
+                var rootPage = GetRootPage();
+                if (rootPage == null) return false;
+
+                var dialog = new ConfirmationDialog();
+                var dialogTask = dialog.ShowAsync(title, message, accept, cancel, false);
+
+                // Add dialog to page
+                AddDialogToPage(rootPage, dialog);
+
+                var result = await dialogTask;
+
+                // Remove dialog from page
+                RemoveDialogFromPage(rootPage, dialog);
+
+                return result;
+            });
         }
-        return false;
+        finally
+        {
+            _dialogSemaphore.Release();
+        }
+    }
+
+    /// <summary>
+    /// Shows a confirmation dialog styled for destructive actions (delete, remove, etc.)
+    /// </summary>
+    public async Task<bool> ShowDestructiveConfirmationAsync(string title, string message, string accept = "Delete", string cancel = "Cancel")
+    {
+        await _dialogSemaphore.WaitAsync();
+        try
+        {
+            return await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                var rootPage = GetRootPage();
+                if (rootPage == null) return false;
+
+                var dialog = new ConfirmationDialog();
+                var dialogTask = dialog.ShowAsync(title, message, accept, cancel, isDestructive: true);
+
+                // Add dialog to page
+                AddDialogToPage(rootPage, dialog);
+
+                var result = await dialogTask;
+
+                // Remove dialog from page
+                RemoveDialogFromPage(rootPage, dialog);
+
+                return result;
+            });
+        }
+        finally
+        {
+            _dialogSemaphore.Release();
+        }
     }
 
     public async Task ShowErrorAsync(string message, string? title = null)
@@ -69,6 +138,85 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
             UnauthorizedAccessException => "You are not authorized to perform this action.",
             _ => "An unexpected error occurred. Please try again."
         };
+    }
+
+    private static void AddDialogToPage(Page rootPage, ContentView dialog)
+    {
+        if (rootPage is ContentPage contentPage)
+        {
+            AddDialogToContentPage(contentPage, dialog);
+        }
+        else if (rootPage is Shell shell)
+        {
+            var currentPage = shell.CurrentPage;
+            if (currentPage is ContentPage shellContentPage)
+            {
+                AddDialogToContentPage(shellContentPage, dialog);
+            }
+        }
+    }
+
+    private static void AddDialogToContentPage(ContentPage contentPage, ContentView dialog)
+    {
+        var existingContent = contentPage.Content;
+        
+        if (existingContent == null)
+            return;
+
+        // Check if already wrapped
+        if (existingContent is Grid existingGrid && existingGrid.StyleId == "DialogWrapper")
+        {
+            // Just add the dialog to existing wrapper
+            existingGrid.Children.Add(dialog);
+            return;
+        }
+
+        // Create a wrapper grid
+        var wrapperGrid = new Grid
+        {
+            StyleId = "DialogWrapper"
+        };
+        
+        // Move existing content to wrapper
+        contentPage.Content = null; // Detach first
+        wrapperGrid.Children.Add(existingContent);
+        wrapperGrid.Children.Add(dialog);
+        
+        contentPage.Content = wrapperGrid;
+    }
+
+    private static void RemoveDialogFromPage(Page rootPage, ContentView dialog)
+    {
+        if (rootPage is ContentPage contentPage)
+        {
+            RemoveDialogFromContentPage(contentPage, dialog);
+        }
+        else if (rootPage is Shell shell)
+        {
+            var currentPage = shell.CurrentPage;
+            if (currentPage is ContentPage shellContentPage)
+            {
+                RemoveDialogFromContentPage(shellContentPage, dialog);
+            }
+        }
+    }
+
+    private static void RemoveDialogFromContentPage(ContentPage contentPage, ContentView dialog)
+    {
+        if (dialog.Parent is Grid parentGrid)
+        {
+            parentGrid.Children.Remove(dialog);
+            
+            // If the parent grid was our wrapper and only has original content, unwrap it
+            if (parentGrid.Parent is ContentPage cp && 
+                parentGrid.Children.Count == 1 &&
+                parentGrid.StyleId == "DialogWrapper")
+            {
+                var originalContent = parentGrid.Children[0];
+                parentGrid.Children.Clear();
+                cp.Content = (View)originalContent;
+            }
+        }
     }
 
     #endregion

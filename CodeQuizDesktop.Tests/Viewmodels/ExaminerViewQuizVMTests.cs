@@ -11,14 +11,16 @@ namespace CodeQuizDesktop.Tests.Viewmodels
     public class ExaminerViewQuizVMTests
     {
         private readonly Mock<IQuizzesRepository> _quizzesRepoMock;
+        private readonly Mock<IAttemptsRepository> _attemptsRepoMock;
         private readonly Mock<INavigationService> _navServiceMock;
         private readonly ExaminerViewQuizVM _viewModel;
 
         public ExaminerViewQuizVMTests()
         {
             _quizzesRepoMock = new Mock<IQuizzesRepository>();
+            _attemptsRepoMock = new Mock<IAttemptsRepository>();
             _navServiceMock = new Mock<INavigationService>();
-            _viewModel = new ExaminerViewQuizVM(_quizzesRepoMock.Object, _navServiceMock.Object);
+            _viewModel = new ExaminerViewQuizVM(_quizzesRepoMock.Object, _attemptsRepoMock.Object, _navServiceMock.Object);
         }
 
         private ExaminerQuiz CreateMockQuiz()
@@ -74,11 +76,15 @@ namespace CodeQuizDesktop.Tests.Viewmodels
         [Fact]
         public async Task ReturnToPreviousPage_ShouldNavigateBack()
         {
+            // Arrange - Set a quiz so we can properly leave groups
+            _viewModel.Quiz = CreateMockQuiz();
+            
             // Act
             await _viewModel.ReturnToPreviousPage();
 
             // Assert
             _navServiceMock.Verify(x => x.GoToAsync(".."), Times.Once);
+            _attemptsRepoMock.Verify(x => x.LeaveQuizGroupAsync(1), Times.Once);
         }
 
         [Fact]

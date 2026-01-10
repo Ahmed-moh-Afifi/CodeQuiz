@@ -51,6 +51,9 @@ namespace CodeQuizBackend.Quiz.Controllers
             });
         }
 
+        /// <summary>
+        /// Updates a solution's code (student saving their work)
+        /// </summary>
         [HttpPut("solutions")]
         [Authorize]
         public async Task<ActionResult<ApiResponse<SolutionDTO>>> UpdateSolution([FromBody] SolutionDTO solution)
@@ -61,6 +64,22 @@ namespace CodeQuizBackend.Quiz.Controllers
                 Success = true,
                 Data = updatedSolution,
                 Message = "Solution updated successfully"
+            });
+        }
+
+        /// <summary>
+        /// Updates a solution's grade (instructor grading)
+        /// </summary>
+        [HttpPut("solutions/grade")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<SolutionDTO>>> UpdateSolutionGrade([FromBody] UpdateSolutionGradeRequest request)
+        {
+            var updatedSolution = await attemptsService.UpdateSolutionGrade(request);
+            return Ok(new ApiResponse<SolutionDTO>()
+            {
+                Success = true,
+                Data = updatedSolution,
+                Message = "Solution grade updated successfully"
             });
         }
 

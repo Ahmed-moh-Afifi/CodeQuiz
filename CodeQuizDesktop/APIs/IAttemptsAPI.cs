@@ -16,8 +16,17 @@ namespace CodeQuizDesktop.APIs
         [Post("/Attempts/{attemptId}/submit")]
         public Task<Models.ApiResponse<ExamineeAttempt>> SubmitAttempt(int attemptId);
 
+        /// <summary>
+        /// Updates a solution's code (student saving their work)
+        /// </summary>
         [Put("/Attempts/solutions")]
         public Task<Models.ApiResponse<Solution>> UpdateSolution([Body] Solution solution);
+
+        /// <summary>
+        /// Updates a solution's grade (instructor grading)
+        /// </summary>
+        [Put("/Attempts/solutions/grade")]
+        public Task<Models.ApiResponse<Solution>> UpdateSolutionGrade([Body] UpdateSolutionGradeRequest request);
 
         [Get("/Attempts/user")]
         public Task<Models.ApiResponse<List<ExamineeAttempt>>> GetUserAttempts();

@@ -10,6 +10,12 @@ namespace CodeQuizBackend.Quiz.Services
     public class AttemptTimerService(IServiceProvider serviceProvider, IAppLogger<AttemptTimerService> logger, IHubContext<AttemptsHub> attemptsHubContext) : BackgroundService
     {
         private readonly TimeSpan checkInterval = TimeSpan.FromSeconds(10);
+        
+        /// <summary>
+        /// Grace buffer period: The background service waits this amount of time after an attempt expires
+        /// before auto-submitting. This allows late network packets from the frontend to arrive.
+        /// </summary>
+        private readonly TimeSpan graceBufferPeriod = TimeSpan.FromSeconds(30);
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -53,6 +59,7 @@ namespace CodeQuizBackend.Quiz.Services
 
             // Filter expired attempts in memory to ensure consistent DateTime comparison
             // This avoids issues with EF Core translating DateTime arithmetic differently
+            // Only target attempts that have been expired for at least the grace buffer period
             var expiredAttempts = activeAttempts
                 .Where(a =>
                 {
@@ -60,14 +67,15 @@ namespace CodeQuizBackend.Quiz.Services
                     var quizEndTime = a.Quiz.EndDate;
                     var maxEndTime = durationEndTime < quizEndTime ? durationEndTime : quizEndTime;
                     
-                    // Only mark as expired if the max end time has truly passed
-                    return maxEndTime <= now;
+                    // Only mark as expired if the max end time plus grace buffer has passed
+                    // This gives frontend clients time to submit their final saves
+                    return maxEndTime.Add(graceBufferPeriod) <= now;
                 })
                 .ToList();
 
             if (expiredAttempts.Any())
             {
-                logger.LogInfo($"Found {expiredAttempts.Count} expired attempts to auto-submit. Current UTC time: {now:yyyy-MM-dd HH:mm:ss}");
+                logger.LogInfo($"Found {expiredAttempts.Count} expired attempts to auto-submit (past {graceBufferPeriod.TotalSeconds}s grace buffer). Current UTC time: {now:yyyy-MM-dd HH:mm:ss}");
 
                 foreach (var attempt in expiredAttempts)
                 {

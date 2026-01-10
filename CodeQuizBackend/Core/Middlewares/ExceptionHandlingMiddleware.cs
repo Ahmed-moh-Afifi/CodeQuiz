@@ -54,6 +54,11 @@ namespace CodeQuizBackend.Core.Middlewares
                 logger.LogWarning(ex, "Attempt not submitted");
                 await HandleExceptionAsync(context, StatusCodes.Status400BadRequest, ex.Message);
             }
+            catch (DeadlineExceededException ex)
+            {
+                logger.LogWarning(ex, "Deadline exceeded for solution save");
+                await HandleExceptionAsync(context, StatusCodes.Status403Forbidden, ex.Message);
+            }
             catch (UnsupportedLanguageException ex)
             {
                 logger.LogWarning(ex, "Unsupported language");

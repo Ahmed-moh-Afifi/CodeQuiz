@@ -36,4 +36,14 @@ public interface IUIService : IAlertService
     /// <param name="operation">The async operation to execute.</param>
     /// <param name="loadingMessage">Optional message to display during loading.</param>
     Task ExecuteWithLoadingAsync(Func<Task> operation, string? loadingMessage = null);
+
+    /// <summary>
+    /// Shows a confirmation dialog styled for destructive actions (delete, remove, etc.)
+    /// </summary>
+    /// <param name="title">The dialog title.</param>
+    /// <param name="message">The confirmation message.</param>
+    /// <param name="accept">The accept button text.</param>
+    /// <param name="cancel">The cancel button text.</param>
+    /// <returns>True if user confirmed, false otherwise.</returns>
+    Task<bool> ShowDestructiveConfirmationAsync(string title, string message, string accept = "Delete", string cancel = "Cancel");
 }

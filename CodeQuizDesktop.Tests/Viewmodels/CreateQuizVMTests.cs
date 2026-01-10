@@ -53,12 +53,34 @@ namespace CodeQuizDesktop.Tests.Viewmodels
         }
 
         [Fact]
-        public async Task ReturnToPreviousPage_ShouldNavigateBack()
+        public async Task ReturnToPreviousPage_WhenNoChanges_ShouldNavigateBack()
         {
+            // Arrange - no changes made (empty questions and no title)
+            _viewModel.QuizTitle = null;
+            _viewModel.QuestionModels.Clear();
+
             // Act
             await _viewModel.ReturnToPreviousPage();
 
             // Assert
+            _navigationServiceMock.Verify(x => x.GoToAsync(".."), Times.Once);
+        }
+
+        [Fact]
+        public async Task ReturnToPreviousPage_WhenChangesExist_ShouldConfirmFirst()
+        {
+            // Arrange - has unsaved changes
+            _viewModel.QuizTitle = "Test Quiz";
+            _uiServiceMock.Setup(x => x.ShowConfirmationAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+
+            // Act
+            await _viewModel.ReturnToPreviousPage();
+
+            // Assert
+            _uiServiceMock.Verify(x => x.ShowConfirmationAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             _navigationServiceMock.Verify(x => x.GoToAsync(".."), Times.Once);
         }
 
@@ -134,7 +156,7 @@ namespace CodeQuizDesktop.Tests.Viewmodels
         }
 
         [Fact]
-        public void DeleteQuestion_ShouldRemoveQuestion()
+        public async Task DeleteQuestionAsync_WhenConfirmed_ShouldRemoveQuestion()
         {
             // Arrange
             var question = new NewQuestionModel
@@ -147,11 +169,40 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             };
             _viewModel.QuestionModels.Add(question);
 
+            _uiServiceMock.Setup(x => x.ShowDestructiveConfirmationAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+
             // Act
-            _viewModel.DeleteQuestion(question);
+            await _viewModel.DeleteQuestionAsync(question);
 
             // Assert
             _viewModel.QuestionModels.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task DeleteQuestionAsync_WhenCancelled_ShouldNotRemoveQuestion()
+        {
+            // Arrange
+            var question = new NewQuestionModel
+            {
+                Statement = "Test",
+                EditorCode = "code",
+                TestCases = new List<TestCase>(),
+                Order = 1,
+                Points = 10
+            };
+            _viewModel.QuestionModels.Add(question);
+
+            _uiServiceMock.Setup(x => x.ShowDestructiveConfirmationAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(false);
+
+            // Act
+            await _viewModel.DeleteQuestionAsync(question);
+
+            // Assert
+            _viewModel.QuestionModels.Should().Contain(question);
         }
 
         [Fact]
@@ -210,7 +261,6 @@ namespace CodeQuizDesktop.Tests.Viewmodels
 
             // Assert
             _quizzesRepositoryMock.Verify(x => x.CreateQuiz(It.IsAny<NewQuizModel>()), Times.Once);
-            _navigationServiceMock.Verify(x => x.GoToAsync(".."), Times.Once);
         }
     }
 }

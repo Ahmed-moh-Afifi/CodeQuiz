@@ -5,6 +5,7 @@ using CommunityToolkit.Maui.Core.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,12 +18,31 @@ namespace CodeQuizDesktop.Viewmodels
         private IAttemptsRepository _attemptsRepository;
         private IQuizzesRepository _quizzesRepository;
         private readonly INavigationService _navigationService;
+        private readonly IUIService _uiService;
 
         private ObservableCollection<ExamineeAttempt> joinedAttempts;
         public ObservableCollection<ExamineeAttempt> JoinedAttempts
         {
             get => joinedAttempts;
-            set { joinedAttempts = value; OnPropertyChanged(); }
+            set 
+            { 
+                // Unsubscribe from old collection
+                if (joinedAttempts != null)
+                {
+                    joinedAttempts.CollectionChanged -= OnJoinedAttemptsChanged;
+                }
+                
+                joinedAttempts = value;
+                
+                // Subscribe to new collection
+                if (joinedAttempts != null)
+                {
+                    joinedAttempts.CollectionChanged += OnJoinedAttemptsChanged;
+                }
+                
+                OnPropertyChanged();
+                UpdateHasRunningAttempts();
+            }
         }
 
         private ObservableCollection<ExaminerQuiz> createdQuizzes;
@@ -49,6 +69,31 @@ namespace CodeQuizDesktop.Viewmodels
         private ObservableCollection<ExamineeAttempt> initializedJoinedAttempts = new();
         private ObservableCollection<ExaminerQuiz> initializedCreatedQuizzes = new();
 
+        // Reactive property for hero section - updates in real-time
+        private bool hasRunningAttempts;
+        public bool HasRunningAttempts
+        {
+            get => hasRunningAttempts;
+            private set
+            {
+                if (hasRunningAttempts != value)
+                {
+                    hasRunningAttempts = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private void OnJoinedAttemptsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            UpdateHasRunningAttempts();
+        }
+
+        private void UpdateHasRunningAttempts()
+        {
+            HasRunningAttempts = JoinedAttempts?.Any(a => a.IsRunning) ?? false;
+        }
+
         public ICommand ContinueAttemptCommand { get => new Command<ExamineeAttempt>(async (a) => await ContinueAttemptAsync(a)); }
         public ICommand ViewResultsCommand { get => new Command<ExamineeAttempt>(async (a) => await ViewResultsAsync(a)); }
 
@@ -58,6 +103,18 @@ namespace CodeQuizDesktop.Viewmodels
         // Navigation commands for "View All" and "Manage All" links
         public ICommand ViewAllJoinedCommand { get => new Command(ViewAllJoined); }
         public ICommand ViewAllCreatedCommand { get => new Command(ViewAllCreated); }
+        
+        // Command to continue the first running attempt from the hero section
+        public ICommand ContinueFirstRunningCommand { get => new Command(async () => await ContinueFirstRunningAsync()); }
+
+        private async Task ContinueFirstRunningAsync()
+        {
+            var firstRunning = JoinedAttempts?.FirstOrDefault(a => a.IsRunning);
+            if (firstRunning != null)
+            {
+                await ContinueAttemptAsync(firstRunning);
+            }
+        }
 
         private void ViewAllJoined()
         {
@@ -87,9 +144,12 @@ namespace CodeQuizDesktop.Viewmodels
 
         public async Task ContinueAttemptAsync(ExamineeAttempt attempt)
         {
-            var beginAttemptRequest = new BeginAttemptRequest() { QuizCode = attempt.Quiz.Code };
-            var response = await _attemptsRepository.BeginAttempt(beginAttemptRequest);
-            await _navigationService.GoToAsync($"///JoinQuizPage", new Dictionary<string, object> { { "attempt", response! } });
+            await ExecuteAsync(async () =>
+            {
+                var beginAttemptRequest = new BeginAttemptRequest() { QuizCode = attempt.Quiz.Code };
+                var response = await _attemptsRepository.BeginAttempt(beginAttemptRequest);
+                await _navigationService.GoToAsync($"///JoinQuizPage", new Dictionary<string, object> { { "attempt", response! } });
+            }, "Loading quiz...");
         }
 
         public async Task ViewResultsAsync(ExamineeAttempt attempt)
@@ -107,30 +167,34 @@ namespace CodeQuizDesktop.Viewmodels
 
         public async Task DeleteCreatedQuizAsync(ExaminerQuiz quiz)
         {
-            var confirm = await _navigationService.DisplayAlert("Delete Quiz", $"Are you sure you want to delete '{quiz.Title}'?", "Delete", "Cancel");
+            var confirm = await _uiService.ShowDestructiveConfirmationAsync(
+                "Delete Quiz",
+                $"Are you sure you want to delete \"{quiz.Title}\"? This action cannot be undone and will remove all associated attempts and grades.",
+                "Delete",
+                "Cancel");
+
             if (!confirm) return;
 
-            try
+            await ExecuteAsync(async () =>
             {
                 await _quizzesRepository.DeleteQuiz(quiz.Id);
 
                 // Optimistically remove from local collections in case notifications don't arrive
-                var local = CreatedQuizzes.FirstOrDefault(q => q.Id == quiz.Id);
-                if (local != null)
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    CreatedQuizzes.Remove(local);
-                }
+                    var local = CreatedQuizzes.FirstOrDefault(q => q.Id == quiz.Id);
+                    if (local != null)
+                    {
+                        CreatedQuizzes.Remove(local);
+                    }
 
-                var relatedAttempts = JoinedAttempts.Where(at => at.QuizId == quiz.Id).ToList();
-                foreach (var ra in relatedAttempts)
-                    JoinedAttempts.Remove(ra);
+                    var relatedAttempts = JoinedAttempts.Where(at => at.QuizId == quiz.Id).ToList();
+                    foreach (var ra in relatedAttempts)
+                        JoinedAttempts.Remove(ra);
 
-                UpdateFilteredQuizzes();
-            }
-            catch (Exception ex)
-            {
-                await _navigationService.DisplayAlert("Delete Failed", ex.Message, "OK");
-            }
+                    UpdateFilteredQuizzes();
+                });
+            }, "Deleting quiz...");
         }
 
         private void UpdateFilteredQuizzes()
@@ -153,8 +217,7 @@ namespace CodeQuizDesktop.Viewmodels
 
         public async Task InitializeAsync()
         {
-            IsBusy = true;
-            try
+            await ExecuteAsync(async () =>
             {
                 var attempts = await _attemptsRepository.GetUserAttempts();
                 initializedJoinedAttempts.Clear();
@@ -180,84 +243,101 @@ namespace CodeQuizDesktop.Viewmodels
                 }
 
                 UpdateFilteredQuizzes();
-            }
-            finally
-            {
-                IsBusy = false;
-            }
+                UpdateHasRunningAttempts();
+            }, "Loading dashboard...");
         }
 
-        public DashboardVM(IAttemptsRepository attemptsRepository, IQuizzesRepository quizzesRepository, INavigationService navigationService)
+        public DashboardVM(IAttemptsRepository attemptsRepository, IQuizzesRepository quizzesRepository, INavigationService navigationService, IUIService uiService)
         {
             _attemptsRepository = attemptsRepository;
             _quizzesRepository = quizzesRepository;
             _navigationService = navigationService;
+            _uiService = uiService;
 
             // Initialize collection properties to point to our backing fields
             JoinedAttempts = initializedJoinedAttempts;
             CreatedQuizzes = initializedCreatedQuizzes;
 
             // Set up subscriptions BEFORE initializing to catch any events
-            _attemptsRepository.SubscribeCreate(a =>
+            _attemptsRepository.SubscribeCreate<ExamineeAttempt>(a =>
             {
-                if (JoinedAttempts.FirstOrDefault(it => it.Id == a.Id) == null)
-                    JoinedAttempts.Add(a);
-            });
-            _attemptsRepository.SubscribeUpdate(a =>
-            {
-                var element = JoinedAttempts.FirstOrDefault(at => at.Id == a.Id);
-                if (element != null)
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    var idx = JoinedAttempts.IndexOf(element);
-                    JoinedAttempts.Remove(element);
-                    // Ensure GradePercentage is populated when available
-                    if (a.GradePercentage == null && a.Solutions != null && a.Quiz != null && a.Quiz.TotalPoints > 0)
+                    if (JoinedAttempts.FirstOrDefault(it => it.Id == a.Id) == null)
                     {
-                        if (a.Solutions.All(s => s.ReceivedGrade != null))
-                        {
-                            a.GradePercentage = (a.Solutions.Sum(s => s.ReceivedGrade) / a.Quiz.TotalPoints) * 100;
-                        }
+                        JoinedAttempts.Add(a);
                     }
+                    // CollectionChanged event will trigger UpdateHasRunningAttempts
+                });
+            });
+            _attemptsRepository.SubscribeUpdate<ExamineeAttempt>(a =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    var element = JoinedAttempts.FirstOrDefault(at => at.Id == a.Id);
+                    if (element != null)
+                    {
+                        var idx = JoinedAttempts.IndexOf(element);
+                        JoinedAttempts.Remove(element);
+                        // Ensure GradePercentage is populated when available
+                        if (a.GradePercentage == null && a.Solutions != null && a.Quiz != null && a.Quiz.TotalPoints > 0)
+                        {
+                            if (a.Solutions.All(s => s.ReceivedGrade != null))
+                            {
+                                a.GradePercentage = (a.Solutions.Sum(s => s.ReceivedGrade) / a.Quiz.TotalPoints) * 100;
+                            }
+                        }
 
-                    JoinedAttempts.Insert(idx, a);
-                }
+                        JoinedAttempts.Insert(idx, a);
+                    }
+                    // CollectionChanged event will trigger UpdateHasRunningAttempts
+                });
             });
 
             _quizzesRepository.SubscribeCreate<ExaminerQuiz>(q =>
             {
-                if (CreatedQuizzes.FirstOrDefault(qu => qu.Id == q.Id) == null)
-                    CreatedQuizzes.Add(q);
-                UpdateFilteredQuizzes();
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    if (CreatedQuizzes.FirstOrDefault(qu => qu.Id == q.Id) == null)
+                        CreatedQuizzes.Add(q);
+                    UpdateFilteredQuizzes();
+                });
             });
             _quizzesRepository.SubscribeUpdate<ExaminerQuiz>(q =>
             {
-                var element = CreatedQuizzes.FirstOrDefault(qu => qu.Id == q.Id);
-                if (element != null)
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    var idx = CreatedQuizzes.IndexOf(element);
-                    CreatedQuizzes.Remove(element);
-                    CreatedQuizzes.Insert(idx, q);
-                }
-                UpdateFilteredQuizzes();
+                    var element = CreatedQuizzes.FirstOrDefault(qu => qu.Id == q.Id);
+                    if (element != null)
+                    {
+                        var idx = CreatedQuizzes.IndexOf(element);
+                        CreatedQuizzes.Remove(element);
+                        CreatedQuizzes.Insert(idx, q);
+                    }
+                    UpdateFilteredQuizzes();
+                });
             });
             _quizzesRepository.SubscribeDetele<ExaminerQuiz>(q =>
             {
-                // Remove from CreatedQuizzes
-                var element = CreatedQuizzes.FirstOrDefault(qu => qu.Id == q);
-                if (element != null)
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    CreatedQuizzes.Remove(element);
-                }
+                    // Remove from CreatedQuizzes
+                    var element = CreatedQuizzes.FirstOrDefault(qu => qu.Id == q);
+                    if (element != null)
+                    {
+                        CreatedQuizzes.Remove(element);
+                    }
 
-                // Also remove any joined attempts that belong to the deleted quiz
-                var relatedAttempts = JoinedAttempts.Where(at => at.QuizId == q).ToList();
-                foreach (var ra in relatedAttempts)
-                {
-                    JoinedAttempts.Remove(ra);
-                }
+                    // Also remove any joined attempts that belong to the deleted quiz
+                    var relatedAttempts = JoinedAttempts.Where(at => at.QuizId == q).ToList();
+                    foreach (var ra in relatedAttempts)
+                    {
+                        JoinedAttempts.Remove(ra);
+                    }
 
-                // Update filtered collections
-                UpdateFilteredQuizzes();
+                    // Update filtered collections
+                    UpdateFilteredQuizzes();
+                });
             });
         }
     }

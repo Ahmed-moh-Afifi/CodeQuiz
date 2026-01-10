@@ -13,13 +13,15 @@ namespace CodeQuizDesktop.Tests.Viewmodels
     {
         private readonly Mock<IQuizzesRepository> _quizzesRepoMock;
         private readonly Mock<INavigationService> _navServiceMock;
+        private readonly Mock<IUIService> _uiServiceMock;
         private readonly CreatedQuizzesVM _viewModel;
 
         public CreatedQuizzesVMTests()
         {
             _quizzesRepoMock = new Mock<IQuizzesRepository>();
             _navServiceMock = new Mock<INavigationService>();
-            _viewModel = new CreatedQuizzesVM(_quizzesRepoMock.Object, _navServiceMock.Object);
+            _uiServiceMock = new Mock<IUIService>();
+            _viewModel = new CreatedQuizzesVM(_quizzesRepoMock.Object, _navServiceMock.Object, _uiServiceMock.Object);
         }
 
         private ExaminerQuiz CreateMockQuiz()
@@ -74,16 +76,35 @@ namespace CodeQuizDesktop.Tests.Viewmodels
         }
 
         [Fact]
-        public async Task OnDeleteQuizAsync_ShouldCallRepository()
+        public async Task OnDeleteQuizAsync_WhenConfirmed_ShouldCallRepository()
         {
             // Arrange
             var quiz = CreateMockQuiz();
+            _uiServiceMock.Setup(x => x.ShowDestructiveConfirmationAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
 
             // Act
             await _viewModel.OnDeleteQuizAsync(quiz);
 
             // Assert
             _quizzesRepoMock.Verify(x => x.DeleteQuiz(quiz.Id), Times.Once);
+        }
+
+        [Fact]
+        public async Task OnDeleteQuizAsync_WhenCancelled_ShouldNotCallRepository()
+        {
+            // Arrange
+            var quiz = CreateMockQuiz();
+            _uiServiceMock.Setup(x => x.ShowDestructiveConfirmationAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(false);
+
+            // Act
+            await _viewModel.OnDeleteQuizAsync(quiz);
+
+            // Assert
+            _quizzesRepoMock.Verify(x => x.DeleteQuiz(quiz.Id), Times.Never);
         }
 
         [Fact]
