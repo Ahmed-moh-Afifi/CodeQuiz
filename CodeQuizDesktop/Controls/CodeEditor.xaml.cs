@@ -16,11 +16,11 @@ public partial class CodeEditor : ContentView
     private bool _isSettingCodeFromWebView = false;
     private string? _initialCode;
     private bool _isInitialCodeSet = false;
-    
+
     // Debounce timer for auto-save functionality
     private CancellationTokenSource? _debounceCts;
     private readonly TimeSpan _debounceDelay = TimeSpan.FromSeconds(2);
-    
+
     /// <summary>
     /// Event fired when the user stops typing for the debounce period (2 seconds).
     /// Used to trigger auto-save functionality in parent components.
@@ -28,6 +28,23 @@ public partial class CodeEditor : ContentView
     public event EventHandler? CodeChangedDebounced;
 
     #region Bindable Properties
+
+    private static readonly Dictionary<string, string> _extensionMap = new()
+    {
+        { "csharp", "cs" },
+        { "python", "py" },
+        { "javascript", "js" },
+        { "java", "java" },
+        { "cpp", "cpp" }
+    };
+
+    public string FileName => $"Solution.{GetExtension()}";
+
+    private string GetExtension()
+    {
+        var lang = Language?.ToLower() ?? "";
+        return _extensionMap.TryGetValue(lang, out var ext) ? ext : lang;
+    }
 
     /// <summary>
     /// The programming language for the editor
@@ -137,7 +154,22 @@ public partial class CodeEditor : ContentView
         get => (string)GetValue(CodeProperty);
         set => SetValue(CodeProperty, value);
     }
-    
+
+    /// <summary>
+    /// The initial code content to revert to when resetting
+    /// </summary>
+    public static readonly BindableProperty InitialCodeProperty = BindableProperty.Create(
+        nameof(InitialCode),
+        typeof(string),
+        typeof(CodeEditor),
+        null);
+
+    public string? InitialCode
+    {
+        get => (string?)GetValue(InitialCodeProperty);
+        set => SetValue(InitialCodeProperty, value);
+    }
+
     /// <summary>
     /// Whether auto-save on typing pause is enabled
     /// </summary>
@@ -252,9 +284,24 @@ public partial class CodeEditor : ContentView
 
     public void ResetCode()
     {
-        if (_initialCode != null)
+        string? newCode = null;
+
+        if (InitialCode != null)
         {
-            Code = _initialCode;
+            newCode = InitialCode;
+        }
+        else if (_initialCode != null)
+        {
+            newCode = _initialCode;
+        }
+
+        if (newCode != null)
+        {
+            Code = newCode;
+            if (EnableAutoSave)
+            {
+                TriggerDebouncedAutoSave();
+            }
         }
     }
 
@@ -356,14 +403,14 @@ private async void OnWebMessageReceived(Microsoft.UI.Xaml.Controls.WebView2 send
         _debounceCts?.Cancel();
         _debounceCts = new CancellationTokenSource();
         var token = _debounceCts.Token;
-        
+
         // Start a new debounce timer
         _ = Task.Run(async () =>
         {
             try
             {
                 await Task.Delay(_debounceDelay, token);
-                
+
                 // If we weren't cancelled, fire the event on the main thread
                 if (!token.IsCancellationRequested)
                 {
@@ -379,7 +426,7 @@ private async void OnWebMessageReceived(Microsoft.UI.Xaml.Controls.WebView2 send
             }
         }, token);
     }
-    
+
     /// <summary>
     /// Cancels any pending debounce timer. Call this when disposing or
     /// when you want to prevent the auto-save from firing.
@@ -394,6 +441,7 @@ private async void OnWebMessageReceived(Microsoft.UI.Xaml.Controls.WebView2 send
     {
         if (bindable is CodeEditor editor && newValue is string language)
         {
+            editor.OnPropertyChanged(nameof(FileName));
             _ = editor.SetLanguageInternalAsync(language);
         }
     }
@@ -411,7 +459,7 @@ private async void OnWebMessageReceived(Microsoft.UI.Xaml.Controls.WebView2 send
             // Skip if the change came from the WebView itself
             if (editor._isSettingCodeFromWebView)
                 return;
-                
+
             _ = editor.SetCodeAsync(code);
         }
     }

@@ -10,10 +10,10 @@ namespace CodeQuizBackend.Execution.Controllers
     public class ExecutionController(ICodeRunnerFactory codeRunnerFactory) : ControllerBase
     {
         [HttpGet("languages")]
-        public ActionResult<ApiResponse<IEnumerable<string>>> GetSupportedLanguages()
+        public ActionResult<ApiResponse<IEnumerable<SupportedLanguage>>> GetSupportedLanguages()
         {
             var languages = codeRunnerFactory.GetSupportedLanguages();
-            return Ok(new ApiResponse<IEnumerable<string>> { Success = true, Data = languages });
+            return Ok(new ApiResponse<IEnumerable<SupportedLanguage>> { Success = true, Data = languages });
         }
 
         [HttpPost("run")]

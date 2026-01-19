@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
+             xmlns:vm="clr-namespace:CodeQuizDesktop.Viewmodels"
+             x:Class="CodeQuizDesktop.Views.ProfilePage"
+             x:DataType="vm:ProfileViewModel"
+             Title="ProfilePage">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior EventName="Appearing" Command="{Binding LoadUserCommand}"/>
+    </ContentPage.Behaviors>
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Header -->
+        <Border Grid.Row="0" StrokeThickness="0" BackgroundColor="{StaticResource BackgroundDark}" Padding="24,16">
+            <Grid RowDefinitions="*,Auto">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                    <Border Style="{StaticResource BackButton}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoBackCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Image Source="arrow_back_ios_new_rounded.png" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Image.Behaviors>
+                                <toolkit:IconTintColorBehavior TintColor="{StaticResource TextPrimary}"/>
+                            </Image.Behaviors>
+                        </Image>
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                        <Label Text="My Profile" Style="{StaticResource PageTitle}" FontSize="26"/>
+                        <Label Text="Manage your account settings and security" Style="{StaticResource CaptionText}" FontSize="15"/>
+                    </VerticalStackLayout>
+                </Grid>
+                <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource BorderDefault}" VerticalOptions="End" Margin="0,16,0,0"/>
+            </Grid>
+        </Border>
+
+        <!-- Content -->
+        <Grid Grid.Row="1" ColumnDefinitions="1.33*,2*" Padding="24" ColumnSpacing="24">
+            
+            <!-- User Info Sidebar -->
+            <Border Style="{StaticResource Card}">
+                <ScrollView>
+                    <VerticalStackLayout Spacing="24">
+                        
+                        <!-- Profile Section -->
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Profile Information" Style="{StaticResource SectionHeader}" FontSize="20"/>
+                            <Border Style="{StaticResource InnerCard}">
+                                <VerticalStackLayout Spacing="20">
+                                    <!-- Avatar -->
+                                    <Grid HorizontalOptions="Center">
+                                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 50" HeightRequest="100" WidthRequest="100" Background="{StaticResource PrimaryGradient}">
+                                            <Border.Shadow>
+                                                <Shadow Brush="#000000" Opacity="0.3" Radius="16" Offset="0,6"/>
+                                            </Border.Shadow>
+                                            <Label Text="{Binding User.FirstCharInName}" FontSize="40" VerticalOptions="Center" HorizontalOptions="Center" FontAttributes="Bold" TextColor="White"/>
+                                        </Border>
+                                    </Grid>
+                                    
+                                    <!-- User Name -->
+                                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                        <Label Text="{Binding User.FullName}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}" HorizontalOptions="Center"/>
+                                        <Label Text="{Binding User.UserName, StringFormat='@{0}'}" FontSize="14" TextColor="{StaticResource TextMuted}" HorizontalOptions="Center"/>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Account Details Section -->
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Account Details" Style="{StaticResource SectionHeader}" FontSize="20"/>
+                            <Border Style="{StaticResource InnerCard}">
+                                <VerticalStackLayout Spacing="16">
+                                    <!-- Email -->
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="Email Address" Style="{StaticResource CaptionText}" FontSize="12"/>
+                                        <!--<HorizontalStackLayout Spacing="8">
+                                            <Image Source="mail.png" WidthRequest="16" HeightRequest="16" VerticalOptions="Center">
+                                                <Image.Behaviors>
+                                                    <toolkit:IconTintColorBehavior TintColor="{StaticResource TextMuted}"/>
+                                                </Image.Behaviors>
+                                            </Image>
+                                            <Label Text="{Binding User.Email}" FontSize="15" TextColor="{StaticResource TextPrimary}" VerticalOptions="Center"/>
+                                        </HorizontalStackLayout>-->
+                                        <Label Text="{Binding User.Email}" FontSize="15" TextColor="{StaticResource TextPrimary}" VerticalOptions="Center"/>
+                                    </VerticalStackLayout>
+
+                                    <BoxView HeightRequest="1" Color="{StaticResource BorderDefault}"/>
+
+                                    <!-- First Name -->
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="First Name" Style="{StaticResource CaptionText}" FontSize="12"/>
+                                        <Label Text="{Binding User.FirstName}" FontSize="15" TextColor="{StaticResource TextPrimary}"/>
+                                    </VerticalStackLayout>
+
+                                    <BoxView HeightRequest="1" Color="{StaticResource BorderDefault}"/>
+
+                                    <!-- Last Name -->
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="Last Name" Style="{StaticResource CaptionText}" FontSize="12"/>
+                                        <Label Text="{Binding User.LastName}" FontSize="15" TextColor="{StaticResource TextPrimary}"/>
+                                    </VerticalStackLayout>
+
+                                    <BoxView HeightRequest="1" Color="{StaticResource BorderDefault}"/>
+
+                                    <!-- Member Since -->
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="Member Since" Style="{StaticResource CaptionText}" FontSize="12"/>
+                                        <!--<HorizontalStackLayout Spacing="8">
+                                            <Image Source="calendar.png" WidthRequest="16" HeightRequest="16" VerticalOptions="Center">
+                                                <Image.Behaviors>
+                                                    <toolkit:IconTintColorBehavior TintColor="{StaticResource TextMuted}"/>
+                                                </Image.Behaviors>
+                                            </Image>
+                                            <Label Text="{Binding User.JoinDate, StringFormat='{0:MMMM dd, yyyy}'}" FontSize="15" TextColor="{StaticResource TextPrimary}" VerticalOptions="Center"/>
+                                        </HorizontalStackLayout>-->
+                                        <Label Text="{Binding User.JoinDate, StringFormat='{0:MMMM dd, yyyy}'}" FontSize="15" TextColor="{StaticResource TextPrimary}" VerticalOptions="Center"/>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Border>
+
+            <!-- Change Password Section -->
+            <Grid RowDefinitions="Auto,*" RowSpacing="20" Grid.Column="1">
+                <!-- Security Header -->
+                <Border Style="{StaticResource Card}">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Image Source="lock.png" WidthRequest="24" HeightRequest="24" VerticalOptions="Center" Margin="0,0,12,0">
+                            <Image.Behaviors>
+                                <toolkit:IconTintColorBehavior TintColor="{StaticResource Primary}"/>
+                            </Image.Behaviors>
+                        </Image>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Security Settings" Style="{StaticResource SectionHeader}" FontSize="20"/>
+                            <Label Text="Manage your password and account security" Style="{StaticResource CaptionText}" FontSize="15"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Password Change Form -->
+                <Border Grid.Row="1" Style="{StaticResource Card}">
+                    <ScrollView>
+                        <VerticalStackLayout Spacing="24">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Change Password" Style="{StaticResource SectionHeader}" FontSize="18"/>
+                                <Label Text="Enter your current password and choose a new one" Style="{StaticResource CaptionText}" FontSize="14"/>
+                            </VerticalStackLayout>
+
+                            <Border Style="{StaticResource InnerCard}">
+                                <VerticalStackLayout Spacing="20">
+                                    <!-- Current Password -->
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="Current Password" Style="{StaticResource CaptionText}" FontSize="15"/>
+                                        <Border Style="{StaticResource InputBorder}" StrokeShape="RoundRectangle 14">
+                                            <Entry Text="{Binding OldPassword}" IsPassword="True" Placeholder="Enter your current password" FontSize="15"/>
+                                        </Border>
+                                    </VerticalStackLayout>
+
+                                    <BoxView HeightRequest="1" Color="{StaticResource BorderDefault}"/>
+
+                                    <!-- New Password -->
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="New Password" Style="{StaticResource CaptionText}" FontSize="15"/>
+                                        <Border Style="{StaticResource InputBorder}" StrokeShape="RoundRectangle 14">
+                                            <Entry Text="{Binding NewPassword}" IsPassword="True" Placeholder="Enter your new password" FontSize="15"/>
+                                        </Border>
+                                        <Label Text="Password must be at least 6 characters" Style="{StaticResource CaptionText}" FontSize="12"/>
+                                    </VerticalStackLayout>
+
+                                    <!-- Confirm Password -->
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="Confirm New Password" Style="{StaticResource CaptionText}" FontSize="15"/>
+                                        <Border Style="{StaticResource InputBorder}" StrokeShape="RoundRectangle 14">
+                                            <Entry Text="{Binding ConfirmPassword}" IsPassword="True" Placeholder="Confirm your new password" FontSize="15"/>
+                                        </Border>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <!-- Update Button -->
+                            <Button Text="Update Password" 
+                                    Style="{StaticResource PrimaryButton}" 
+                                    Command="{Binding ResetPasswordCommand}"
+                                    HorizontalOptions="End"/>
+                        </VerticalStackLayout>
+                    </ScrollView>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</ContentPage>

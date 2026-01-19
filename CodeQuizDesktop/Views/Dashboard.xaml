@@ -253,7 +253,7 @@
                                                     <Label Text="Participants" Style="{StaticResource CaptionText}" FontSize="11"/>
                                                 </VerticalStackLayout>
                                                 <VerticalStackLayout Grid.Column="2" Spacing="2">
-                                                    <Label Text="{Binding AverageAttemptScore, StringFormat='{0:F0}%'}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Success}"/>
+                                                    <Label Text="{Binding AveragePercentage, StringFormat='{0:F0}%'}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Success}"/>
                                                     <Label Text="Avg Score" Style="{StaticResource CaptionText}" FontSize="11"/>
                                                 </VerticalStackLayout>
                                             </Grid>

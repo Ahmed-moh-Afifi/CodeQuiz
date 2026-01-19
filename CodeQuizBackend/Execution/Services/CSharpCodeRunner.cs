@@ -9,6 +9,7 @@ namespace CodeQuizBackend.Execution.Services
     {
         private readonly string baseCodeFilePath = configuration["CodeFilesPath"]!;
         public string Language { get => "CSharp"; }
+        public string Extension { get => "cs"; }
 
         public async Task<CodeRunnerResult> RunCodeAsync(string code, CodeRunnerOptions? options = null)
         {

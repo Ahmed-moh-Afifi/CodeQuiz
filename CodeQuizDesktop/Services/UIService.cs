@@ -112,6 +112,77 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
         }
     }
 
+    /// <summary>
+    /// Shows a success dialog with a checkmark icon.
+    /// </summary>
+    public async Task ShowSuccessAsync(string title, string message, string okText = "OK")
+    {
+        await _dialogSemaphore.WaitAsync();
+        try
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                var rootPage = GetRootPage();
+                if (rootPage == null) return;
+
+                var dialog = new SuccessDialog();
+                var dialogTask = dialog.ShowAsync(title, message, okText);
+
+                // Add dialog to page
+                AddDialogToPage(rootPage, dialog);
+
+                await dialogTask;
+
+                // Remove dialog from page
+                RemoveDialogFromPage(rootPage, dialog);
+            });
+        }
+        finally
+        {
+            _dialogSemaphore.Release();
+        }
+    }
+
+    /// <summary>
+    /// Shows an input dialog that allows the user to enter text.
+    /// </summary>
+    public async Task<string?> ShowInputAsync(
+        string title,
+        string message,
+        string placeholder = "",
+        string submitText = "Submit",
+        string cancelText = "Cancel",
+        Keyboard? keyboard = null,
+        string initialValue = "")
+    {
+        await _dialogSemaphore.WaitAsync();
+        try
+        {
+            return await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                var rootPage = GetRootPage();
+                if (rootPage == null) return null;
+
+                var dialog = new InputDialog();
+                var dialogTask = dialog.ShowAsync(title, message, placeholder, submitText, cancelText, keyboard, initialValue);
+
+                // Add dialog to page
+                AddDialogToPage(rootPage, dialog);
+
+                var result = await dialogTask;
+
+                // Remove dialog from page
+                RemoveDialogFromPage(rootPage, dialog);
+
+                return result;
+            });
+        }
+        finally
+        {
+            _dialogSemaphore.Release();
+        }
+    }
+
     public async Task ShowErrorAsync(string message, string? title = null)
     {
         logger.LogError(message);
@@ -159,14 +230,22 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
     private static void AddDialogToContentPage(ContentPage contentPage, ContentView dialog)
     {
         var existingContent = contentPage.Content;
-        
+
         if (existingContent == null)
             return;
 
-        // Check if already wrapped
-        if (existingContent is Grid existingGrid && existingGrid.StyleId == "DialogWrapper")
+        // Check if root is a Grid (either our wrapper or the user's layout)
+        // reusing it prevents reparenting controls like WebView which reload when moved
+        if (existingContent is Grid existingGrid)
         {
-            // Just add the dialog to existing wrapper
+            // Ensure dialog spans all rows/columns to cover everything
+            int rowSpan = existingGrid.RowDefinitions.Count > 0 ? existingGrid.RowDefinitions.Count : 1;
+            int colSpan = existingGrid.ColumnDefinitions.Count > 0 ? existingGrid.ColumnDefinitions.Count : 1;
+
+            Grid.SetRowSpan(dialog, rowSpan);
+            Grid.SetColumnSpan(dialog, colSpan);
+
+            // Add with z-index implies on top (last child)
             existingGrid.Children.Add(dialog);
             return;
         }
@@ -176,12 +255,12 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
         {
             StyleId = "DialogWrapper"
         };
-        
+
         // Move existing content to wrapper
         contentPage.Content = null; // Detach first
         wrapperGrid.Children.Add(existingContent);
         wrapperGrid.Children.Add(dialog);
-        
+
         contentPage.Content = wrapperGrid;
     }
 
@@ -206,9 +285,9 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
         if (dialog.Parent is Grid parentGrid)
         {
             parentGrid.Children.Remove(dialog);
-            
+
             // If the parent grid was our wrapper and only has original content, unwrap it
-            if (parentGrid.Parent is ContentPage cp && 
+            if (parentGrid.Parent is ContentPage cp &&
                 parentGrid.Children.Count == 1 &&
                 parentGrid.StyleId == "DialogWrapper")
             {
@@ -279,9 +358,9 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
                 if (_loadingOverlay?.Parent is Grid parentGrid)
                 {
                     parentGrid.Children.Remove(_loadingOverlay);
-                    
+
                     // If the parent grid was our wrapper, unwrap it
-                    if (parentGrid.Parent is ContentPage contentPage && 
+                    if (parentGrid.Parent is ContentPage contentPage &&
                         parentGrid.Children.Count == 1 &&
                         parentGrid.StyleId == "LoadingWrapper")
                     {
@@ -290,7 +369,7 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
                         contentPage.Content = (View)originalContent;
                     }
                 }
-                
+
                 _loadingOverlay = null;
             });
         }
@@ -338,14 +417,22 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
     private static void AddOverlayToContentPage(ContentPage contentPage, Grid overlay)
     {
         var existingContent = contentPage.Content;
-        
+
         if (existingContent == null)
             return;
 
-        // Check if already wrapped
-        if (existingContent is Grid existingGrid && existingGrid.StyleId == "LoadingWrapper")
+        // Check if root is a Grid (either our wrapper or the user's layout)
+        // reusing it prevents reparenting controls like WebView which reload when moved
+        if (existingContent is Grid existingGrid)
         {
-            // Just add the overlay to existing wrapper
+            // Ensure overlay spans all rows/columns to cover everything
+            int rowSpan = existingGrid.RowDefinitions.Count > 0 ? existingGrid.RowDefinitions.Count : 1;
+            int colSpan = existingGrid.ColumnDefinitions.Count > 0 ? existingGrid.ColumnDefinitions.Count : 1;
+
+            Grid.SetRowSpan(overlay, rowSpan);
+            Grid.SetColumnSpan(overlay, colSpan);
+
+            // Add with z-index implies on top (last child)
             existingGrid.Children.Add(overlay);
             return;
         }
@@ -355,12 +442,12 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
         {
             StyleId = "LoadingWrapper"
         };
-        
+
         // Move existing content to wrapper
         contentPage.Content = null; // Detach first
         wrapperGrid.Children.Add(existingContent);
         wrapperGrid.Children.Add(overlay);
-        
+
         contentPage.Content = wrapperGrid;
     }
 
@@ -412,4 +499,9 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
     }
 
     #endregion
+
+    public void BeginInvokeOnMainThread(Action action)
+    {
+        MainThread.BeginInvokeOnMainThread(action);
+    }
 }

@@ -68,7 +68,7 @@ builder.Services.AddCors(
         options.AddDefaultPolicy(
             builder =>
             {
-                builder.WithOrigins("http://localhost:4200")
+                builder.AllowAnyOrigin()
                     .AllowAnyHeader()
                     .AllowAnyMethod();
             });
@@ -226,6 +226,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthentication();
 

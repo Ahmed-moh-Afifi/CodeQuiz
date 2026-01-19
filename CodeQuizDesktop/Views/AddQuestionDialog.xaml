@@ -135,7 +135,7 @@
                                     <VerticalStackLayout Spacing="8">
                                         <Label Text="Programming Language" Style="{StaticResource CaptionText}"/>
                                         <Border Style="{StaticResource InputBorder}" BackgroundColor="{StaticResource Secondary}">
-                                            <Picker ItemsSource="{Binding ProgrammingLanguages}" SelectedItem="{Binding ProgrammingLanguage}"/>
+                                            <Picker ItemsSource="{Binding ProgrammingLanguages}" ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedSupportedLanguage}"/>
                                         </Border>
                                     </VerticalStackLayout>
                                     

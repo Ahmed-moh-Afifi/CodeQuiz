@@ -23,7 +23,9 @@ namespace CodeQuizDesktop.Models
         public required int SubmittedAttemptsCount { get; set; }
         public required float AverageAttemptScore { get; set; }
         public required float TotalPoints { get; set; }
-        
+
+        public float AveragePercentage => TotalPoints > 0 ? (AverageAttemptScore / TotalPoints) * 100 : 0;
+
         // Convert UTC dates to local time for display
         public string StartDateString { get => StartDate.ToLocalTime().ToShortDateString() + " - " + StartDate.ToLocalTime().ToShortTimeString(); }
         public string EndDateString { get => EndDate.ToLocalTime().ToShortDateString() + " - " + EndDate.ToLocalTime().ToShortTimeString(); }
@@ -77,7 +79,7 @@ namespace CodeQuizDesktop.Models
                     ExaminerId = this.ExaminerId,
                     GlobalQuestionConfiguration = this.GlobalQuestionConfiguration,
                     AllowMultipleAttempts = this.AllowMultipleAttempts,
-                    Questions = this.Questions.Select(q => q.QuestionToModel).ToList() 
+                    Questions = this.Questions.Select(q => q.QuestionToModel).ToList()
                 };
             }
         }

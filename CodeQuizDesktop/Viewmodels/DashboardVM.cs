@@ -24,22 +24,22 @@ namespace CodeQuizDesktop.Viewmodels
         public ObservableCollection<ExamineeAttempt> JoinedAttempts
         {
             get => joinedAttempts;
-            set 
-            { 
+            set
+            {
                 // Unsubscribe from old collection
                 if (joinedAttempts != null)
                 {
                     joinedAttempts.CollectionChanged -= OnJoinedAttemptsChanged;
                 }
-                
+
                 joinedAttempts = value;
-                
+
                 // Subscribe to new collection
                 if (joinedAttempts != null)
                 {
                     joinedAttempts.CollectionChanged += OnJoinedAttemptsChanged;
                 }
-                
+
                 OnPropertyChanged();
                 UpdateHasRunningAttempts();
             }
@@ -103,7 +103,7 @@ namespace CodeQuizDesktop.Viewmodels
         // Navigation commands for "View All" and "Manage All" links
         public ICommand ViewAllJoinedCommand { get => new Command(ViewAllJoined); }
         public ICommand ViewAllCreatedCommand { get => new Command(ViewAllCreated); }
-        
+
         // Command to continue the first running attempt from the hero section
         public ICommand ContinueFirstRunningCommand { get => new Command(async () => await ContinueFirstRunningAsync()); }
 
@@ -180,7 +180,7 @@ namespace CodeQuizDesktop.Viewmodels
                 await _quizzesRepository.DeleteQuiz(quiz.Id);
 
                 // Optimistically remove from local collections in case notifications don't arrive
-                MainThread.BeginInvokeOnMainThread(() =>
+                _uiService.BeginInvokeOnMainThread(() =>
                 {
                     var local = CreatedQuizzes.FirstOrDefault(q => q.Id == quiz.Id);
                     if (local != null)
@@ -261,7 +261,7 @@ namespace CodeQuizDesktop.Viewmodels
             // Set up subscriptions BEFORE initializing to catch any events
             _attemptsRepository.SubscribeCreate<ExamineeAttempt>(a =>
             {
-                MainThread.BeginInvokeOnMainThread(() =>
+                _uiService.BeginInvokeOnMainThread(() =>
                 {
                     if (JoinedAttempts.FirstOrDefault(it => it.Id == a.Id) == null)
                     {
@@ -272,7 +272,7 @@ namespace CodeQuizDesktop.Viewmodels
             });
             _attemptsRepository.SubscribeUpdate<ExamineeAttempt>(a =>
             {
-                MainThread.BeginInvokeOnMainThread(() =>
+                _uiService.BeginInvokeOnMainThread(() =>
                 {
                     var element = JoinedAttempts.FirstOrDefault(at => at.Id == a.Id);
                     if (element != null)
@@ -296,7 +296,7 @@ namespace CodeQuizDesktop.Viewmodels
 
             _quizzesRepository.SubscribeCreate<ExaminerQuiz>(q =>
             {
-                MainThread.BeginInvokeOnMainThread(() =>
+                _uiService.BeginInvokeOnMainThread(() =>
                 {
                     if (CreatedQuizzes.FirstOrDefault(qu => qu.Id == q.Id) == null)
                         CreatedQuizzes.Add(q);
@@ -305,7 +305,7 @@ namespace CodeQuizDesktop.Viewmodels
             });
             _quizzesRepository.SubscribeUpdate<ExaminerQuiz>(q =>
             {
-                MainThread.BeginInvokeOnMainThread(() =>
+                _uiService.BeginInvokeOnMainThread(() =>
                 {
                     var element = CreatedQuizzes.FirstOrDefault(qu => qu.Id == q.Id);
                     if (element != null)
@@ -319,7 +319,7 @@ namespace CodeQuizDesktop.Viewmodels
             });
             _quizzesRepository.SubscribeDetele<ExaminerQuiz>(q =>
             {
-                MainThread.BeginInvokeOnMainThread(() =>
+                _uiService.BeginInvokeOnMainThread(() =>
                 {
                     // Remove from CreatedQuizzes
                     var element = CreatedQuizzes.FirstOrDefault(qu => qu.Id == q);

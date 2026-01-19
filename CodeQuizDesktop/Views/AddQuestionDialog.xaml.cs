@@ -145,8 +145,8 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
     }
 
     // Data Sources
-    private List<string> programmingLanguages = ["Python"];
-    public List<string> ProgrammingLanguages
+    private List<SupportedLanguage> programmingLanguages = [];
+    public List<SupportedLanguage> ProgrammingLanguages
     {
         get
         {
@@ -155,6 +155,21 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
         set
         {
             programmingLanguages = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private SupportedLanguage? selectedSupportedLanguage;
+    public SupportedLanguage? SelectedSupportedLanguage
+    {
+        get => selectedSupportedLanguage ?? ProgrammingLanguages.FirstOrDefault(l => l.Name == ProgrammingLanguage);
+        set
+        {
+            selectedSupportedLanguage = value;
+            if (value != null)
+            {
+                ProgrammingLanguage = value.Name;
+            }
             OnPropertyChanged();
         }
     }
@@ -202,8 +217,8 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
                 AllowIntellisense = QuestionModel.QuestionConfiguration.AllowIntellisense;
                 AllowSignatureHelp = QuestionModel.QuestionConfiguration.AllowSignatureHelp;
             }
-            LoadProgrammingLanguages();
         }
+        LoadProgrammingLanguages();
         TestCases.CollectionChanged += (item, e) =>
         {
             for (int i = 0; i < TestCases.Count; i++)

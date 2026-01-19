@@ -11,7 +11,7 @@ namespace CodeQuizDesktop.APIs
     public interface IExecutionAPI
     {
         [Get("/Execution/languages")]
-        public Task<Models.ApiResponse<IEnumerable<string>>> GetSupportedLanguages();
+        public Task<Models.ApiResponse<IEnumerable<SupportedLanguage>>> GetSupportedLanguages();
 
         [Post("/Execution/run")]
         public Task<Models.ApiResponse<CodeRunnerResult>> RunCode([Body] RunCodeRequest runCodeRequest);

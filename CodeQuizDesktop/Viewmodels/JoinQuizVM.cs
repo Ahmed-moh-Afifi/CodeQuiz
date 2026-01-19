@@ -105,7 +105,7 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 if (LastSavedTime == null)
                     return "Not saved yet";
-                
+
                 var timeSince = DateTime.Now - LastSavedTime.Value;
                 if (timeSince.TotalSeconds < 5)
                     return "Just now";
@@ -218,18 +218,26 @@ namespace CodeQuizDesktop.Viewmodels
                 OnPropertyChanged();
             }
         }
-        
+
         /// <summary>
         /// Flag to prevent multiple simultaneous auto-save operations
         /// </summary>
         private bool _isAutoSaving = false;
-        
+
         /// <summary>
         /// Flag to prevent multiple simultaneous submission operations
         /// </summary>
         private bool _isSubmitting = false;
 
-        public EditorType EditorTypeValue { get; set; }
+        public EditorType EditorTypeValue
+        {
+            get => editorTypeValue;
+            set
+            {
+                editorTypeValue = value;
+                OnPropertyChanged();
+            }
+        }
 
         // Commands
         public ICommand ReturnCommand { get => new Command(async () => await ReturnToPreviousPageAsync()); }
@@ -241,6 +249,7 @@ namespace CodeQuizDesktop.Viewmodels
 
         // Remaining Time Timer
         IDispatcherTimer? dispatcherTimer;
+        private EditorType editorTypeValue;
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
@@ -291,7 +300,7 @@ namespace CodeQuizDesktop.Viewmodels
         {
             await _navigationService.GoToAsync("///MainPage");
         }
-        
+
         /// <summary>
         /// Saves the current solution asynchronously and waits for the operation to complete.
         /// Returns true if save was successful, false otherwise.
@@ -312,7 +321,7 @@ namespace CodeQuizDesktop.Viewmodels
                 return false;
             }
         }
-        
+
         /// <summary>
         /// Handles the debounced auto-save event from the CodeEditor.
         /// Saves the current solution when the user stops typing for 2 seconds.
@@ -322,7 +331,7 @@ namespace CodeQuizDesktop.Viewmodels
             // Prevent multiple simultaneous saves
             if (_isAutoSaving || Submitting || IsSavingManually || _isSubmitting)
                 return;
-                
+
             try
             {
                 _isAutoSaving = true;
@@ -336,7 +345,7 @@ namespace CodeQuizDesktop.Viewmodels
                 IsAutoSaving = false;
             }
         }
-        
+
         /// <summary>
         /// Handles the time expiration sequence using "Frontend-First" submission strategy.
         /// When the timer reaches zero:
@@ -352,15 +361,15 @@ namespace CodeQuizDesktop.Viewmodels
                 System.Diagnostics.Debug.WriteLine("HandleTimeExpiredAsync: Already submitting, skipping");
                 return;
             }
-            
+
             _isSubmitting = true;
-            
+
             // 1. Immediately lock the UI
             Submitting = true;
-            
+
             // Stop the timer to prevent further ticks
             dispatcherTimer?.Stop();
-            
+
             try
             {
                 // 2. Save any pending changes (best effort - don't fail if this fails)
@@ -372,13 +381,13 @@ namespace CodeQuizDesktop.Viewmodels
                 // Log but don't prevent submission - data loss is acceptable if save fails at deadline
                 System.Diagnostics.Debug.WriteLine($"Failed to save final solution: {ex.Message}");
             }
-            
+
             try
             {
                 // 3. Frontend-First: Submit the attempt directly from the client
                 System.Diagnostics.Debug.WriteLine("Submitting attempt from frontend (Frontend-First strategy)");
                 await _attemptsRepository.SubmitAttempt(Attempt!.Id);
-                
+
                 Submitting = false;
                 await ReturnToPreviousPageAsync();
             }
@@ -417,7 +426,7 @@ namespace CodeQuizDesktop.Viewmodels
             // Set flags BEFORE showing loading indicator to prevent race conditions
             _isSubmitting = true;
             //Submitting = true;
-            
+
             // Stop the timer to prevent time-based submission during manual submission
             dispatcherTimer?.Stop();
 
@@ -426,14 +435,14 @@ namespace CodeQuizDesktop.Viewmodels
                 // Show loading indicator manually instead of using ExecuteAsync to avoid double loading
                 if (UIService != null)
                     await UIService.ShowLoadingAsync("Submitting quiz...");
-                    
+
                 // Await save to ensure changes are persisted before submit
                 await SaveSolutionAsync();
                 await _attemptsRepository.SubmitAttempt(Attempt!.Id);
-                
+
                 if (UIService != null)
                     await UIService.HideLoadingAsync();
-                    
+
                 await ReturnToPreviousPageAsync();
             }
             catch (Exception ex)
@@ -441,7 +450,7 @@ namespace CodeQuizDesktop.Viewmodels
                 System.Diagnostics.Debug.WriteLine($"SubmitQuizAsync failed: {ex.Message}");
                 if (UIService != null)
                     await UIService.HideLoadingAsync();
-                    
+
                 await _uiService.ShowErrorAsync($"Failed to submit quiz: {ex.Message}");
             }
             finally
@@ -455,12 +464,12 @@ namespace CodeQuizDesktop.Viewmodels
         {
             if (IsSavingManually || Submitting || _isSubmitting)
                 return;
-                
+
             try
             {
                 IsSavingManually = true;
                 await SaveSolutionAsync();
-                
+
                 if (SelectedQuestion!.Order + 1 <= Attempt!.Quiz.Questions.Count)
                 {
                     SelectedQuestion = Attempt!.Quiz.Questions.Find(q => q.Order == SelectedQuestion!.Order + 1);
@@ -476,12 +485,12 @@ namespace CodeQuizDesktop.Viewmodels
         {
             if (IsSavingManually || Submitting || _isSubmitting)
                 return;
-                
+
             try
             {
                 IsSavingManually = true;
                 await SaveSolutionAsync();
-                
+
                 if (SelectedQuestion!.Order - 1 > 0)
                 {
                     SelectedQuestion = Attempt!.Quiz.Questions.Find(q => q.Order == SelectedQuestion!.Order - 1);
@@ -497,7 +506,7 @@ namespace CodeQuizDesktop.Viewmodels
         {
             if (IsSavingManually || Submitting || _isSubmitting)
                 return;
-                
+
             try
             {
                 IsSavingManually = true;

@@ -30,17 +30,22 @@
                     <Shadow Brush="#000000" Opacity="0.2" Radius="12" Offset="0,4"/>
                 </Border.Shadow>
                 <VerticalStackLayout Spacing="0">
-                    <!-- Avatar -->
-                    <Grid Padding="20,24">
-                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 50" HeightRequest="80" WidthRequest="80" VerticalOptions="Center" HorizontalOptions="Center" Background="{StaticResource PrimaryGradient}">
-                            <Label Text="{Binding User.FirstCharInName}" FontSize="32" VerticalOptions="Center" HorizontalOptions="Center" FontAttributes="Bold"/>
+                    <VerticalStackLayout Spacing="0">
+                        <VerticalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenProfileCommand}"/>
+                        </VerticalStackLayout.GestureRecognizers>
+                        <!-- Avatar -->
+                        <Grid Padding="20,24">
+                            <Border StrokeThickness="0" StrokeShape="RoundRectangle 50" HeightRequest="80" WidthRequest="80" VerticalOptions="Center" HorizontalOptions="Center" Background="{StaticResource PrimaryGradient}">
+                                <Label Text="{Binding User.FirstCharInName}" FontSize="32" VerticalOptions="Center" HorizontalOptions="Center" FontAttributes="Bold"/>
+                            </Border>
+                        </Grid>
+                        
+                        <!-- User Name -->
+                        <Border BackgroundColor="{StaticResource BackgroundDark}" Padding="16,12" StrokeThickness="0">
+                            <Label Text="{Binding User.FullName}" FontSize="15" FontAttributes="Bold" HorizontalOptions="Center"/>
                         </Border>
-                    </Grid>
-                    
-                    <!-- User Name -->
-                    <Border BackgroundColor="{StaticResource BackgroundDark}" Padding="16,12" StrokeThickness="0">
-                        <Label Text="{Binding User.FullName}" FontSize="15" FontAttributes="Bold" HorizontalOptions="Center"/>
-                    </Border>
+                    </VerticalStackLayout>
                     
                     <!-- Logout Button -->
                     <Border StrokeThickness="0" Padding="12">

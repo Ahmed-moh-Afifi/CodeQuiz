@@ -13,6 +13,7 @@ namespace CodeQuizDesktop
             Routing.RegisterRoute(nameof(ExamineeReviewQuiz), typeof(ExamineeReviewQuiz));
             Routing.RegisterRoute(nameof(CreateQuiz), typeof(CreateQuiz));
             Routing.RegisterRoute(nameof(JoinQuiz), typeof(JoinQuiz));
+            Routing.RegisterRoute(nameof(ProfilePage), typeof(ProfilePage));
 
         }
     }

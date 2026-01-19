@@ -1,4 +1,5 @@
 ﻿using CodeQuizBackend.Execution.Exceptions;
+using CodeQuizBackend.Execution.Models;
 
 namespace CodeQuizBackend.Execution.Services
 {
@@ -15,9 +16,9 @@ namespace CodeQuizBackend.Execution.Services
             throw new UnsupportedLanguageException(language);
         }
 
-        public IEnumerable<string> GetSupportedLanguages()
+        public IEnumerable<SupportedLanguage> GetSupportedLanguages()
         {
-            return codeRunners.Values.Select(r => r.Language);
+            return codeRunners.Values.Select(r => new SupportedLanguage { Name = r.Language, Extension = r.Extension });
         }
     }
 }

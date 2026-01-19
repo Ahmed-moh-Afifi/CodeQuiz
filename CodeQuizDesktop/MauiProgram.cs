@@ -78,6 +78,7 @@ namespace CodeQuizDesktop
             builder.Services.AddTransient<CreateQuiz>();
             builder.Services.AddTransient<JoinQuiz>();
             builder.Services.AddTransient<ExaminerViewQuiz>();
+            builder.Services.AddTransient<ProfilePage>();
 
             //ViewModels
             builder.Services.AddTransient<LoginVM>();
@@ -91,6 +92,7 @@ namespace CodeQuizDesktop
             builder.Services.AddTransient<StartupViewModel>();
             builder.Services.AddTransient<GradeAttemptVM>();
             builder.Services.AddTransient<ExamineeReviewQuizVM>();
+            builder.Services.AddTransient<ProfileViewModel>();
 
             //Services
             builder.Services.AddSingleton(SecureStorage.Default);

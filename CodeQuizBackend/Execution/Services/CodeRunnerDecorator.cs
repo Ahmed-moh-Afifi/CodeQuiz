@@ -6,6 +6,7 @@ namespace CodeQuizBackend.Execution.Services
     {
         protected ICodeRunner innerRunner = innerRunner;
         public virtual string Language { get => innerRunner.Language; }
+        public virtual string Extension { get => innerRunner.Extension; }
 
         public virtual Task<CodeRunnerResult> RunCodeAsync(string code, CodeRunnerOptions? options = null)
         {

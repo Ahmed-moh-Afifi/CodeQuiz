@@ -1,0 +1,329 @@
+/* Hero Section */
+.hero {
+  background: radial-gradient(circle at center, var(--primary-pressed), var(--background-dark));
+  padding: 100px 0;
+  text-align: center;
+  border-bottom: 1px solid var(--border-subtle);
+  position: relative;
+  z-index: 10;
+
+  .logo {
+    span {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary-light);
+      background: var(--card-background);
+      padding: 10px 20px;
+      border-radius: 8px;
+    }
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    background: linear-gradient(to right, var(--text-primary), var(--text-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  p {
+    font-size: 1.5rem;
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.cta-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 50px;
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
+
+    &.btn-primary {
+      background-color: var(--primary);
+      color: var(--text-primary);
+      box-shadow: 0 4px 15px rgba(89, 28, 33, 0.4);
+
+      &:hover {
+        background-color: var(--primary-hover);
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  .meta {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+}
+
+/* Features Section */
+.features-section {
+  padding: 80px 0;
+  position: relative;
+
+  /* Textured Background with Spotlight */
+  background-image:
+    radial-gradient(
+      circle 300px at var(--cursor-x) var(--cursor-y),
+      rgba(89, 28, 33, 0.25),
+      transparent 100%
+    ),
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    40px 40px,
+    40px 40px;
+  background-attachment: fixed;
+
+  .section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 80px;
+    color: var(--text-primary);
+  }
+}
+
+/* Timeline */
+.timeline {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+
+  /* Vertical Line */
+  .timeline-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary);
+    transform: translateX(-50%);
+    border-radius: 2px;
+    box-shadow: 0 0 15px 2px var(--primary-hover);
+    z-index: 1;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom, transparent, var(--primary-light), transparent);
+      opacity: 0.5;
+      animation: pulseLine 3s infinite ease-in-out;
+    }
+  }
+
+  @keyframes pulseLine {
+    0% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.8;
+    }
+    100% {
+      opacity: 0.3;
+    }
+  }
+
+  .timeline-item {
+    display: flex;
+    justify-content: flex-start; /* Default (Left Side) */
+    padding-bottom: 100px;
+    position: relative;
+    width: 50%;
+    padding-right: 40px; /* Space for line */
+
+    /* Reverse = Right Side */
+    &.reverse {
+      margin-left: auto; /* Push to right */
+      padding-right: 0;
+      padding-left: 40px;
+      justify-content: flex-start; /* Content starts from line outwards */
+
+      .timeline-content {
+        flex-direction: row; /* Image then Desc */
+
+        .description-wrapper {
+          text-align: left;
+          align-items: flex-start;
+          .connector-dot {
+            left: -46px; /* Adjust based on padding */
+            right: auto;
+          }
+          .connector-line {
+            left: -40px;
+            right: auto;
+          }
+        }
+      }
+    }
+  }
+
+  .timeline-content {
+    display: flex;
+    flex-direction: row-reverse; /* Desc then Image for Left Side (so image is outer?) No. */
+    /* Let's stack them nicely: Image close to center? Or Desc close to center? */
+    /* "Screenshots come out of that line" -> Image should be attached to line? */
+    /* Let's put Description outer, Image inner close to line. */
+
+    align-items: center;
+    gap: 20px;
+    background: var(--card-background);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-default);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    width: 100%;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease,
+      border-color 0.3s ease;
+
+    &:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 30px rgba(89, 28, 33, 0.2);
+      transform: translateY(-5px);
+
+      .description-wrapper h3 {
+        text-shadow: 0 0 10px rgba(122, 42, 50, 0.5);
+      }
+    }
+
+    .screenshot-wrapper {
+      flex: 1;
+      img.screenshot {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid var(--border-subtle);
+        transition: box-shadow 0.3s ease;
+      }
+    }
+
+    &:hover .screenshot-wrapper img.screenshot {
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .description-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+
+      h3 {
+        color: var(--primary-light);
+        margin-bottom: 10px;
+        transition: text-shadow 0.3s ease;
+      }
+      p {
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      /* Connector Dot on the line */
+      .connector-dot {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: var(--primary);
+        border: 4px solid var(--background-dark);
+        box-shadow: 0 0 10px var(--primary);
+        border-radius: 50%;
+        top: 50%;
+        right: -52px; /* Pull to center line */
+        transform: translateY(-50%);
+        z-index: 2;
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+
+      &:hover .connector-dot {
+        transform: translateY(-50%) scale(1.2);
+        box-shadow: 0 0 15px var(--primary-light);
+      }
+
+      .connector-line {
+        position: absolute;
+        height: 2px;
+        width: 40px;
+        background: var(--primary);
+        top: 50%;
+        right: -42px;
+      }
+    }
+  }
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 40px 0;
+  border-top: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+
+  a {
+    color: var(--primary-light);
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .timeline {
+    .timeline-line {
+      left: 20px; /* Line moves to left */
+    }
+
+    .timeline-item {
+      width: 100%;
+      padding-left: 50px;
+      padding-right: 0;
+      margin-bottom: 40px;
+
+      &.reverse {
+        padding-left: 50px;
+      }
+
+      .timeline-content {
+        flex-direction: column; /* Stack vertically on mobile */
+
+        .description-wrapper {
+          text-align: left;
+          .connector-dot {
+            left: -62px;
+            right: auto;
+          }
+          .connector-line {
+            left: -52px;
+            right: auto;
+            width: 30px;
+          }
+        }
+      }
+    }
+  }
+}

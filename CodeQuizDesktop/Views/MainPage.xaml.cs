@@ -2,6 +2,7 @@
 using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
 using CodeQuizDesktop.Viewmodels;
+using CodeQuizDesktop.Views;
 using System.Windows.Input;
 
 namespace CodeQuizDesktop
@@ -73,6 +74,7 @@ namespace CodeQuizDesktop
         }
 
         public ICommand LogoutCommand { get => new Command(Logout); }
+        public ICommand OpenProfileCommand { get => new Command(async () => await Shell.Current.GoToAsync(nameof(ProfilePage))); }
 
         public MainPage(DashboardVM dashboardVM, CreatedQuizzesVM createdQuizzesVM, JoinedQuizzesVM joinedQuizzesVM, IUsersRepository usersRepository, IAuthenticationRepository authenticationRepository, IAppLogger<MainPage> logger)
         {

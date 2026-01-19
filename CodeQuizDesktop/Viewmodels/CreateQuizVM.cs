@@ -136,6 +136,21 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
+        private SupportedLanguage? selectedSupportedLanguage;
+        public SupportedLanguage? SelectedSupportedLanguage
+        {
+            get => selectedSupportedLanguage ?? ProgrammingLanguages.FirstOrDefault(l => l.Name == ProgrammingLanguage);
+            set
+            {
+                selectedSupportedLanguage = value;
+                if (value != null)
+                {
+                    ProgrammingLanguage = value.Name;
+                }
+                OnPropertyChanged();
+            }
+        }
+
         private string? programmingLanguage;
         public string? ProgrammingLanguage
         {
@@ -147,6 +162,7 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 programmingLanguage = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(SelectedSupportedLanguage));
             }
         }
 
@@ -266,8 +282,8 @@ namespace CodeQuizDesktop.Viewmodels
         }
 
         // Data Sources
-        private List<string> programmingLanguages = ["Python"];
-        public List<string> ProgrammingLanguages
+        private List<SupportedLanguage> programmingLanguages = [];
+        public List<SupportedLanguage> ProgrammingLanguages
         {
             get
             {
@@ -277,6 +293,7 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 programmingLanguages = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(SelectedSupportedLanguage));
             }
         }
 
@@ -327,6 +344,13 @@ namespace CodeQuizDesktop.Viewmodels
         {
             var languages = await executionRepository.GetSupportedLanguages();
             ProgrammingLanguages = languages.ToList();
+
+            // Select language if editing
+            if (programmingLanguage != null)
+            {
+                // This implies UI binding to SelectedItem expects a SupportedLanguage, but ProgrammingLanguage is string
+                // We should probably keep ProgrammingLanguage as string for compatibility with Model, but the UI ComboBox needs to bind to something
+            }
         }
 
         public async Task ReturnToPreviousPage()
@@ -433,10 +457,19 @@ namespace CodeQuizDesktop.Viewmodels
                 return;
             }
 
+            var confirmed = await uiService.ShowConfirmationAsync(
+                "Confirm Publish",
+                $"Are you sure you want to {(QuizModel == null && EditedQuizId == null ? "publish" : "update")} this quiz?",
+                (QuizModel == null && EditedQuizId == null ? "Publish" : "Update"),
+                "Cancel");
+
+            if (!confirmed)
+                return;
+
             var loadingMessage = QuizModel == null && EditedQuizId == null ? "Publishing quiz..." : "Updating quiz...";
 
             var minsDuration = int.Parse(QuizDurationInMinutes!);
-            
+
             // Convert local times to UTC before sending to backend
             var newQuizModel = new NewQuizModel()
             {
@@ -468,7 +501,7 @@ namespace CodeQuizDesktop.Viewmodels
                     var quiz = await quizzesRepository.UpdateQuiz((int)EditedQuizId, newQuizModel);
                 }
 
-                ReturnToPreviousPage();
+                await navigationService.GoToAsync("..");
             }, loadingMessage);
         }
 
@@ -492,7 +525,7 @@ namespace CodeQuizDesktop.Viewmodels
                 ShowErrors = receivedQuizModel.GlobalQuestionConfiguration.ShowError;
                 QuestionModels = new ObservableCollection<NewQuestionModel>(receivedQuizModel.Questions);
                 AllowIntellisense = receivedQuizModel.GlobalQuestionConfiguration.AllowIntellisense;
-                allowSignatureHelp = receivedQuizModel.GlobalQuestionConfiguration.AllowSignatureHelp;
+                AllowSignatureHelp = receivedQuizModel.GlobalQuestionConfiguration.AllowSignatureHelp;
             }
         }
 

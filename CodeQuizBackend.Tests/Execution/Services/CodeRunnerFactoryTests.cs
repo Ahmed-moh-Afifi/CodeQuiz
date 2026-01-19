@@ -3,6 +3,7 @@ using CodeQuizBackend.Execution.Services;
 using FluentAssertions;
 using Moq;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace CodeQuizBackend.Tests.Execution.Services
@@ -78,7 +79,7 @@ namespace CodeQuizBackend.Tests.Execution.Services
             var languages = _factory.GetSupportedLanguages();
 
             // Assert
-            languages.Should().Contain(new[] { "csharp", "python" });
+            languages.Select(l => l.Name).Should().Contain(new[] { "csharp", "python" });
         }
     }
 }

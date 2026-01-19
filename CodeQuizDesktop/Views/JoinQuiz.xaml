@@ -218,6 +218,7 @@
                         AllowExecution="{Binding SelectedQuestion.QuestionConfiguration.AllowExecution}"
                         Language="{Binding SelectedQuestion.QuestionConfiguration.Language}"
                         Code="{Binding CodeInEditor}"
+                        InitialCode="{Binding SelectedQuestion.EditorCode}"
                         EditorType="{Binding EditorTypeValue}"
                         EnableAutoSave="True"
                         HeightRequest="800"/>

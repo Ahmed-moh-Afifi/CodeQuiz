@@ -31,7 +31,9 @@ namespace CodeQuizBackend.Authentication.Services
                 return;
             }
 
-            var resetLink = configuration["ForgetPasswordWebsiteUrl"] + resetPassToken;
+            // URL-encode the token to handle special characters like + and /
+            var encodedToken = Uri.EscapeDataString(resetPassToken);
+            var resetLink = configuration["ForgetPasswordWebsiteUrl"] + encodedToken;
             var firstName = user.FirstName ?? user.UserName ?? "User";
 
             await mailService.SendPasswordResetEmailAsync(forgetPasswordModel.Email, firstName, resetLink);

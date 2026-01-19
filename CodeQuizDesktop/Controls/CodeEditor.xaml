@@ -10,7 +10,7 @@
             <Grid ColumnDefinitions="*,Auto">
                 <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                     <Label Text="&lt;/&gt;" TextColor="{StaticResource Primary}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center"/>
-                    <Label Text="Solution" TextColor="{StaticResource TextPrimary}" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                    <Label Text="{Binding FileName, Source={x:Reference this}}" TextColor="{StaticResource TextPrimary}" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center"/>
                 </HorizontalStackLayout>
                 
                 <HorizontalStackLayout Grid.Column="1" Spacing="12" VerticalOptions="Center">

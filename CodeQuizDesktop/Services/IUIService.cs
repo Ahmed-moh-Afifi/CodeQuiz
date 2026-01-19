@@ -46,4 +46,38 @@ public interface IUIService : IAlertService
     /// <param name="cancel">The cancel button text.</param>
     /// <returns>True if user confirmed, false otherwise.</returns>
     Task<bool> ShowDestructiveConfirmationAsync(string title, string message, string accept = "Delete", string cancel = "Cancel");
+
+    /// <summary>
+    /// Shows a success dialog with a checkmark icon.
+    /// </summary>
+    /// <param name="title">The dialog title.</param>
+    /// <param name="message">The success message.</param>
+    /// <param name="okText">The OK button text.</param>
+    Task ShowSuccessAsync(string title, string message, string okText = "OK");
+
+    /// <summary>
+    /// Shows an input dialog that allows the user to enter text.
+    /// </summary>
+    /// <param name="title">The dialog title.</param>
+    /// <param name="message">The prompt message.</param>
+    /// <param name="placeholder">Placeholder text for the input field.</param>
+    /// <param name="submitText">The submit button text.</param>
+    /// <param name="cancelText">The cancel button text.</param>
+    /// <param name="keyboard">The keyboard type for the input.</param>
+    /// <param name="initialValue">Initial value for the input field.</param>
+    /// <returns>The entered text, or null if cancelled.</returns>
+    Task<string?> ShowInputAsync(
+        string title,
+        string message,
+        string placeholder = "",
+        string submitText = "Submit",
+        string cancelText = "Cancel",
+        Keyboard? keyboard = null,
+        string initialValue = "");
+
+    /// <summary>
+    /// Invokes an action on the main thread.
+    /// </summary>
+    /// <param name="action">The action to execute.</param>
+    void BeginInvokeOnMainThread(Action action);
 }

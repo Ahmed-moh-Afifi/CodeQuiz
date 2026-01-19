@@ -29,7 +29,11 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             _uiServiceMock = new Mock<IUIService>();
 
             _executionRepositoryMock.Setup(x => x.GetSupportedLanguages())
-                .ReturnsAsync(new List<string> { "Python", "C#" });
+                .ReturnsAsync(new List<SupportedLanguage>
+                {
+                    new SupportedLanguage { Name = "Python", Extension = ".py" },
+                    new SupportedLanguage { Name = "C#", Extension = ".cs" }
+                });
 
             _viewModel = new CreateQuizVM(
                 _quizDialogServiceMock.Object,
@@ -48,8 +52,8 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             await _viewModel.LoadProgrammingLanguages();
 
             // Assert
-            _viewModel.ProgrammingLanguages.Should().Contain("Python");
-            _viewModel.ProgrammingLanguages.Should().Contain("C#");
+            _viewModel.ProgrammingLanguages.Should().Contain(l => l.Name == "Python");
+            _viewModel.ProgrammingLanguages.Should().Contain(l => l.Name == "C#");
         }
 
         [Fact]
@@ -255,6 +259,10 @@ namespace CodeQuizDesktop.Tests.Viewmodels
                 JoinDate = DateTime.Now
             };
             _authenticationRepositoryMock.Setup(x => x.LoggedInUser).Returns(user);
+
+            _uiServiceMock.Setup(x => x.ShowConfirmationAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
 
             // Act
             await _viewModel.CreateAndPublishQuizAsync();

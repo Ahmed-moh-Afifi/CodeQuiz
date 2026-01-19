@@ -64,6 +64,9 @@
                         <Label Text="{}}" FontFamily="SFMonoRegular" FontSize="18" TextColor="{StaticResource TextMuted}"/>
                     </VerticalStackLayout>
                     
+                    <!-- Forgot Password Link -->
+                    <Button Text="Forgot password?" Style="{StaticResource GhostButton}" FontFamily="InterRegular" FontSize="14" HorizontalOptions="End" Command="{Binding ForgotPassCommand}"/>
+                    
                     <!-- Login Button -->
                     <Button Text="Log in" Style="{StaticResource PrimaryButton}" HorizontalOptions="FillAndExpand" FontFamily="InterBlack" FontSize="18" Command="{Binding LoginCommand}">
                         <Button.Shadow>

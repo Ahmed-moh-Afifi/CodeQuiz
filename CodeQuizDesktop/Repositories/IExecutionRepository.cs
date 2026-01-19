@@ -9,7 +9,7 @@ namespace CodeQuizDesktop.Repositories
 {
     public interface IExecutionRepository
     {
-        public Task<IEnumerable<string>> GetSupportedLanguages();
+        public Task<IEnumerable<SupportedLanguage>> GetSupportedLanguages();
         public Task<CodeRunnerResult> RunCode(RunCodeRequest runCodeRequest);
     }
 }

@@ -6,7 +6,7 @@ namespace CodeQuizDesktop.Repositories;
 
 public class ExecutionRepository(IExecutionAPI executionAPI) : IExecutionRepository
 {
-    public async Task<IEnumerable<string>> GetSupportedLanguages()
+    public async Task<IEnumerable<SupportedLanguage>> GetSupportedLanguages()
     {
         try
         {

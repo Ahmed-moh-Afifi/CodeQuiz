@@ -27,6 +27,9 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             _attemptsRepoMock.Setup(x => x.GetUserAttempts()).ReturnsAsync(new List<ExamineeAttempt>());
             _quizzesRepoMock.Setup(x => x.GetUserQuizzes()).ReturnsAsync(new List<ExaminerQuiz>());
 
+            _uiServiceMock.Setup(x => x.BeginInvokeOnMainThread(It.IsAny<Action>()))
+                .Callback<Action>(action => action());
+
             _viewModel = new DashboardVM(_attemptsRepoMock.Object, _quizzesRepoMock.Object, _navServiceMock.Object, _uiServiceMock.Object);
         }
 

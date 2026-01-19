@@ -1,0 +1,55 @@
+<app-reset-password *ngIf="resetToken" [token]="resetToken"></app-reset-password>
+
+<div *ngIf="!resetToken">
+  <div class="hero">
+    <div class="container">
+      <div class="logo">
+        <span>&lt;CodeQuiz /&gt;</span>
+      </div>
+      <h1>Master Coding with CodeQuiz</h1>
+      <p>The ultimate platform for creating and taking coding assessments.</p>
+
+      <div class="cta-group">
+        <a [href]="downloadUrl()" class="btn btn-primary" target="_blank">
+          <span class="icon"></span> Download {{ latestVersion() || 'Latest' }}
+        </a>
+        <p class="meta">Available for Windows</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="features-section">
+    <div class="container">
+      <h2 class="section-title">Features</h2>
+
+      <div class="timeline">
+        <div class="timeline-line"></div>
+
+        <div
+          class="timeline-item"
+          *ngFor="let feature of features; let i = index"
+          [class.reverse]="i % 2 !== 0"
+        >
+          <div class="timeline-content">
+            <div class="screenshot-wrapper">
+              <img [src]="feature.image" [alt]="feature.title" class="screenshot" />
+            </div>
+            <div class="description-wrapper">
+              <div class="connector-dot"></div>
+              <div class="connector-line"></div>
+              <h3>{{ feature.title }}</h3>
+              <p>{{ feature.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 CodeQuiz. All rights reserved.</p>
+      <a href="https://github.com/Ahmed-moh-Afifi/CodeQuiz" target="_blank">View on GitHub</a>
+    </div>
+  </footer>
+</div>

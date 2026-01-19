@@ -105,7 +105,7 @@
                                             </Label.Text>
                                         </Label>
 
-                                        <Label Grid.Column="7" Text="{Binding AverageAttemptScore, StringFormat='{0:F1}%'}" Style="{StaticResource SuccessText}" VerticalOptions="Center"/>
+                                        <Label Grid.Column="7" Text="{Binding AveragePercentage, StringFormat='{0:F1}%'}" Style="{StaticResource SuccessText}" VerticalOptions="Center"/>
 
                                         <!-- Action Buttons -->
                                         <HorizontalStackLayout Grid.Column="8" Spacing="10" VerticalOptions="Center">

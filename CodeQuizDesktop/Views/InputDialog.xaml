@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
+             x:Class="CodeQuizDesktop.Views.InputDialog"
+             x:Name="inputDialogView">
+
+    <Grid BackgroundColor="#99000000" 
+          HorizontalOptions="Fill" 
+          VerticalOptions="Fill"
+          x:Name="overlayGrid">
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer Tapped="OnOverlayTapped"/>
+        </Grid.GestureRecognizers>
+
+        <!-- Dialog Container -->
+        <Border Style="{StaticResource DialogContainer}"
+                WidthRequest="420"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                x:Name="dialogContainer">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer/>
+            </Border.GestureRecognizers>
+
+            <Grid RowDefinitions="Auto,Auto,Auto">
+                <!-- Header with Icon -->
+                <Grid Style="{StaticResource DialogHeader}" ColumnDefinitions="Auto,*,Auto">
+                    <Border x:Name="iconContainer"
+                            WidthRequest="48" 
+                            HeightRequest="48" 
+                            StrokeThickness="0" 
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{StaticResource PrimaryTransparent}">
+                        <Image x:Name="headerIcon"
+                               Source="question.png" 
+                               WidthRequest="24" 
+                               HeightRequest="24" 
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center">
+                            <Image.Behaviors>
+                                <toolkit:IconTintColorBehavior TintColor="{StaticResource Primary}"/>
+                            </Image.Behaviors>
+                        </Image>
+                    </Border>
+                    
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="16,0,0,0" Spacing="4">
+                        <Label x:Name="titleLabel"
+                               Text="Enter Information"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}"/>
+                    </VerticalStackLayout>
+
+                    <Border Grid.Column="2" Style="{StaticResource CloseButton}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCancelClicked"/>
+                        </Border.GestureRecognizers>
+                        <Image Source="close.png" 
+                               WidthRequest="16" 
+                               HeightRequest="16" 
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center">
+                            <Image.Behaviors>
+                                <toolkit:IconTintColorBehavior TintColor="{StaticResource TextMuted}"/>
+                            </Image.Behaviors>
+                        </Image>
+                    </Border>
+                </Grid>
+
+                <BoxView Grid.Row="0" HeightRequest="1" Color="{StaticResource BorderDefault}" VerticalOptions="End"/>
+
+                <!-- Content - Message and Input -->
+                <VerticalStackLayout Grid.Row="1" Padding="24,20" Spacing="16">
+                    <Label x:Name="messageLabel"
+                           Text="Please enter the required information:"
+                           FontSize="15"
+                           TextColor="{StaticResource TextSecondary}"
+                           LineBreakMode="WordWrap"/>
+                    
+                    <Border Style="{StaticResource InputBorder}">
+                        <Entry x:Name="inputEntry"
+                               Placeholder="Enter here..."
+                               Style="{StaticResource CodeInput}"
+                               VerticalTextAlignment="Center"
+                               Completed="OnInputCompleted"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Footer with Cancel and Submit buttons -->
+                <Border Grid.Row="2" Style="{StaticResource DialogFooter}" StrokeShape="RoundRectangle 0,0,16,16">
+                    <HorizontalStackLayout HorizontalOptions="End" Spacing="12">
+                        <Button x:Name="cancelButton"
+                                Text="Cancel"
+                                Style="{StaticResource SecondaryButton}"
+                                MinimumWidthRequest="100"
+                                Clicked="OnCancelClicked"/>
+                        <Button x:Name="submitButton"
+                                Text="Submit"
+                                Style="{StaticResource PrimaryButton}"
+                                MinimumWidthRequest="100"
+                                Clicked="OnSubmitClicked"/>
+                    </HorizontalStackLayout>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentView>
