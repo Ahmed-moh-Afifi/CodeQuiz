@@ -1,0 +1,103 @@
+name: Tests
+
+on:
+  push:
+    branches: [master, frontend]
+  pull_request:
+    branches: [master, frontend]
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/CodeQuizBackend*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore Backend dependencies
+        run: dotnet restore CodeQuizBackend.Tests/CodeQuizBackend.Tests.csproj
+
+      - name: Build Backend Tests
+        run: dotnet build CodeQuizBackend.Tests/CodeQuizBackend.Tests.csproj --configuration Release --no-restore
+
+      - name: Run Backend Tests
+        run: dotnet test CodeQuizBackend.Tests/CodeQuizBackend.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=backend-test-results.trx" --collect:"XPlat Code Coverage"
+
+      - name: Upload Backend Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-results
+          path: CodeQuizBackend.Tests/TestResults/
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: "**/coverage.cobertura.xml"
+
+  desktop-tests:
+    name: Desktop Tests (Windows)
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - name: Install .NET workloads
+        run: dotnet workload restore
+
+      - name: Install MAUI Workload
+        run: dotnet workload install maui-windows
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore CodeQuizDesktop.Tests/CodeQuizDesktop.Tests.csproj
+
+      - name: Build Desktop Tests
+        run: dotnet build CodeQuizDesktop.Tests/CodeQuizDesktop.Tests.csproj --configuration Release --no-restore
+
+      - name: Run Desktop Tests
+        run: dotnet test CodeQuizDesktop.Tests/CodeQuizDesktop.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=desktop-test-results.trx"
+
+      - name: Upload Desktop Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-test-results
+          path: CodeQuizDesktop.Tests/TestResults/
