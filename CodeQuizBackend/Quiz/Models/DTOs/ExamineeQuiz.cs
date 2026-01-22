@@ -14,6 +14,7 @@ namespace CodeQuizBackend.Quiz.Models.DTOs
         public required string ExaminerId { get; set; }
         public required QuestionConfiguration GlobalQuestionConfiguration { get; set; }
         public required bool AllowMultipleAttempts { get; set; }
+        public required bool ShowAiFeedbackToStudents { get; set; }
         public required List<QuestionDTO> Questions { get; set; }
         public required UserDTO Examiner { get; set; }
         public int QustionsCount { get => Questions.Count; }

@@ -6,17 +6,15 @@
              x:Class="CodeQuizDesktop.Views.AddQuestionDialog"
              xmlns:local="clr-namespace:CodeQuizDesktop.Controls"
              xmlns:models="clr-namespace:CodeQuizDesktop.Models"
-             BackgroundColor="Transparent"
              Padding="0"
              Margin="0"
              CanBeDismissedByTappingOutsideOfPopup="False"
              x:TypeArguments="models:NewQuestionModel"
-             xmlns:views="clr-namespace:CodeQuizDesktop.Views">
+             xmlns:views="clr-namespace:CodeQuizDesktop.Views"
+             Background="Transparent">
              
-    <Border StrokeThickness="0" StrokeShape="RoundRectangle 20" Background="Transparent" Margin="0">
-        <Grid VerticalOptions="Center" HorizontalOptions="Center">
-            <Border Style="{StaticResource DialogContainer}" MaximumHeightRequest="900" WidthRequest="720" HeightRequest="900" Padding="0" VerticalOptions="Center" HorizontalOptions="Center">
-                <Grid RowDefinitions="Auto,*,Auto">
+    <Border Style="{StaticResource DialogContainer}" MaximumHeightRequest="900" WidthRequest="720" HeightRequest="900" Padding="0" VerticalOptions="Center" HorizontalOptions="Center">
+        <Grid RowDefinitions="Auto,*,Auto">
                     
                     <!-- Dialog Header -->
                     <Grid Style="{StaticResource DialogHeader}" ColumnDefinitions="*,Auto">
@@ -25,7 +23,11 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnCloseButtonClicked"/>
                             </Border.GestureRecognizers>
-                            <Label Text="✕" FontSize="16" TextColor="{StaticResource TextPrimary}" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <Image Source="close.png" WidthRequest="16" HeightRequest="16" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Image.Behaviors>
+                                    <toolkit:IconTintColorBehavior TintColor="{StaticResource TextPrimary}"/>
+                                </Image.Behaviors>
+                            </Image>
                         </Border>
                     </Grid>
                     
@@ -55,7 +57,7 @@
                             <VerticalStackLayout Spacing="8">
                                 <Label Text="Starter Code in Editor" Style="{StaticResource ItemTitle}"/>
                                 <Border Stroke="{StaticResource BorderDefault}" StrokeThickness="1" StrokeShape="RoundRectangle 12">
-                                    <local:CodeEditor EditorType="IntellisenseOnly" Code="{Binding EditorCode}" x:Name="code" HeightRequest="400"/>
+                                    <local:CodeEditor EditorType="IntellisenseOnly" Code="{Binding EditorCode}" Language="{Binding EffectiveLanguage}" x:Name="code" HeightRequest="400"/>
                                 </Border>
                             </VerticalStackLayout>
                             
@@ -121,6 +123,36 @@
                                     </Border.GestureRecognizers>
                                     <Label Text="+ Add Test Case" TextColor="{StaticResource Primary}" HorizontalTextAlignment="Center" FontAttributes="Bold"/>
                                 </Border>
+                                
+                                <!-- Generate Test Cases with AI Button -->
+                                <Border StrokeShape="RoundRectangle 12" 
+                                        BackgroundColor="{StaticResource Primary}" 
+                                        Padding="16,12" 
+                                        StrokeThickness="0"
+                                        Margin="0,4"
+                                        IsEnabled="{Binding IsGeneratingTestCases, Converter={StaticResource InverseBoolConverter}}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding GenerateTestCasesCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                        <Image Source="auto_awesome.png" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" IsVisible="{Binding IsGeneratingTestCases, Converter={StaticResource InverseBoolConverter}}">
+                                            <Image.Behaviors>
+                                                <toolkit:IconTintColorBehavior TintColor="White"/>
+                                            </Image.Behaviors>
+                                        </Image>
+                                        <ActivityIndicator IsRunning="{Binding IsGeneratingTestCases}" 
+                                                           IsVisible="{Binding IsGeneratingTestCases}"
+                                                           HeightRequest="20" 
+                                                           WidthRequest="20" 
+                                                           Color="White"/>
+                                        <Label Grid.Column="1" 
+                                               Text="Generate Test Cases with AI" 
+                                               TextColor="White" 
+                                               FontAttributes="Bold"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalOptions="Center"/>
+                                    </Grid>
+                                </Border>
                             </VerticalStackLayout>
                             
                             <!-- Independent Configuration Toggle -->
@@ -174,7 +206,5 @@
                         </Grid>
                     </Border>
                 </Grid>
-            </Border>
-        </Grid>
     </Border>
 </toolkit:Popup>

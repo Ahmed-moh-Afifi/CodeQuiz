@@ -15,6 +15,18 @@ namespace CodeQuizBackend.Quiz.Models
         public required QuestionConfiguration GlobalQuestionConfiguration { get; set; }
         public required bool AllowMultipleAttempts { get; set; }
 
+        /// <summary>
+        /// Controls whether students can see AI feedback on their solutions.
+        /// When false (default), only instructors see AI assessment details.
+        /// </summary>
+        public bool ShowAiFeedbackToStudents { get; set; } = false;
+
+        /// <summary>
+        /// Indicates whether the end-of-quiz summary email has been sent to the examiner.
+        /// Used to prevent duplicate emails.
+        /// </summary>
+        public bool EndSummaryEmailSent { get; set; } = false;
+
         public virtual User Examiner { get; set; } = null!;
         public virtual List<Question> Questions { get; set; } = [];
         public virtual List<Attempt> Attempts { get; set; } = [];
@@ -32,6 +44,7 @@ namespace CodeQuizBackend.Quiz.Models
                 ExaminerId = ExaminerId,
                 GlobalQuestionConfiguration = GlobalQuestionConfiguration,
                 AllowMultipleAttempts = AllowMultipleAttempts,
+                ShowAiFeedbackToStudents = ShowAiFeedbackToStudents,
                 Questions = Questions.Select(q => q.ToDTO(q.QuestionConfiguration ?? GlobalQuestionConfiguration)).ToList(),
                 AttemptsCount = attemptsCount,
                 SubmittedAttemptsCount = submittedAttemptsCount,
@@ -52,6 +65,7 @@ namespace CodeQuizBackend.Quiz.Models
                 ExaminerId = ExaminerId,
                 GlobalQuestionConfiguration = GlobalQuestionConfiguration,
                 AllowMultipleAttempts = AllowMultipleAttempts,
+                ShowAiFeedbackToStudents = ShowAiFeedbackToStudents,
                 Questions = Questions.Select(q => q.ToDTO(q.QuestionConfiguration ?? GlobalQuestionConfiguration)).ToList(),
                 Examiner = Examiner.ToDTO(),
             };

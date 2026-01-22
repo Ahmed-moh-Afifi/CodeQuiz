@@ -98,6 +98,60 @@ public class QuizStatistics : BaseObservableModel
         set { _normalDistributionValues = value; OnPropertyChanged(); }
     }
 
+    #region AI Assessment Statistics
+
+    private int _totalAiAssessments;
+    /// <summary>
+    /// Total number of solutions with AI assessments completed.
+    /// </summary>
+    public int TotalAiAssessments
+    {
+        get => _totalAiAssessments;
+        set { _totalAiAssessments = value; OnPropertyChanged(); }
+    }
+
+    private int _flaggedSolutions;
+    /// <summary>
+    /// Number of solutions flagged as suspicious by AI.
+    /// </summary>
+    public int FlaggedSolutions
+    {
+        get => _flaggedSolutions;
+        set { _flaggedSolutions = value; OnPropertyChanged(); }
+    }
+
+    private double _flaggedPercentage;
+    /// <summary>
+    /// Percentage of solutions flagged as suspicious.
+    /// </summary>
+    public double FlaggedPercentage
+    {
+        get => _flaggedPercentage;
+        set { _flaggedPercentage = value; OnPropertyChanged(); }
+    }
+
+    private List<FlagCount> _commonFlags = [];
+    /// <summary>
+    /// Most common AI flags with their counts.
+    /// </summary>
+    public List<FlagCount> CommonFlags
+    {
+        get => _commonFlags;
+        set { _commonFlags = value; OnPropertyChanged(); }
+    }
+
+    private double _averageAiConfidence;
+    /// <summary>
+    /// Average AI confidence score across all assessments.
+    /// </summary>
+    public double AverageAiConfidence
+    {
+        get => _averageAiConfidence;
+        set { _averageAiConfidence = value; OnPropertyChanged(); }
+    }
+
+    #endregion
+
     /// <summary>
     /// Calculates statistics from a list of attempts.
     /// </summary>
@@ -162,7 +216,52 @@ public class QuizStatistics : BaseObservableModel
         stats.GradeDistribution = CalculateGradeDistribution(grades, totalPoints);
         stats.NormalDistributionValues = CalculateNormalDistribution(stats.AverageGrade, stats.StandardDeviation, totalPoints);
 
+        // AI Assessment Statistics
+        CalculateAiStatistics(gradedAttempts, stats);
+
         return stats;
+    }
+
+    /// <summary>
+    /// Calculates AI assessment statistics from graded attempts.
+    /// </summary>
+    private static void CalculateAiStatistics(List<ExaminerAttempt> gradedAttempts, QuizStatistics stats)
+    {
+        // Get all solutions with AI assessments
+        var allSolutions = gradedAttempts
+            .SelectMany(a => a.Solutions ?? [])
+            .ToList();
+
+        var aiAssessedSolutions = allSolutions
+            .Where(s => s.AiAssessment != null)
+            .ToList();
+
+        stats.TotalAiAssessments = aiAssessedSolutions.Count;
+
+        if (aiAssessedSolutions.Count == 0)
+        {
+            return;
+        }
+
+        // Count flagged solutions (IsValid == false)
+        stats.FlaggedSolutions = aiAssessedSolutions.Count(s => s.AiAssessment!.IsValid == false);
+        stats.FlaggedPercentage = Math.Round((double)stats.FlaggedSolutions / stats.TotalAiAssessments * 100, 1);
+
+        // Average confidence
+        stats.AverageAiConfidence = Math.Round(
+            aiAssessedSolutions.Average(s => (double)s.AiAssessment!.ConfidenceScore) * 100, 1);
+
+        // Common flags
+        var flagCounts = aiAssessedSolutions
+            .Where(s => s.AiAssessment!.Flags != null && s.AiAssessment.Flags.Count > 0)
+            .SelectMany(s => s.AiAssessment!.Flags)
+            .GroupBy(f => f)
+            .Select(g => new FlagCount { Flag = g.Key, Count = g.Count() })
+            .OrderByDescending(f => f.Count)
+            .Take(5)
+            .ToList();
+
+        stats.CommonFlags = flagCounts;
     }
 
     private static List<GradeDistributionBucket> CalculateGradeDistribution(List<double> grades, float totalPoints)
@@ -175,10 +274,10 @@ public class QuizStatistics : BaseObservableModel
         {
             double rangeStart = i * bucketSize;
             double rangeEnd = (i + 1) * bucketSize;
-            
+
             int count = grades.Count(g => g >= rangeStart && (i == bucketCount - 1 ? g <= rangeEnd : g < rangeEnd));
             double percentage = grades.Count > 0 ? (double)count / grades.Count * 100 : 0;
-            
+
             buckets.Add(new GradeDistributionBucket
             {
                 RangeStart = rangeStart,
@@ -214,15 +313,15 @@ public class QuizStatistics : BaseObservableModel
         {
             double rangeStart = i * bucketSize;
             double rangeEnd = (i + 1) * bucketSize;
-            
+
             // Calculate the probability mass for this bucket using CDF difference
             double zStart = (rangeStart - idealMean) / idealStdDev;
             double zEnd = (rangeEnd - idealMean) / idealStdDev;
             double probability = NormalCDF(zEnd) - NormalCDF(zStart);
-            
+
             // Convert probability to percentage (probability * 100)
             double expectedPercentage = probability * 100;
-            
+
             values.Add(Math.Max(0, Math.Round(expectedPercentage, 2)));
         }
 
@@ -234,7 +333,7 @@ public class QuizStatistics : BaseObservableModel
     /// </summary>
     private static double NormalCDF(double z)
     {
-        // Using Abramowitz and Stegun approximation (maximum error: 7.5×10?8)
+        // Using Abramowitz and Stegun approximation (maximum error: 7.5ï¿½10?8)
         const double a1 = 0.254829592;
         const double a2 = -0.284496736;
         const double a3 = 1.421413741;
@@ -264,4 +363,13 @@ public class GradeDistributionBucket
     public int Count { get; set; }
     public double Percentage { get; set; }
     public string Label { get; set; } = "";
+}
+
+/// <summary>
+/// Represents a flag and its occurrence count.
+/// </summary>
+public class FlagCount
+{
+    public string Flag { get; set; } = "";
+    public int Count { get; set; }
 }

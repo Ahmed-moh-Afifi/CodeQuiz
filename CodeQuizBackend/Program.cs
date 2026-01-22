@@ -4,6 +4,7 @@ using CodeQuizBackend.Authentication.Services;
 using CodeQuizBackend.Core.Data;
 using CodeQuizBackend.Core.Logging;
 using CodeQuizBackend.Core.Middlewares;
+using CodeQuizBackend.Core.Services.Ai;
 using CodeQuizBackend.Execution.Models;
 using CodeQuizBackend.Execution.Services;
 using CodeQuizBackend.Quiz.Hubs;
@@ -147,6 +148,22 @@ builder.Services.AddScoped<ICodeRunner, PythonCodeRunner>();
 builder.Services.AddScoped<ICodeRunnerFactory, CodeRunnerFactory>();
 builder.Services.AddScoped<IEvaluator, Evaluator>();
 
+// AI Services (Groq)
+builder.Services.Configure<GroqSettings>(options =>
+{
+    options.ApiKey = Environment.GetEnvironmentVariable("GROQ_API_KEY") ?? "";
+    options.Model = Environment.GetEnvironmentVariable("GROQ_MODEL") ?? "llama-3.3-70b-versatile";
+    options.MaxTokens = int.TryParse(Environment.GetEnvironmentVariable("GROQ_MAX_TOKENS"), out var maxTokens) ? maxTokens : 2048;
+    options.Temperature = float.TryParse(Environment.GetEnvironmentVariable("GROQ_TEMPERATURE"), out var temp) ? temp : 0.3f;
+});
+builder.Services.AddHttpClient<IGroqService, GroqService>();
+builder.Services.AddScoped<IAiAssessmentService, AiAssessmentService>();
+builder.Services.AddScoped<IAiTestCaseGeneratorService, AiTestCaseGeneratorService>();
+
+// Background evaluation services
+builder.Services.AddSingleton<IEvaluationQueue, EvaluationQueue>();
+builder.Services.AddHostedService<EvaluationBackgroundService>();
+
 // Sandboxed code execution services
 builder.Services.AddSingleton(new SandboxConfiguration
 {
@@ -184,6 +201,7 @@ builder.Services.AddSingleton<SandboxedCodeRunnerFactory>(sp => innerRunner => n
 
 // Background services
 builder.Services.AddHostedService<AttemptTimerService>();
+builder.Services.AddHostedService<QuizEndMonitorService>();
 
 builder.Services.AddSignalR();
 

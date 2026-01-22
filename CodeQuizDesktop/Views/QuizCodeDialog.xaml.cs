@@ -43,14 +43,14 @@ public partial class QuizCodeDialog : ContentView
 
     public string CopyButtonText
     {
-        get => copyButton.Text;
-        set => copyButton.Text = value;
+        get => copyButtonLabel.Text;
+        set => copyButtonLabel.Text = value;
     }
 
     public string ShareButtonText
     {
-        get => shareButton.Text;
-        set => shareButton.Text = value;
+        get => shareButtonLabel.Text;
+        set => shareButtonLabel.Text = value;
     }
 
     public string CancelButtonText
@@ -100,10 +100,10 @@ public partial class QuizCodeDialog : ContentView
             await Clipboard.Default.SetTextAsync(_code);
 
             // Visual feedback - temporarily change button text
-            var originalText = copyButton.Text;
-            copyButton.Text = "Copied!";
+            var originalText = copyButtonLabel.Text;
+            copyButtonLabel.Text = "Copied!";
             await Task.Delay(1500);
-            copyButton.Text = originalText;
+            copyButtonLabel.Text = originalText;
         }
         catch
         {

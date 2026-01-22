@@ -1,3 +1,4 @@
+using CodeQuizDesktop.APIs;
 using CodeQuizDesktop.Models;
 using CodeQuizDesktop.Repositories;
 using CodeQuizDesktop.Services;
@@ -22,6 +23,9 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
     private ObservableCollection<TestCase> testCases = [];
     private float points = 0;
     private bool independentlyConfigured = false;
+
+    // Global language from quiz (used when question is not independently configured)
+    private string? _globalLanguage;
 
 
 
@@ -81,10 +85,17 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
         }
         set
         {
-            OnPropertyChanged();
             programmingLanguage = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(EffectiveLanguage));
         }
     }
+
+    /// <summary>
+    /// Gets the effective language for the code editor.
+    /// Returns the question's language if independently configured, otherwise uses the global language.
+    /// </summary>
+    public string? EffectiveLanguage => IndependentlyConfigured ? ProgrammingLanguage : _globalLanguage;
     public bool AllowExecution
     {
         get => allowExecution;
@@ -141,6 +152,7 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
         {
             independentlyConfigured = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(EffectiveLanguage));
         }
     }
 
@@ -177,13 +189,30 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
     //Commands
     public ICommand AddTestCaseCommand { get => new Command(AddTestCase); }
     public ICommand DeleteTestCaseCommand { get => new Command<TestCase>(DeleteTestCase); }
+    public ICommand GenerateTestCasesCommand { get => new Command(async () => await GenerateTestCases()); }
 
     private readonly IUIService uiService = MauiProgram.GetService<IUIService>();
+    private readonly IAiAPI aiApi = MauiProgram.GetService<IAiAPI>();
 
-    public AddQuestionDialog(NewQuestionModel newQuestionModel = null)
+    private bool isGeneratingTestCases = false;
+    public bool IsGeneratingTestCases
+    {
+        get => isGeneratingTestCases;
+        set
+        {
+            isGeneratingTestCases = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public AddQuestionDialog(NewQuestionModel? newQuestionModel = null, string? globalLanguage = null)
     {
         InitializeComponent();
         BindingContext = this;
+        _globalLanguage = globalLanguage;
+
+        // Notify EffectiveLanguage after setting global language so the code editor picks it up
+        OnPropertyChanged(nameof(EffectiveLanguage));
         QuestionModel = newQuestionModel;
         if (QuestionModel != null)
         {
@@ -243,6 +272,68 @@ public partial class AddQuestionDialog : Popup<NewQuestionModel?>
     public void DeleteTestCase(TestCase tc)
     {
         TestCases.Remove(tc);
+    }
+
+    /// <summary>
+    /// Generates test cases using AI based on the question statement.
+    /// </summary>
+    public async Task GenerateTestCases()
+    {
+        if (string.IsNullOrWhiteSpace(Statement))
+        {
+            await uiService.ShowErrorAsync("Please enter a question statement before generating test cases.", "Missing Statement");
+            return;
+        }
+
+        // Use question's language if independently configured, otherwise use global language
+        var language = IndependentlyConfigured ? ProgrammingLanguage : _globalLanguage;
+        if (string.IsNullOrWhiteSpace(language))
+        {
+            await uiService.ShowErrorAsync("Please select a programming language. Either configure this question independently and select a language, or set a global language in the quiz configuration.", "Missing Language");
+            return;
+        }
+
+        try
+        {
+            IsGeneratingTestCases = true;
+
+            var request = new GenerateTestCasesRequest
+            {
+                ProblemStatement = Statement,
+                Language = language,
+                ExistingTestCases = TestCases.Count > 0 ? TestCases.ToList() : null,
+                SampleSolution = !string.IsNullOrWhiteSpace(EditorCode) ? EditorCode : null,
+                Count = 3 // Generate 3 test cases at a time
+            };
+
+            var response = await aiApi.GenerateTestCases(request);
+
+            if (response.Success && response.Data != null)
+            {
+                foreach (var generatedTestCase in response.Data)
+                {
+                    // Add the generated test case to the collection
+                    var tc = generatedTestCase.TestCase;
+                    tc.TestCaseNumber = -1; // Will be reassigned by CollectionChanged handler
+                    TestCases.Add(tc);
+                }
+
+                await uiService.ShowAlertAsync("Success", $"Generated {response.Data.Count} test cases successfully.", "OK");
+            }
+            else
+            {
+                await uiService.ShowErrorAsync(response.Message ?? "Failed to generate test cases. Please try again.", "Generation Failed");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error generating test cases: {ex.Message}");
+            await uiService.ShowErrorAsync($"An error occurred while generating test cases: {ex.Message}", "Error");
+        }
+        finally
+        {
+            IsGeneratingTestCases = false;
+        }
     }
 
     /// <summary>

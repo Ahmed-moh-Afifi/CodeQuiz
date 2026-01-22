@@ -120,7 +120,7 @@
                                 <Border Style="{StaticResource InnerCard}" Padding="24">
                                     <HorizontalStackLayout Spacing="16" HorizontalOptions="Center">
                                         <Border BackgroundColor="{StaticResource Secondary}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="12">
-                                            <Image Source="question.svg" WidthRequest="24" HeightRequest="24">
+                                            <Image Source="quiz.png" WidthRequest="24" HeightRequest="24">
                                                 <Image.Behaviors>
                                                     <toolkit:IconTintColorBehavior TintColor="{StaticResource TextMuted}"/>
                                                 </Image.Behaviors>
@@ -212,7 +212,7 @@
                                 <Border Style="{StaticResource InnerCard}" Padding="24">
                                     <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
                                         <Border BackgroundColor="{StaticResource Secondary}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="12" HorizontalOptions="Center">
-                                            <Image Source="pencil.svg" WidthRequest="24" HeightRequest="24">
+                                            <Image Source="teacher.png" WidthRequest="24" HeightRequest="24">
                                                 <Image.Behaviors>
                                                     <toolkit:IconTintColorBehavior TintColor="{StaticResource TextMuted}"/>
                                                 </Image.Behaviors>

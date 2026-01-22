@@ -5,7 +5,7 @@ namespace CodeQuizDesktop.Services
 {
     public interface IQuizDialogService
     {
-        Task<NewQuestionModel?> ShowAddQuestionDialogAsync();
-        Task<NewQuestionModel?> ShowEditQuestionDialogAsync(NewQuestionModel existingQuestion);
+        Task<NewQuestionModel?> ShowAddQuestionDialogAsync(string? globalLanguage = null);
+        Task<NewQuestionModel?> ShowEditQuestionDialogAsync(NewQuestionModel existingQuestion, string? globalLanguage = null);
     }
 }

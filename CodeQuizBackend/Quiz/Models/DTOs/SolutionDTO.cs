@@ -10,6 +10,18 @@ namespace CodeQuizBackend.Quiz.Models.DTOs
         public required int AttemptId { get; set; }
         public string? EvaluatedBy { get; set; }
         public float? ReceivedGrade { get; set; }
+
+        /// <summary>
+        /// Feedback comment from the examiner for the student.
+        /// </summary>
+        public string? Feedback { get; set; }
+
         public List<EvaluationResult>? EvaluationResults { get; set; }
+
+        /// <summary>
+        /// AI assessment of the solution. May be null if AI assessment hasn't run yet,
+        /// or if the instructor has disabled AI feedback visibility for students.
+        /// </summary>
+        public AiAssessmentDTO? AiAssessment { get; set; }
     }
 }

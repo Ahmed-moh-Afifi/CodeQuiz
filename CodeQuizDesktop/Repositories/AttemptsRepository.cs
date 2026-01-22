@@ -20,7 +20,8 @@ namespace CodeQuizDesktop.Repositories
         private readonly SemaphoreSlim _initLock = new(1, 1);
         private string? _currentUserId;
         private readonly HashSet<int> _joinedQuizGroups = [];
-        
+        private readonly List<Action<EvaluationStatusPayload>> _evaluationStatusSubscribers = [];
+
         public AttemptsRepository(IAttemptsAPI attemptsAPI, IAuthenticationRepository authRepository)
         {
             this.attemptsAPI = attemptsAPI;
@@ -30,7 +31,7 @@ namespace CodeQuizDesktop.Repositories
         private async Task EnsureInitializedAsync()
         {
             var userId = _authRepository.LoggedInUser?.Id;
-            
+
             // If user changed or not connected, reinitialize
             if (_currentUserId != userId || _connection?.State != HubConnectionState.Connected)
             {
@@ -53,7 +54,7 @@ namespace CodeQuizDesktop.Repositories
                             {
                                 await _connection.InvokeAsync("LeaveUserGroup", _currentUserId);
                                 await _connection.InvokeAsync("LeaveExaminerGroup", _currentUserId);
-                                
+
                                 // Leave all joined quiz groups
                                 foreach (var quizId in _joinedQuizGroups)
                                 {
@@ -70,36 +71,69 @@ namespace CodeQuizDesktop.Repositories
                         .WithUrl($"{Config.HUB}/Attempts")
                         .WithAutomaticReconnect()
                         .Build();
-                    
+
                     // Handle reconnection to re-join groups
                     _connection.Reconnected += OnReconnectedAsync;
-                        
+
                     // Handle both ExaminerAttempt and ExamineeAttempt notifications
                     _connection.On<ExamineeAttempt>("AttemptAutoSubmitted", eea =>
                     {
                         NotifyUpdate(eea);
                     });
-                    
+
                     _connection.On<ExaminerAttempt, ExamineeAttempt>("AttemptCreated", (era, eea) =>
                     {
                         NotifyCreate(era);
                         NotifyCreate(eea);
                     });
-                    
+
                     _connection.On<ExaminerAttempt, ExamineeAttempt>("AttemptUpdated", (era, eea) =>
                     {
                         NotifyUpdate(era);
                         NotifyUpdate(eea);
                     });
-                    
+
                     _connection.On<int>("AttemptDeleted", id =>
                     {
                         NotifyDelete<ExaminerAttempt>(id);
                         NotifyDelete<ExamineeAttempt>(id);
                     });
-                    
+
+                    // AI Assessment evaluation events
+                    _connection.On<EvaluationStatusPayload>("EvaluationStarted", payload =>
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Evaluation started for attempt {payload.AttemptId}");
+                        NotifyEvaluationStatus(payload);
+                    });
+
+                    _connection.On<EvaluationStatusPayload>("SystemGradingComplete", payload =>
+                    {
+                        System.Diagnostics.Debug.WriteLine($"System grading complete for attempt {payload.AttemptId}");
+                        if (payload.ExaminerAttempt != null)
+                            NotifyUpdate(payload.ExaminerAttempt);
+                        if (payload.ExamineeAttempt != null)
+                            NotifyUpdate(payload.ExamineeAttempt);
+                        NotifyEvaluationStatus(payload);
+                    });
+
+                    _connection.On<EvaluationStatusPayload>("AiAssessmentComplete", payload =>
+                    {
+                        System.Diagnostics.Debug.WriteLine($"AI assessment complete for attempt {payload.AttemptId}");
+                        if (payload.ExaminerAttempt != null)
+                            NotifyUpdate(payload.ExaminerAttempt);
+                        if (payload.ExamineeAttempt != null)
+                            NotifyUpdate(payload.ExamineeAttempt);
+                        NotifyEvaluationStatus(payload);
+                    });
+
+                    _connection.On<EvaluationStatusPayload>("EvaluationFailed", payload =>
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Evaluation failed for attempt {payload.AttemptId}: {payload.ErrorMessage}");
+                        NotifyEvaluationStatus(payload);
+                    });
+
                     await _connection.StartAsync();
-                    
+
                     // Join user-specific and examiner groups for the logged-in user
                     if (userId != null)
                     {
@@ -107,7 +141,7 @@ namespace CodeQuizDesktop.Repositories
                         await _connection.InvokeAsync("JoinExaminerGroup", userId);
                         _currentUserId = userId;
                     }
-                    
+
                     _isInitialized = true;
                 }
                 catch (Exception ex)
@@ -121,21 +155,21 @@ namespace CodeQuizDesktop.Repositories
                 }
             }
         }
-        
+
         /// <summary>
         /// Handles reconnection by re-joining all groups
         /// </summary>
         private async Task OnReconnectedAsync(string? connectionId)
         {
             System.Diagnostics.Debug.WriteLine($"SignalR reconnected with connection ID: {connectionId}");
-            
+
             try
             {
                 if (_currentUserId != null)
                 {
                     await _connection!.InvokeAsync("JoinUserGroup", _currentUserId);
                     await _connection!.InvokeAsync("JoinExaminerGroup", _currentUserId);
-                    
+
                     // Re-join all quiz groups
                     foreach (var quizId in _joinedQuizGroups)
                     {
@@ -156,7 +190,7 @@ namespace CodeQuizDesktop.Repositories
         public async Task JoinQuizGroupAsync(int quizId)
         {
             await EnsureInitializedAsync();
-            
+
             if (_connection?.State == HubConnectionState.Connected && !_joinedQuizGroups.Contains(quizId))
             {
                 try
@@ -260,6 +294,43 @@ namespace CodeQuizDesktop.Repositories
             {
                 throw ApiServiceException.FromException(ex, "Failed to update solution grade.");
             }
+        }
+
+        /// <summary>
+        /// Notifies all subscribers of an evaluation status update
+        /// </summary>
+        private void NotifyEvaluationStatus(EvaluationStatusPayload payload)
+        {
+            foreach (var subscriber in _evaluationStatusSubscribers.ToList())
+            {
+                try
+                {
+                    subscriber(payload);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error notifying evaluation status subscriber: {ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Subscribes to evaluation status updates (EvaluationStarted, SystemGradingComplete, AiAssessmentComplete, EvaluationFailed)
+        /// </summary>
+        public void SubscribeEvaluationStatus(Action<EvaluationStatusPayload> action)
+        {
+            if (!_evaluationStatusSubscribers.Contains(action))
+            {
+                _evaluationStatusSubscribers.Add(action);
+            }
+        }
+
+        /// <summary>
+        /// Unsubscribes from evaluation status updates
+        /// </summary>
+        public void UnsubscribeEvaluationStatus(Action<EvaluationStatusPayload> action)
+        {
+            _evaluationStatusSubscribers.Remove(action);
         }
     }
 }

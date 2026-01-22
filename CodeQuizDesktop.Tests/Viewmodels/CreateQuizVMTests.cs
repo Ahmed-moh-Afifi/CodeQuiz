@@ -100,7 +100,7 @@ namespace CodeQuizDesktop.Tests.Viewmodels
                 Order = 1,
                 Points = 10
             };
-            _quizDialogServiceMock.Setup(x => x.ShowAddQuestionDialogAsync())
+            _quizDialogServiceMock.Setup(x => x.ShowAddQuestionDialogAsync(It.IsAny<string?>()))
                 .ReturnsAsync(newQuestion);
 
             // Act
@@ -114,7 +114,7 @@ namespace CodeQuizDesktop.Tests.Viewmodels
         public async Task AddQuestion_ShouldNotAddQuestion_WhenDialogReturnsNull()
         {
             // Arrange
-            _quizDialogServiceMock.Setup(x => x.ShowAddQuestionDialogAsync())
+            _quizDialogServiceMock.Setup(x => x.ShowAddQuestionDialogAsync(It.IsAny<string?>()))
                 .ReturnsAsync((NewQuestionModel?)null);
 
             // Act
@@ -147,7 +147,7 @@ namespace CodeQuizDesktop.Tests.Viewmodels
                 Points = 20
             };
 
-            _quizDialogServiceMock.Setup(x => x.ShowEditQuestionDialogAsync(originalQuestion))
+            _quizDialogServiceMock.Setup(x => x.ShowEditQuestionDialogAsync(originalQuestion, It.IsAny<string?>()))
                 .ReturnsAsync(updatedQuestion);
 
             // Act

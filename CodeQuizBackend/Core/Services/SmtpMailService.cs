@@ -182,5 +182,110 @@ namespace CodeQuizBackend.Services
 
             await SendEmailAsync(toEmail, subject, body, isHtml: true);
         }
+
+        public async Task SendQuizEndSummaryAsync(string toEmail, string examinerName, QuizEndStatistics stats)
+        {
+            var subject = $"Quiz Ended: {stats.QuizTitle}";
+            var passRateColor = stats.PassRate >= 70 ? "#4CAF50" : (stats.PassRate >= 40 ? "#FFC107" : "#F44336");
+            var flaggedColor = stats.FlaggedSolutions > 0 ? "#F44336" : "#4CAF50";
+
+            var body = $"""
+                <html>
+                <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: {TextColor}; margin: 0; padding: 0; background-color: {BackgroundDarker};">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <div style="background: linear-gradient(135deg, {PrimaryLightColor}, {PrimaryColor}); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+                            <h1 style="color: white; margin: 0; font-size: 28px;">CodeQuiz</h1>
+                            <p style="color: {TextColor}; margin: 10px 0 0 0; font-size: 14px;">Quiz Summary Report</p>
+                        </div>
+                        <div style="background-color: {BackgroundDark}; padding: 30px; border-radius: 0 0 12px 12px; border: 1px solid {BorderColor}; border-top: none;">
+                            <h2 style="color: {TextColor}; margin-top: 0;">Hello {examinerName},</h2>
+                            <p style="color: {TextColor};">Your quiz <strong style="color: white;">{stats.QuizTitle}</strong> has ended. Here's a summary of the results:</p>
+                            
+                            <!-- Quiz Duration Info -->
+                            <div style="background-color: {BackgroundDarker}; padding: 16px; border-radius: 8px; margin: 20px 0; border: 1px solid {BorderColor};">
+                                <p style="margin: 0; font-size: 13px; color: {MutedTextColor};">
+                                    <strong style="color: {TextColor};">Quiz Period:</strong> {stats.StartDate:MMM dd, yyyy HH:mm} - {stats.EndDate:MMM dd, yyyy HH:mm}
+                                </p>
+                            </div>
+
+                            <!-- Statistics Grid -->
+                            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                                <tr>
+                                    <td style="padding: 12px; background-color: {BackgroundDarker}; border: 1px solid {BorderColor}; border-radius: 8px 0 0 0; text-align: center; width: 33%;">
+                                        <p style="margin: 0; font-size: 28px; font-weight: bold; color: {TextColor};">{stats.TotalAttempts}</p>
+                                        <p style="margin: 4px 0 0 0; font-size: 12px; color: {MutedTextColor};">Total Attempts</p>
+                                    </td>
+                                    <td style="padding: 12px; background-color: {BackgroundDarker}; border: 1px solid {BorderColor}; text-align: center; width: 33%;">
+                                        <p style="margin: 0; font-size: 28px; font-weight: bold; color: #4CAF50;">{stats.SubmittedAttempts}</p>
+                                        <p style="margin: 4px 0 0 0; font-size: 12px; color: {MutedTextColor};">Submitted</p>
+                                    </td>
+                                    <td style="padding: 12px; background-color: {BackgroundDarker}; border: 1px solid {BorderColor}; border-radius: 0 8px 0 0; text-align: center; width: 33%;">
+                                        <p style="margin: 0; font-size: 28px; font-weight: bold; color: #FFC107;">{stats.InProgressAttempts}</p>
+                                        <p style="margin: 4px 0 0 0; font-size: 12px; color: {MutedTextColor};">Auto-Submitted</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px; background-color: {BackgroundDarker}; border: 1px solid {BorderColor}; border-radius: 0 0 0 8px; text-align: center;">
+                                        <p style="margin: 0; font-size: 28px; font-weight: bold; color: {passRateColor};">{stats.PassRate:F0}%</p>
+                                        <p style="margin: 4px 0 0 0; font-size: 12px; color: {MutedTextColor};">Pass Rate</p>
+                                    </td>
+                                    <td style="padding: 12px; background-color: {BackgroundDarker}; border: 1px solid {BorderColor}; text-align: center;">
+                                        <p style="margin: 0; font-size: 28px; font-weight: bold; color: {TextColor};">{stats.AverageGrade:F1}</p>
+                                        <p style="margin: 4px 0 0 0; font-size: 12px; color: {MutedTextColor};">Average Grade</p>
+                                    </td>
+                                    <td style="padding: 12px; background-color: {BackgroundDarker}; border: 1px solid {BorderColor}; border-radius: 0 0 8px 0; text-align: center;">
+                                        <p style="margin: 0; font-size: 28px; font-weight: bold; color: {TextColor};">{stats.TotalPoints:F0}</p>
+                                        <p style="margin: 4px 0 0 0; font-size: 12px; color: {MutedTextColor};">Total Points</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Grade Details -->
+                            <div style="background-color: {BackgroundDarker}; padding: 16px; border-radius: 8px; margin: 20px 0; border: 1px solid {BorderColor};">
+                                <h3 style="color: {TextColor}; margin: 0 0 12px 0; font-size: 14px;">Grade Details</h3>
+                                <table style="width: 100%;">
+                                    <tr>
+                                        <td style="padding: 6px 0; color: {TextColor};">Highest Grade</td>
+                                        <td style="padding: 6px 0; text-align: right; color: #4CAF50; font-weight: bold;">{stats.HighestGrade:F1}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px 0; color: {TextColor};">Lowest Grade</td>
+                                        <td style="padding: 6px 0; text-align: right; color: #F44336; font-weight: bold;">{stats.LowestGrade:F1}</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- AI Assessment Summary (if any) -->
+                            {(stats.TotalAiAssessments > 0 ? $"""
+                            <div style="background-color: {BackgroundDarker}; padding: 16px; border-radius: 8px; margin: 20px 0; border: 1px solid {BorderColor};">
+                                <h3 style="color: {TextColor}; margin: 0 0 12px 0; font-size: 14px;">🤖 AI Assessment Summary</h3>
+                                <table style="width: 100%;">
+                                    <tr>
+                                        <td style="padding: 6px 0; color: {TextColor};">Solutions Assessed</td>
+                                        <td style="padding: 6px 0; text-align: right; color: {TextColor}; font-weight: bold;">{stats.TotalAiAssessments}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px 0; color: {TextColor};">Flagged Solutions</td>
+                                        <td style="padding: 6px 0; text-align: right; color: {flaggedColor}; font-weight: bold;">{stats.FlaggedSolutions}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            """ : "")}
+
+                            <div style="text-align: center; margin: 30px 0;">
+                                <p style="color: {MutedTextColor};">Log in to CodeQuiz to view detailed results and grade submissions.</p>
+                            </div>
+                            <hr style="border: none; border-top: 1px solid {BorderColor}; margin: 20px 0;">
+                            <p style="font-size: 12px; color: {MutedTextColor}; text-align: center;">
+                                This is an automated message from CodeQuiz. Please do not reply to this email.
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """;
+
+            await SendEmailAsync(toEmail, subject, body, isHtml: true);
+        }
     }
 }

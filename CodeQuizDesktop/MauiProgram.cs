@@ -44,7 +44,7 @@ namespace CodeQuizDesktop
             Microsoft.Maui.Handlers.PickerHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveBorder(h.PlatformView));
             Microsoft.Maui.Handlers.DatePickerHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveBorder(h.PlatformView));
             Microsoft.Maui.Handlers.TimePickerHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveBorder(h.PlatformView));
-            Microsoft.Maui.Handlers.ButtonHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveButtonBorder(h.PlatformView));
+            Microsoft.Maui.Handlers.ButtonHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveButtonBorder(h.PlatformView, v));
 
             // Helper method to modify the Windows Native Control
             static void RemoveBorder(object platformView)
@@ -59,24 +59,48 @@ namespace CodeQuizDesktop
         nativeControl.FocusVisualPrimaryThickness = new Microsoft.UI.Xaml.Thickness(0);
         nativeControl.FocusVisualSecondaryThickness = new Microsoft.UI.Xaml.Thickness(0);
         
-        // 3. Optional: Force the border brush to transparent just in case
-        // nativeControl.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+        // 3. Force the border brush to transparent in all states
+        nativeControl.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+        
+        // 4. Override the focus state border brushes for TextBox and RichEditBox
+        if (nativeControl is Microsoft.UI.Xaml.Controls.TextBox textBox)
+        {
+            textBox.Resources["TextControlBorderBrush"] = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+            textBox.Resources["TextControlBorderBrushPointerOver"] = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+            textBox.Resources["TextControlBorderBrushFocused"] = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+            textBox.Resources["TextControlBorderBrushDisabled"] = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+        }
+        else if (nativeControl.GetType().Name == "MauiRichEditBox")
+        {
+            // RichEditBox is used for Editor - override its resources too
+            nativeControl.Resources["TextControlBorderBrush"] = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+            nativeControl.Resources["TextControlBorderBrushPointerOver"] = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+            nativeControl.Resources["TextControlBorderBrushFocused"] = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+            nativeControl.Resources["TextControlBorderBrushDisabled"] = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+        }
     }
 #endif
             }
 
-            // Helper method to remove borders from buttons on Windows
-            static void RemoveButtonBorder(object platformView)
+            // Helper method to remove borders from buttons on Windows (except those with BorderWidth > 0)
+            static void RemoveButtonBorder(object platformView, IView view)
             {
 #if WINDOWS
     if (platformView is Microsoft.UI.Xaml.Controls.Button nativeButton)
     {
-        // Remove the focus visual (focus ring)
+        // Remove the focus visual (focus ring) for all buttons
         nativeButton.FocusVisualPrimaryThickness = new Microsoft.UI.Xaml.Thickness(0);
         nativeButton.FocusVisualSecondaryThickness = new Microsoft.UI.Xaml.Thickness(0);
         nativeButton.UseSystemFocusVisuals = false;
         
-        // Remove border thickness
+        // Only remove border for buttons that don't have an explicit border (e.g., DangerButton has BorderWidth="1")
+        if (view is Button mauiButton && mauiButton.BorderWidth > 0)
+        {
+            // Keep the border for buttons that explicitly define one
+            return;
+        }
+        
+        // Remove border thickness for other buttons
         nativeButton.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
         nativeButton.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
     }
@@ -142,6 +166,7 @@ namespace CodeQuizDesktop
             builder.Services.AddRefitClient<IQuizzesAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<LoggingHandler>();
             builder.Services.AddRefitClient<IUsersAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<LoggingHandler>();
             builder.Services.AddRefitClient<IExecutionAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<LoggingHandler>();
+            builder.Services.AddRefitClient<IAiAPI>().ConfigureHttpClient(c => c.BaseAddress = new Uri(uri)).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<LoggingHandler>();
 
             var app = builder.Build();
             serviceProvider = app.Services;

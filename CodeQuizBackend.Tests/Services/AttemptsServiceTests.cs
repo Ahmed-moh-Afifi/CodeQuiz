@@ -1,4 +1,5 @@
 using CodeQuizBackend.Core.Data;
+using CodeQuizBackend.Core.Services;
 using CodeQuizBackend.Execution.Services;
 using CodeQuizBackend.Quiz.Exceptions;
 using CodeQuizBackend.Quiz.Hubs;
@@ -23,6 +24,7 @@ namespace CodeQuizBackend.Tests.Services
         private readonly Mock<IHubContext<AttemptsHub>> _attemptsHubContextMock;
         private readonly Mock<IHubContext<QuizzesHub>> _quizzesHubContextMock;
         private readonly Mock<IMailService> _mailServiceMock;
+        private readonly Mock<IEvaluationQueue> _evaluationQueueMock;
         private readonly AttemptsService _attemptsService;
 
         public AttemptsServiceTests()
@@ -33,7 +35,7 @@ namespace CodeQuizBackend.Tests.Services
             _dbContext = new ApplicationDbContext(options);
 
             _evaluatorMock = new Mock<IEvaluator>();
-            
+
             _attemptsHubContextMock = new Mock<IHubContext<AttemptsHub>>();
             var attemptsClientsMock = new Mock<IHubClients>();
             var attemptsClientProxyMock = new Mock<IClientProxy>();
@@ -49,13 +51,15 @@ namespace CodeQuizBackend.Tests.Services
             quizzesClientsMock.Setup(x => x.Group(It.IsAny<string>())).Returns(quizzesClientProxyMock.Object);
 
             _mailServiceMock = new Mock<IMailService>();
+            _evaluationQueueMock = new Mock<IEvaluationQueue>();
 
             _attemptsService = new AttemptsService(
                 _dbContext,
                 _evaluatorMock.Object,
                 _attemptsHubContextMock.Object,
                 _quizzesHubContextMock.Object,
-                _mailServiceMock.Object
+                _mailServiceMock.Object,
+                _evaluationQueueMock.Object
             );
         }
 

@@ -35,6 +35,7 @@ namespace CodeQuizDesktop.Viewmodels
             }
         }
 
+        private ObservableCollection<ExaminerAttempt> _allAttempts = [];
         private ObservableCollection<ExaminerAttempt> attempts = [];
 
         public ObservableCollection<ExaminerAttempt> Attempts
@@ -55,6 +56,101 @@ namespace CodeQuizDesktop.Viewmodels
                 UpdateStatistics();
             }
         }
+
+        #region Filtering
+
+        private string? _activeFilter = null;
+        private string? _activeFilterFlag = null;
+
+        /// <summary>
+        /// The currently active filter description for display.
+        /// </summary>
+        public string? ActiveFilterDescription
+        {
+            get
+            {
+                if (_activeFilter == null) return null;
+                return _activeFilter switch
+                {
+                    "ai_assessed" => "AI Assessed",
+                    "flagged" => "Flagged",
+                    "flag" => $"Flag: {_activeFilterFlag}",
+                    _ => null
+                };
+            }
+        }
+
+        /// <summary>
+        /// Whether a filter is currently active.
+        /// </summary>
+        public bool IsFilterActive => _activeFilter != null;
+
+        /// <summary>
+        /// Command to filter by AI assessed attempts.
+        /// </summary>
+        public ICommand FilterByAiAssessedCommand => new Command(() => ApplyFilter("ai_assessed"));
+
+        /// <summary>
+        /// Command to filter by flagged attempts.
+        /// </summary>
+        public ICommand FilterByFlaggedCommand => new Command(() => ApplyFilter("flagged"));
+
+        /// <summary>
+        /// Command to filter by a specific flag.
+        /// </summary>
+        public ICommand FilterByFlagCommand => new Command<string>(flag => ApplyFilter("flag", flag));
+
+        /// <summary>
+        /// Command to clear all filters.
+        /// </summary>
+        public ICommand ClearFilterCommand => new Command(ClearFilter);
+
+        private void ApplyFilter(string filterType, string? flag = null)
+        {
+            _activeFilter = filterType;
+            _activeFilterFlag = flag;
+
+            var filtered = filterType switch
+            {
+                "ai_assessed" => _allAttempts.Where(a => a.HasAiAssessments),
+                "flagged" => _allAttempts.Where(a => a.HasSuspiciousSolutions),
+                "flag" when flag != null => _allAttempts.Where(a =>
+                    a.Solutions.Any(s => s.AiAssessment?.Flags?.Contains(flag) == true)),
+                _ => _allAttempts.AsEnumerable()
+            };
+
+            Attempts = new ObservableCollection<ExaminerAttempt>(filtered);
+            OnPropertyChanged(nameof(ActiveFilterDescription));
+            OnPropertyChanged(nameof(IsFilterActive));
+        }
+
+        private void ClearFilter()
+        {
+            _activeFilter = null;
+            _activeFilterFlag = null;
+            Attempts = new ObservableCollection<ExaminerAttempt>(_allAttempts);
+            OnPropertyChanged(nameof(ActiveFilterDescription));
+            OnPropertyChanged(nameof(IsFilterActive));
+        }
+
+        /// <summary>
+        /// Checks if an attempt should be included in the currently filtered view.
+        /// </summary>
+        private bool ShouldIncludeInFilteredView(ExaminerAttempt attempt)
+        {
+            if (_activeFilter == null) return true;
+
+            return _activeFilter switch
+            {
+                "ai_assessed" => attempt.HasAiAssessments,
+                "flagged" => attempt.HasSuspiciousSolutions,
+                "flag" when _activeFilterFlag != null =>
+                    attempt.Solutions.Any(s => s.AiAssessment?.Flags?.Contains(_activeFilterFlag) == true),
+                _ => true
+            };
+        }
+
+        #endregion
 
         private void OnAttemptsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
@@ -144,7 +240,7 @@ namespace CodeQuizDesktop.Viewmodels
                 OnPropertyChanged();
             }
         }
-        
+
         private bool _isChartVisible = false;
         /// <summary>
         /// Controls chart visibility - only show when we have valid data
@@ -157,6 +253,16 @@ namespace CodeQuizDesktop.Viewmodels
                 _isChartVisible = value;
                 OnPropertyChanged();
             }
+        }
+
+        /// <summary>
+        /// Restores the chart after navigating back to this page.
+        /// Called from the View's OnNavigatedTo.
+        /// </summary>
+        public void RestoreChart()
+        {
+            // Re-trigger chart update to restore it
+            UpdateChartSeries();
         }
 
         private void UpdateStatistics()
@@ -249,7 +355,7 @@ namespace CodeQuizDesktop.Viewmodels
                         MinLimit = 0
                     }
                 ];
-                
+
                 IsChartVisible = true;
             }
             catch (Exception ex)
@@ -270,7 +376,7 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 // Hide chart first to prevent any rendering during cleanup
                 IsChartVisible = false;
-                
+
                 // Leave the quiz group when navigating away
                 if (Quiz != null)
                 {
@@ -289,7 +395,7 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 System.Diagnostics.Debug.WriteLine($"Error during cleanup: {ex.Message}");
             }
-            
+
             await _navigationService.GoToAsync("..");
         }
 
@@ -310,7 +416,7 @@ namespace CodeQuizDesktop.Viewmodels
         {
             if (Attempts == null || Attempts.Count == 0)
                 return;
-                
+
             await ExportToExcel(Attempts.ToList());
         }
 
@@ -320,7 +426,7 @@ namespace CodeQuizDesktop.Viewmodels
         {
             if (examinerAttempts.Count == 0)
                 return;
-                
+
             using var workbook = new XLWorkbook();
             var ws = workbook.Worksheets.Add("Grades Report");
 
@@ -380,9 +486,21 @@ namespace CodeQuizDesktop.Viewmodels
         {
             if (query.ContainsKey("quiz") && query["quiz"] is ExaminerQuiz receivedQuiz)
             {
+                // Only load data if this is a new quiz or first load
+                // This preserves filter state when navigating back from GradeAttempt
+                bool isNewQuiz = Quiz?.Id != receivedQuiz.Id;
                 Quiz = receivedQuiz;
-                await LoadAttemptsAsync();
-                await SubscribeToRealTimeUpdatesAsync();
+
+                if (isNewQuiz || _allAttempts.Count == 0)
+                {
+                    await LoadAttemptsAsync();
+                    await SubscribeToRealTimeUpdatesAsync();
+                }
+                else
+                {
+                    // Reapply the current filter to ensure UI stays consistent
+                    ReapplyCurrentFilter();
+                }
             }
         }
 
@@ -391,36 +509,61 @@ namespace CodeQuizDesktop.Viewmodels
             await ExecuteAsync(async () =>
             {
                 var response = await _quizzesRepository.GetQuizAttempts(Quiz!.Id);
-                Attempts = response.ToObservableCollection();
+                _allAttempts = response.ToObservableCollection();
+                // Apply current filter after loading, or show all if no filter
+                ReapplyCurrentFilter();
             }, "Loading attempts...");
         }
-        
+
+        /// <summary>
+        /// Reapplies the current filter to the attempts collection.
+        /// If no filter is active, shows all attempts.
+        /// </summary>
+        private void ReapplyCurrentFilter()
+        {
+            if (_activeFilter != null)
+            {
+                ApplyFilter(_activeFilter, _activeFilterFlag);
+            }
+            else
+            {
+                Attempts = new ObservableCollection<ExaminerAttempt>(_allAttempts);
+            }
+        }
+
         /// <summary>
         /// Subscribe to real-time attempt updates for the current quiz
         /// </summary>
         private async Task SubscribeToRealTimeUpdatesAsync()
         {
             if (Quiz == null) return;
-            
+
             try
             {
                 // Join the quiz group to receive real-time updates
                 await _attemptsRepository.JoinQuizGroupAsync(Quiz.Id);
-                
+
                 // Create handlers that filter by quiz ID and marshal to UI thread
                 _attemptCreatedHandler = (attempt) =>
                 {
                     // Only process if this attempt belongs to our quiz
                     if (attempt.QuizId != Quiz.Id) return;
-                    
+
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
                         try
                         {
-                            // Check if attempt already exists
-                            if (Attempts.Any(a => a.Id == attempt.Id)) return;
-                            
-                            Attempts.Add(attempt);
+                            // Check if attempt already exists in all attempts
+                            if (_allAttempts.Any(a => a.Id == attempt.Id)) return;
+
+                            _allAttempts.Add(attempt);
+
+                            // Also add to filtered view if it passes the current filter
+                            if (ShouldIncludeInFilteredView(attempt))
+                            {
+                                Attempts.Add(attempt);
+                            }
+
                             System.Diagnostics.Debug.WriteLine($"Real-time: New attempt added for quiz {Quiz.Id}");
                         }
                         catch (Exception ex)
@@ -429,29 +572,53 @@ namespace CodeQuizDesktop.Viewmodels
                         }
                     });
                 };
-                
+
                 _attemptUpdatedHandler = (attempt) =>
                 {
                     // Only process if this attempt belongs to our quiz
                     if (attempt.QuizId != Quiz.Id) return;
-                    
+
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
                         try
                         {
-                            var existingAttempt = Attempts.FirstOrDefault(a => a.Id == attempt.Id);
-                            if (existingAttempt != null)
+                            // Update in _allAttempts
+                            var existingInAll = _allAttempts.FirstOrDefault(a => a.Id == attempt.Id);
+                            if (existingInAll != null)
                             {
-                                var idx = Attempts.IndexOf(existingAttempt);
-                                Attempts.Remove(existingAttempt);
-                                Attempts.Insert(idx, attempt);
-                                System.Diagnostics.Debug.WriteLine($"Real-time: Attempt {attempt.Id} updated for quiz {Quiz.Id}");
+                                var idxAll = _allAttempts.IndexOf(existingInAll);
+                                _allAttempts.Remove(existingInAll);
+                                _allAttempts.Insert(idxAll, attempt);
                             }
                             else
                             {
-                                // Attempt not found, add it (might have been created while loading)
+                                _allAttempts.Add(attempt);
+                            }
+
+                            // Update in filtered Attempts
+                            var existingAttempt = Attempts.FirstOrDefault(a => a.Id == attempt.Id);
+                            if (existingAttempt != null)
+                            {
+                                // Check if it should still be in filtered view
+                                if (ShouldIncludeInFilteredView(attempt))
+                                {
+                                    var idx = Attempts.IndexOf(existingAttempt);
+                                    Attempts.Remove(existingAttempt);
+                                    Attempts.Insert(idx, attempt);
+                                }
+                                else
+                                {
+                                    // Remove from filtered view since it no longer matches filter
+                                    Attempts.Remove(existingAttempt);
+                                }
+                            }
+                            else if (ShouldIncludeInFilteredView(attempt))
+                            {
+                                // Add to filtered view if it now matches the filter
                                 Attempts.Add(attempt);
                             }
+
+                            System.Diagnostics.Debug.WriteLine($"Real-time: Attempt {attempt.Id} updated for quiz {Quiz.Id}");
                         }
                         catch (Exception ex)
                         {
@@ -459,7 +626,7 @@ namespace CodeQuizDesktop.Viewmodels
                         }
                     });
                 };
-                
+
                 _attemptsRepository.SubscribeCreate(_attemptCreatedHandler);
                 _attemptsRepository.SubscribeUpdate(_attemptUpdatedHandler);
             }
@@ -468,7 +635,7 @@ namespace CodeQuizDesktop.Viewmodels
                 System.Diagnostics.Debug.WriteLine($"Error subscribing to real-time updates: {ex.Message}");
             }
         }
-        
+
         /// <summary>
         /// Unsubscribe from real-time updates when leaving the view
         /// </summary>
@@ -481,7 +648,7 @@ namespace CodeQuizDesktop.Viewmodels
                     _attemptsRepository.UnsubscribeCreate(_attemptCreatedHandler);
                     _attemptCreatedHandler = null;
                 }
-                
+
                 if (_attemptUpdatedHandler != null)
                 {
                     _attemptsRepository.UnsubscribeUpdate(_attemptUpdatedHandler);

@@ -39,9 +39,9 @@ namespace CodeQuizBackend.Quiz.Services
             // Get the quiz to find the examiner before deleting
             var quiz = await dbContext.Quizzes.FindAsync(id);
             var examinerId = quiz?.ExaminerId;
-            
+
             await quizzesRepository.DeleteQuizAsync(id);
-            
+
             // Only notify the examiner who owns the quiz
             if (examinerId != null)
             {
@@ -115,11 +115,11 @@ namespace CodeQuizBackend.Quiz.Services
             }).FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Quiz not found.");
             var updatedExaminerQuiz = updatedQuiz.ToExaminerQuiz(statistics.AttemptsCount, statistics.SubmittedAttemptsCount, statistics.AverageAttemptScore);
             var updatedExamineeQuiz = updatedQuiz.ToExamineeQuiz();
-            
+
             // Only notify the examiner who owns the quiz
             await quizzesHubContext.Clients.Group($"examiner_{updatedQuiz.ExaminerId}")
                 .SendAsync("QuizUpdated", updatedExaminerQuiz, updatedExamineeQuiz);
-                
+
             return updatedExaminerQuiz;
         }
 
@@ -128,6 +128,7 @@ namespace CodeQuizBackend.Quiz.Services
             var examinerAttempts = await dbContext.Attempts
                 .Where(a => a.QuizId == quizId)
                 .Include(a => a.Solutions)
+                .ThenInclude(s => s.AiAssessment)
                 .Include(a => a.Examinee)
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Questions)

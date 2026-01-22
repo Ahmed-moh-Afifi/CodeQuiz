@@ -56,5 +56,45 @@ namespace CodeQuizDesktop.Models
                 return "-";
             }
         }
+
+        /// <summary>
+        /// Whether this attempt has any solutions flagged as suspicious by AI assessment.
+        /// </summary>
+        public bool HasSuspiciousSolutions => Solutions.Any(s => s.AiAssessment != null && !s.AiAssessment.IsValid);
+
+        /// <summary>
+        /// Whether this attempt has AI assessments on any solution.
+        /// </summary>
+        public bool HasAiAssessments => Solutions.Any(s => s.AiAssessment != null);
+
+        /// <summary>
+        /// Count of solutions with suspicious AI assessments.
+        /// </summary>
+        public int SuspiciousSolutionCount => Solutions.Count(s => s.AiAssessment != null && !s.AiAssessment.IsValid);
+
+        /// <summary>
+        /// Whether all solutions have been graded.
+        /// </summary>
+        public bool IsFullyGraded => Solutions.All(s => s.ReceivedGrade.HasValue);
+
+        /// <summary>
+        /// Whether at least one solution has been graded.
+        /// </summary>
+        public bool IsPartiallyGraded => Solutions.Any(s => s.ReceivedGrade.HasValue) && !IsFullyGraded;
+
+        /// <summary>
+        /// Whether no solutions have been graded yet.
+        /// </summary>
+        public bool IsPendingGrading => !Solutions.Any(s => s.ReceivedGrade.HasValue);
+
+        /// <summary>
+        /// The grading status text for display.
+        /// </summary>
+        public string GradingStatusText => IsFullyGraded ? "Graded" : IsPartiallyGraded ? "Partial" : "Pending";
+
+        /// <summary>
+        /// The primary status to show (prioritizes suspicious over grading status).
+        /// </summary>
+        public string PrimaryStatus => HasSuspiciousSolutions ? "Suspicious" : GradingStatusText;
     }
 }

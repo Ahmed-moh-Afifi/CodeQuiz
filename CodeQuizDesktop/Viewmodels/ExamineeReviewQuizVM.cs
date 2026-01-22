@@ -20,6 +20,7 @@ namespace CodeQuizDesktop.Viewmodels
             {
                 attempt = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(ShowAiFeedback));
             }
         }
 
@@ -38,9 +39,107 @@ namespace CodeQuizDesktop.Viewmodels
                 // Update Grade when question changes
                 Grade = Attempt!.Solutions.Find(s => s.QuestionId == value.Id)?.ReceivedGrade;
 
+                // Update current solution and AI assessment
+                UpdateCurrentSolution();
+
                 OnPropertyChanged();
             }
         }
+
+        #region AI Assessment Properties
+
+        /// <summary>
+        /// Whether to show AI feedback based on instructor setting.
+        /// </summary>
+        public bool ShowAiFeedback => Attempt?.Quiz?.ShowAiFeedbackToStudents == true;
+
+        private Solution? currentSolution;
+        /// <summary>
+        /// The current solution for the selected question.
+        /// </summary>
+        public Solution? CurrentSolution
+        {
+            get => currentSolution;
+            set
+            {
+                currentSolution = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasAiAssessment));
+                OnPropertyChanged(nameof(AiValidityText));
+                OnPropertyChanged(nameof(AiConfidenceText));
+                OnPropertyChanged(nameof(PassedTestCasesText));
+                OnPropertyChanged(nameof(HasEvaluationResults));
+                OnPropertyChanged(nameof(HasInstructorFeedback));
+                OnPropertyChanged(nameof(InstructorFeedbackAuthor));
+            }
+        }
+
+        /// <summary>
+        /// Whether the current solution has an AI assessment.
+        /// </summary>
+        public bool HasAiAssessment => CurrentSolution?.AiAssessment != null && ShowAiFeedback;
+
+        /// <summary>
+        /// Whether the current solution has instructor feedback.
+        /// </summary>
+        public bool HasInstructorFeedback => !string.IsNullOrWhiteSpace(CurrentSolution?.Feedback);
+
+        /// <summary>
+        /// The name of the instructor who provided the feedback.
+        /// Returns the EvaluatedBy value if available, otherwise "Instructor".
+        /// </summary>
+        public string InstructorFeedbackAuthor => CurrentSolution?.EvaluatedBy ?? "Instructor";
+
+        /// <summary>
+        /// Whether the current solution has evaluation results.
+        /// </summary>
+        public bool HasEvaluationResults => CurrentSolution?.EvaluationResults?.Any() == true;
+
+        /// <summary>
+        /// User-friendly text for AI validity status.
+        /// </summary>
+        public string AiValidityText => CurrentSolution?.AiAssessment?.IsValid == true
+            ? "Valid Solution"
+            : "Solution Needs Review";
+
+        /// <summary>
+        /// User-friendly text for AI confidence score.
+        /// </summary>
+        public string AiConfidenceText => CurrentSolution?.AiAssessment != null
+            ? $"{(CurrentSolution.AiAssessment.ConfidenceScore * 100):F0}% confidence"
+            : "";
+
+        /// <summary>
+        /// Text showing passed vs total test cases.
+        /// </summary>
+        public string PassedTestCasesText
+        {
+            get
+            {
+                if (CurrentSolution?.EvaluationResults == null || !CurrentSolution.EvaluationResults.Any())
+                    return "";
+
+                var passed = CurrentSolution.EvaluationResults.Count(r => r.IsSuccessful);
+                var total = CurrentSolution.EvaluationResults.Count;
+                return $"{passed}/{total} test cases passed";
+            }
+        }
+
+        /// <summary>
+        /// Updates the current solution when the selected question changes.
+        /// </summary>
+        private void UpdateCurrentSolution()
+        {
+            if (SelectedQuestion == null || Attempt == null)
+            {
+                CurrentSolution = null;
+                return;
+            }
+
+            CurrentSolution = Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion.Id);
+        }
+
+        #endregion
 
         private bool hasTestCases;
         public bool HasTestCases

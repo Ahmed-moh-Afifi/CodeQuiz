@@ -11,14 +11,25 @@ namespace CodeQuizBackend.Quiz.Models
         public required int AttemptId { get; set; }
         public string? EvaluatedBy { get; set; }
         public float? ReceivedGrade { get; set; }
+
+        /// <summary>
+        /// Feedback comment from the examiner for the student.
+        /// </summary>
+        public string? Feedback { get; set; }
+
         public List<EvaluationResult>? EvaluationResults { get; set; }
+
+        /// <summary>
+        /// AI assessment of the solution, evaluating validity beyond test case results.
+        /// </summary>
+        public virtual AiAssessment? AiAssessment { get; set; }
 
         public virtual Question Question { get; set; } = null!;
         public virtual Attempt Attempt { get; set; } = null!;
 
-        public SolutionDTO ToDTO()
+        public SolutionDTO ToDTO(bool includeAiAssessment = true)
         {
-            return new() 
+            return new()
             {
                 Id = Id,
                 QuestionId = QuestionId,
@@ -26,7 +37,20 @@ namespace CodeQuizBackend.Quiz.Models
                 Code = Code,
                 ReceivedGrade = ReceivedGrade,
                 EvaluatedBy = EvaluatedBy,
-                EvaluationResults = EvaluationResults
+                Feedback = Feedback,
+                EvaluationResults = EvaluationResults,
+                AiAssessment = includeAiAssessment && AiAssessment != null ? new AiAssessmentDTO
+                {
+                    Id = AiAssessment.Id,
+                    SolutionId = AiAssessment.SolutionId,
+                    IsValid = AiAssessment.IsValid,
+                    ConfidenceScore = AiAssessment.ConfidenceScore,
+                    Reasoning = AiAssessment.Reasoning,
+                    Flags = AiAssessment.Flags,
+                    AssessedAt = AiAssessment.AssessedAt,
+                    Model = AiAssessment.Model,
+                    SuggestedGrade = AiAssessment.SuggestedGrade
+                } : null
             };
         }
     }

@@ -1,5 +1,6 @@
 ﻿using CodeQuizBackend.Core.Data;
 using CodeQuizBackend.Core.Exceptions;
+using CodeQuizBackend.Execution.Models;
 using CodeQuizBackend.Execution.Services;
 using CodeQuizBackend.Quiz.Exceptions;
 using CodeQuizBackend.Quiz.Hubs;
@@ -12,7 +13,13 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace CodeQuizBackend.Quiz.Services
 {
-    public class AttemptsService(ApplicationDbContext dbContext, IEvaluator evaluator, IHubContext<AttemptsHub> attemptsHubContext, IHubContext<QuizzesHub> quizzesHubContext, IMailService mailService) : IAttemptsService
+    public class AttemptsService(
+        ApplicationDbContext dbContext,
+        IEvaluator evaluator,
+        IHubContext<AttemptsHub> attemptsHubContext,
+        IHubContext<QuizzesHub> quizzesHubContext,
+        IMailService mailService,
+        IEvaluationQueue evaluationQueue) : IAttemptsService
     {
         /// <summary>
         /// Maximum network allowance in seconds after attempt deadline for accepting saves.
@@ -50,7 +57,7 @@ namespace CodeQuizBackend.Quiz.Services
 
                 // Use UTC time for all quiz availability checks
                 var now = DateTime.UtcNow;
-                
+
                 if (now < quiz.StartDate)
                 {
                     throw new QuizNotActiveException("This quiz has not started yet. Please wait until the scheduled start time.");
@@ -87,19 +94,19 @@ namespace CodeQuizBackend.Quiz.Services
                 };
                 dbContext.Attempts.Add(attempt);
                 await dbContext.SaveChangesAsync();
-                
+
                 // Send to specific groups instead of all clients
                 var examinerAttempt = attempt.ToExaminerAttempt();
                 var examineeAttempt = attempt.ToExamineeAttempt();
-                
+
                 // Notify the examinee (user who started the attempt)
                 await attemptsHubContext.Clients.Group($"user_{examineeId}")
                     .SendAsync("AttemptCreated", examinerAttempt, examineeAttempt);
-                    
+
                 // Notify the examiner (quiz creator)
                 await attemptsHubContext.Clients.Group($"examiner_{quiz.ExaminerId}")
                     .SendAsync("AttemptCreated", examinerAttempt, examineeAttempt);
-                
+
                 // Send updated quiz statistics to the examiner via QuizzesHub
                 await NotifyQuizStatisticsUpdatedAsync(quiz.Id, quiz.ExaminerId);
             }
@@ -112,6 +119,7 @@ namespace CodeQuizBackend.Quiz.Services
             var examineeAttempts = await dbContext.Attempts
                 .Where(a => a.ExamineeId == examineeId)
                 .Include(a => a.Solutions)
+                .ThenInclude(s => s.AiAssessment)
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Examiner)
                 .Include(a => a.Quiz)
@@ -130,29 +138,38 @@ namespace CodeQuizBackend.Quiz.Services
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Questions)
                 .Include(a => a.Solutions)
+                .ThenInclude(s => s.AiAssessment)
                 .Include(a => a.Examinee)
                 .FirstOrDefaultAsync()
                 ?? throw new ResourceNotFoundException("Attempt not found.");
 
             attempt.EndTime ??= DateTime.UtcNow; // Use UTC for consistent time tracking
             await dbContext.SaveChangesAsync();
-            
+
             // Send to specific groups instead of all clients
             var examinerAttempt = attempt.ToExaminerAttempt();
             var examineeAttempt = attempt.ToExamineeAttempt();
-            
+
             // Notify the examinee
             await attemptsHubContext.Clients.Group($"user_{attempt.ExamineeId}")
                 .SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
-                
+
             // Notify the examiner
             await attemptsHubContext.Clients.Group($"examiner_{attempt.Quiz.ExaminerId}")
                 .SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
-            
+
             // Send updated quiz statistics to the examiner via QuizzesHub
             await NotifyQuizStatisticsUpdatedAsync(attempt.QuizId, attempt.Quiz.ExaminerId);
-                
-            await EvaluateAttempt(attempt.Id);
+
+            // Enqueue for background evaluation (system grading + AI assessment)
+            await evaluationQueue.EnqueueAsync(new EvaluationJob
+            {
+                AttemptId = attempt.Id,
+                ExamineeId = attempt.ExamineeId,
+                ExaminerId = attempt.Quiz.ExaminerId,
+                QuizId = attempt.QuizId
+            });
+
             return examineeAttempt;
         }
 
@@ -167,21 +184,21 @@ namespace CodeQuizBackend.Quiz.Services
             // Enforce strict deadline: Reject saves after attempt deadline + network allowance
             var attempt = sol.Attempt;
             var now = DateTime.UtcNow;
-            
+
             // Calculate the actual deadline (min of duration-based end time and quiz end date)
             var durationEndTime = attempt.StartTime.Add(attempt.Quiz.Duration);
             var quizEndTime = attempt.Quiz.EndDate;
             var attemptDeadline = durationEndTime < quizEndTime ? durationEndTime : quizEndTime;
-            
+
             // Add network allowance to the deadline
             var strictDeadline = attemptDeadline.AddSeconds(NetworkAllowanceSeconds);
-            
+
             // If the attempt is already submitted (has EndTime), reject the save
             if (attempt.EndTime != null)
             {
                 throw new DeadlineExceededException("This attempt has already been submitted. Your solution cannot be saved.");
             }
-            
+
             // If we're past the strict deadline, reject the save
             if (now > strictDeadline)
             {
@@ -195,9 +212,10 @@ namespace CodeQuizBackend.Quiz.Services
         }
 
         /// <summary>
-        /// Updates only the grade and evaluator for a solution.
+        /// Updates only the grade, feedback, and evaluator for a solution.
         /// Used by instructors for manual grading, separate from student code saves.
         /// No deadline restrictions apply - instructors can grade at any time.
+        /// Only updates fields that are provided (non-null).
         /// </summary>
         public async Task<SolutionDTO> UpdateSolutionGrade(UpdateSolutionGradeRequest request)
         {
@@ -210,15 +228,22 @@ namespace CodeQuizBackend.Quiz.Services
                 .FirstOrDefaultAsync(s => s.Id == request.SolutionId)
                 ?? throw new ResourceNotFoundException("Solution not found.");
 
-            // Update only grading-related fields
-            sol.ReceivedGrade = request.ReceivedGrade;
+            // Update only grading-related fields if provided
+            if (request.ReceivedGrade.HasValue)
+            {
+                sol.ReceivedGrade = request.ReceivedGrade.Value;
+            }
+            if (request.Feedback != null)
+            {
+                sol.Feedback = request.Feedback;
+            }
             sol.EvaluatedBy = request.EvaluatedBy;
-            
+
             await dbContext.SaveChangesAsync();
-            
+
             // Notify both examinee and examiner about the grade update
             var attempt = sol.Attempt;
-            
+
             // Reload attempt with all related data for DTOs
             var fullAttempt = await dbContext.Attempts
                 .Where(a => a.Id == attempt.Id)
@@ -227,23 +252,24 @@ namespace CodeQuizBackend.Quiz.Services
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Questions)
                 .Include(a => a.Solutions)
+                .ThenInclude(s => s.AiAssessment)
                 .Include(a => a.Examinee)
                 .FirstAsync();
-            
+
             var examinerAttempt = fullAttempt.ToExaminerAttempt();
             var examineeAttempt = fullAttempt.ToExamineeAttempt();
-            
+
             // Notify the examinee about their grade
             await attemptsHubContext.Clients.Group($"user_{attempt.ExamineeId}")
                 .SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
-                
+
             // Notify the examiner
             await attemptsHubContext.Clients.Group($"examiner_{attempt.Quiz.ExaminerId}")
                 .SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
-            
+
             // Send updated quiz statistics (average score may have changed)
             await NotifyQuizStatisticsUpdatedAsync(attempt.QuizId, attempt.Quiz.ExaminerId);
-            
+
             return sol.ToDTO();
         }
 
@@ -255,6 +281,7 @@ namespace CodeQuizBackend.Quiz.Services
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Questions)
                 .Include(a => a.Solutions)
+                .ThenInclude(s => s.AiAssessment)
                 .Include(a => a.Quiz)
                 .ThenInclude(q => q.Examiner)
                 .FirstOrDefaultAsync()
@@ -270,16 +297,16 @@ namespace CodeQuizBackend.Quiz.Services
             var examineeAttempt = attempt.ToExamineeAttempt();
             var examinerAttempt = attempt.ToExaminerAttempt();
             if (evaluated) await mailService.SendAttemptFeedbackAsync(attempt.Examinee.Email!, attempt.Examinee.FirstName, attempt.Quiz.Title, (float)examineeAttempt.Grade!, attempt.Quiz.ToExamineeQuiz().TotalPoints, attempt.StartTime, DateTime.UtcNow);
-            
+
             // Send to specific groups instead of all clients
             // Notify the examinee
             await attemptsHubContext.Clients.Group($"user_{attempt.ExamineeId}")
                 .SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
-                
+
             // Notify the examiner
             await attemptsHubContext.Clients.Group($"examiner_{attempt.Quiz.ExaminerId}")
                 .SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
-            
+
             // Send updated quiz statistics (average score changed after evaluation)
             await NotifyQuizStatisticsUpdatedAsync(attempt.QuizId, attempt.Quiz.ExaminerId);
         }
@@ -315,7 +342,7 @@ namespace CodeQuizBackend.Quiz.Services
                 quizWithStats.AttemptsCount,
                 quizWithStats.SubmittedAttemptsCount,
                 quizWithStats.AverageAttemptScore);
-            
+
             var examineeQuiz = quizWithStats.Quiz.ToExamineeQuiz();
 
             // Notify the examiner via QuizzesHub
@@ -331,14 +358,37 @@ namespace CodeQuizBackend.Quiz.Services
                 var question = attempt.Quiz.Questions.First(q => q.Id == solution.QuestionId);
                 if (!question.TestCases.IsNullOrEmpty())
                 {
-                    var correctSolution = TestCasesPassed(attempt.Quiz, question, solution);
-                    solution.ReceivedGrade = correctSolution ? question.Points : 0;
+                    var evaluationResults = EvaluateTestCases(attempt.Quiz, question, solution);
+                    solution.EvaluationResults = evaluationResults;
+
+                    // Percentage-based grading: grade = (passed / total) * points
+                    var passedCount = evaluationResults.Count(r => r.IsSuccessful);
+                    var totalCount = evaluationResults.Count;
+                    var passRatio = totalCount > 0 ? (float)passedCount / totalCount : 0;
+                    solution.ReceivedGrade = passRatio * question.Points;
                     solution.EvaluatedBy = "System";
                     evaluatedCount++;
                 }
             }
 
             return evaluatedCount == attempt.Solutions.Count;
+        }
+
+        /// <summary>
+        /// Evaluates all test cases for a solution and returns the results.
+        /// </summary>
+        private List<EvaluationResult> EvaluateTestCases(Quiz.Models.Quiz quiz, Question question, Solution solution)
+        {
+            var questionConfig = question.QuestionConfiguration ?? quiz.GlobalQuestionConfiguration;
+            var results = new List<EvaluationResult>();
+
+            foreach (var testCase in question.TestCases)
+            {
+                var result = evaluator.EvaluateAsync(questionConfig.Language, solution.Code, testCase).Result;
+                results.Add(result);
+            }
+
+            return results;
         }
 
         private bool TestCasesPassed(Quiz.Models.Quiz quiz, Question question, Solution solution)

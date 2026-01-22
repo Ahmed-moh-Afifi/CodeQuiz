@@ -17,6 +17,7 @@ namespace CodeQuizDesktop.Tests.Viewmodels
         private readonly Mock<IAttemptsRepository> _attemptsRepoMock;
         private readonly Mock<INavigationService> _navServiceMock;
         private readonly Mock<IAuthenticationRepository> _authRepoMock;
+        private readonly Mock<IUIService> _uiServiceMock;
         private readonly GradeAttemptVM _viewModel;
 
         public GradeAttemptVMTests()
@@ -25,7 +26,8 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             _attemptsRepoMock = new Mock<IAttemptsRepository>();
             _navServiceMock = new Mock<INavigationService>();
             _authRepoMock = new Mock<IAuthenticationRepository>();
-            
+            _uiServiceMock = new Mock<IUIService>();
+
             // Setup auth repo to return a mock user
             _authRepoMock.Setup(x => x.LoggedInUser).Returns(new User
             {
@@ -36,8 +38,8 @@ namespace CodeQuizDesktop.Tests.Viewmodels
                 Email = "instructor@example.com",
                 JoinDate = DateTime.Now
             });
-            
-            _viewModel = new GradeAttemptVM(_executionRepoMock.Object, _attemptsRepoMock.Object, _navServiceMock.Object, _authRepoMock.Object);
+
+            _viewModel = new GradeAttemptVM(_executionRepoMock.Object, _attemptsRepoMock.Object, _navServiceMock.Object, _authRepoMock.Object, _uiServiceMock.Object);
         }
 
         private ExaminerQuiz CreateMockQuiz()
@@ -141,21 +143,22 @@ namespace CodeQuizDesktop.Tests.Viewmodels
         }
 
         [Fact]
-        public async Task ReturnToPreviousPage_ShouldSaveAndNavigateBack()
+        public async Task ReturnToPreviousPage_WithNoChanges_ShouldNavigateBackWithoutSaving()
         {
             // Arrange
             SetupViewModel();
+            // No grade changes made
 
             // Act
             await _viewModel.ReturnToPreviousPage();
 
-            // Assert
-            _attemptsRepoMock.Verify(x => x.UpdateSolutionGrade(It.IsAny<UpdateSolutionGradeRequest>()), Times.Once);
+            // Assert - no save should occur, just navigate back
+            _attemptsRepoMock.Verify(x => x.UpdateSolutionGrade(It.IsAny<UpdateSolutionGradeRequest>()), Times.Never);
             _navServiceMock.Verify(x => x.GoToAsync(".."), Times.Once);
         }
 
         [Fact]
-        public async Task NextQuestion_ShouldSaveAndMoveToNext()
+        public void NextQuestion_ShouldMoveToNextWithoutSaving()
         {
             // Arrange
             SetupViewModel();
@@ -163,34 +166,53 @@ namespace CodeQuizDesktop.Tests.Viewmodels
 
             // Act
             _viewModel.NextQuestion();
-            
-            // Allow async save to complete
-            await Task.Delay(100);
 
-            // Assert
-            _attemptsRepoMock.Verify(x => x.UpdateSolutionGrade(It.IsAny<UpdateSolutionGradeRequest>()), Times.Once);
+            // Assert - no save should occur, just move to next question
+            _attemptsRepoMock.Verify(x => x.UpdateSolutionGrade(It.IsAny<UpdateSolutionGradeRequest>()), Times.Never);
             _viewModel.SelectedQuestion.Order.Should().Be(2);
             _viewModel.Grade.Should().Be(8); // Grade for Q2
         }
 
         [Fact]
-        public async Task PreviousQuestion_ShouldSaveAndMoveToPrevious()
+        public void PreviousQuestion_ShouldMoveToPreviousWithoutSaving()
         {
             // Arrange
             SetupViewModel();
             _viewModel.NextQuestion(); // Move to 2
-            await Task.Delay(100); // Allow async save
             _viewModel.SelectedQuestion.Order.Should().Be(2);
-            _attemptsRepoMock.Invocations.Clear(); // Clear previous save
 
             // Act
             _viewModel.PreviousQuestion();
-            await Task.Delay(100); // Allow async save
 
-            // Assert
-            _attemptsRepoMock.Verify(x => x.UpdateSolutionGrade(It.IsAny<UpdateSolutionGradeRequest>()), Times.Once);
+            // Assert - no save should occur, just move to previous question
+            _attemptsRepoMock.Verify(x => x.UpdateSolutionGrade(It.IsAny<UpdateSolutionGradeRequest>()), Times.Never);
             _viewModel.SelectedQuestion.Order.Should().Be(1);
             _viewModel.Grade.Should().Be(5); // Grade for Q1
+        }
+
+        [Fact]
+        public async Task SaveAllGradesAndGoBack_ShouldSaveOnlyChangedGrades()
+        {
+            // Arrange
+            SetupViewModel();
+
+            // Simulate ApplyQueryAttributes to initialize tracking dictionaries
+            _viewModel.ApplyQueryAttributes(new Dictionary<string, object>
+            {
+                { "attempt", _viewModel.Attempt },
+                { "quiz", _viewModel.Quiz }
+            });
+
+            // Now change the grade from 5 to 10
+            _viewModel.Grade = 10;
+
+            // Act
+            await _viewModel.SaveAllGradesAndGoBack();
+
+            // Assert - should save only the changed grade (solution ID 201)
+            _attemptsRepoMock.Verify(x => x.UpdateSolutionGrade(It.Is<UpdateSolutionGradeRequest>(r =>
+                r.SolutionId == 201 && r.ReceivedGrade == 10)), Times.Once);
+            _navServiceMock.Verify(x => x.GoToAsync(".."), Times.Once);
         }
 
         [Fact]

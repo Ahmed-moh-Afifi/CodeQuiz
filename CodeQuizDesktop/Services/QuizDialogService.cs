@@ -20,22 +20,23 @@ namespace CodeQuizDesktop.Services
             _popupService = popupService;
         }
 
-        public async Task<NewQuestionModel?> ShowAddQuestionDialogAsync()
+        public async Task<NewQuestionModel?> ShowAddQuestionDialogAsync(string? globalLanguage = null)
         {
-            var result = await _popupService.ShowPopupAsync<AddQuestionDialog, NewQuestionModel?>(Shell.Current, new PopupOptions
+            var popup = new AddQuestionDialog(null, globalLanguage);
+            var result = await Shell.Current.CurrentPage.ShowPopupAsync<NewQuestionModel?>(popup, new PopupOptions
             {
                 Shape = new RoundRectangle
                 {
-                    CornerRadius = new CornerRadius(20),
+                    CornerRadius = new CornerRadius(0),
                     StrokeThickness = 0
                 }
             });
             return result?.Result;
         }
 
-        public async Task<NewQuestionModel?> ShowEditQuestionDialogAsync(NewQuestionModel existingQuestion)
+        public async Task<NewQuestionModel?> ShowEditQuestionDialogAsync(NewQuestionModel existingQuestion, string? globalLanguage = null)
         {
-            var popup = new AddQuestionDialog(existingQuestion);
+            var popup = new AddQuestionDialog(existingQuestion, globalLanguage);
             var result = await Shell.Current.CurrentPage.ShowPopupAsync<NewQuestionModel?>(popup);
             NewQuestionModel? value = result?.Result;
             return value;

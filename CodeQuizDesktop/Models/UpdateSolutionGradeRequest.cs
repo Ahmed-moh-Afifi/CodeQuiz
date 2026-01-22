@@ -10,15 +10,20 @@ namespace CodeQuizDesktop.Models
         /// The ID of the solution to grade
         /// </summary>
         public required int SolutionId { get; set; }
-        
+
         /// <summary>
-        /// The grade awarded for this solution
+        /// The grade awarded for this solution (null to leave unchanged)
         /// </summary>
-        public required float ReceivedGrade { get; set; }
-        
+        public float? ReceivedGrade { get; set; }
+
         /// <summary>
         /// Identifier of who evaluated this solution (e.g., instructor name or "System")
         /// </summary>
         public string? EvaluatedBy { get; set; }
+
+        /// <summary>
+        /// Feedback comment from the examiner for the student
+        /// </summary>
+        public string? Feedback { get; set; }
     }
 }

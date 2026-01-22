@@ -6,6 +6,12 @@
 
     <!-- ========== CONVERTERS ========== -->
     <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+    <converters:AiValidityToColorConverter x:Key="AiValidityToColorConverter"/>
+    <converters:AiConfidenceToColorConverter x:Key="AiConfidenceToColorConverter"/>
+    <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
+    <converters:BoolToPassFailConverter x:Key="BoolToPassFailConverter"/>
+    <converters:GreaterThanZeroConverter x:Key="GreaterThanZeroConverter"/>
+    <converters:PercentToDecimalConverter x:Key="PercentToDecimalConverter"/>
 
     <!-- ========== TYPOGRAPHY ========== -->
     

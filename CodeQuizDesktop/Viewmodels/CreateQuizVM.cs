@@ -373,7 +373,7 @@ namespace CodeQuizDesktop.Viewmodels
 
         public async Task AddQuestion()
         {
-            var result = await quizDialogService.ShowAddQuestionDialogAsync();
+            var result = await quizDialogService.ShowAddQuestionDialogAsync(ProgrammingLanguage);
 
             if (result != null)
             {
@@ -398,7 +398,7 @@ namespace CodeQuizDesktop.Viewmodels
 
         public async Task EditQuestion(NewQuestionModel newQuestionModel)
         {
-            var result = await quizDialogService.ShowEditQuestionDialogAsync(newQuestionModel);
+            var result = await quizDialogService.ShowEditQuestionDialogAsync(newQuestionModel, ProgrammingLanguage);
 
             if (result is NewQuestionModel updatedModel)
             {

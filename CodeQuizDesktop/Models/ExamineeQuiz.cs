@@ -17,6 +17,7 @@ namespace CodeQuizDesktop.Models
         public required string ExaminerId { get; set; }
         public required QuestionConfiguration GlobalQuestionConfiguration { get; set; }
         public required bool AllowMultipleAttempts { get; set; }
+        public bool ShowAiFeedbackToStudents { get; set; }
         public required List<Question> Questions { get; set; }
         public required User Examiner { get; set; }
         public required int QustionsCount { get; set; }

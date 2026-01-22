@@ -127,6 +127,49 @@ namespace CodeQuizBackend.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("CodeQuizBackend.Quiz.Models.AiAssessment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssessedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<float>("ConfidenceScore")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Flags")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsValid")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Reasoning")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("SolutionId")
+                        .HasColumnType("int");
+
+                    b.Property<float?>("SuggestedGrade")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SolutionId")
+                        .IsUnique();
+
+                    b.ToTable("AiAssessments");
+                });
+
             modelBuilder.Entity("CodeQuizBackend.Quiz.Models.Attempt", b =>
                 {
                     b.Property<int>("Id")
@@ -210,9 +253,15 @@ namespace CodeQuizBackend.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<bool>("EndSummaryEmailSent")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("ExaminerId")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("ShowAiFeedbackToStudents")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime(6)");
@@ -244,6 +293,9 @@ namespace CodeQuizBackend.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("EvaluatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Feedback")
                         .HasColumnType("longtext");
 
                     b.Property<int>("QuestionId")
@@ -391,6 +443,17 @@ namespace CodeQuizBackend.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("CodeQuizBackend.Quiz.Models.AiAssessment", b =>
+                {
+                    b.HasOne("CodeQuizBackend.Quiz.Models.Solution", "Solution")
+                        .WithOne("AiAssessment")
+                        .HasForeignKey("CodeQuizBackend.Quiz.Models.AiAssessment", "SolutionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Solution");
                 });
 
             modelBuilder.Entity("CodeQuizBackend.Quiz.Models.Attempt", b =>
@@ -673,6 +736,11 @@ namespace CodeQuizBackend.Migrations
                     b.Navigation("Attempts");
 
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("CodeQuizBackend.Quiz.Models.Solution", b =>
+                {
+                    b.Navigation("AiAssessment");
                 });
 #pragma warning restore 612, 618
         }

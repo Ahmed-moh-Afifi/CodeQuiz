@@ -112,33 +112,47 @@
                                 MinimumWidthRequest="100"
                                 Clicked="OnCancelClicked"/>
                         
-                        <!-- Action Buttons (Right) -->
-                        <Button x:Name="shareButton"
+                        <!-- Share Button -->
+                        <Border x:Name="shareButton"
                                 Grid.Column="2"
-                                Text="Share"
-                                Style="{StaticResource SecondaryButton}"
-                                MinimumWidthRequest="100"
-                                Margin="0,0,12,0"
-                                Clicked="OnShareClicked">
-                            <Button.ImageSource>
-                                <FontImageSource Glyph="&#x2197;" 
-                                                 Size="16" 
-                                                 Color="{StaticResource TextPrimary}"/>
-                            </Button.ImageSource>
-                        </Button>
+                                BackgroundColor="{StaticResource SurfaceDark}"
+                                StrokeShape="RoundRectangle 8"
+                                Stroke="{StaticResource BorderSubtle}"
+                                StrokeThickness="1"
+                                Padding="16,10"
+                                Margin="0,0,12,0">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnShareClicked"/>
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <Image Source="share.png" WidthRequest="16" HeightRequest="16" VerticalOptions="Center">
+                                    <Image.Behaviors>
+                                        <toolkit:IconTintColorBehavior TintColor="White"/>
+                                    </Image.Behaviors>
+                                </Image>
+                                <Label x:Name="shareButtonLabel" Text="Share" TextColor="White" VerticalOptions="Center" FontSize="14"/>
+                            </HorizontalStackLayout>
+                        </Border>
                         
-                        <Button x:Name="copyButton"
+                        <!-- Copy Code Button -->
+                        <Border x:Name="copyButton"
                                 Grid.Column="3"
-                                Text="Copy Code"
-                                Style="{StaticResource PrimaryButton}"
-                                MinimumWidthRequest="120"
-                                Clicked="OnCopyClicked">
-                            <Button.ImageSource>
-                                <FontImageSource Glyph="&#x2398;" 
-                                                 Size="16" 
-                                                 Color="{StaticResource TextPrimary}"/>
-                            </Button.ImageSource>
-                        </Button>
+                                BackgroundColor="{StaticResource Primary}"
+                                StrokeShape="RoundRectangle 8"
+                                StrokeThickness="0"
+                                Padding="16,10">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCopyClicked"/>
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <Image Source="clipboard.png" WidthRequest="16" HeightRequest="16" VerticalOptions="Center">
+                                    <Image.Behaviors>
+                                        <toolkit:IconTintColorBehavior TintColor="White"/>
+                                    </Image.Behaviors>
+                                </Image>
+                                <Label x:Name="copyButtonLabel" Text="Copy Code" TextColor="White" VerticalOptions="Center" FontSize="14" FontAttributes="Bold"/>
+                            </HorizontalStackLayout>
+                        </Border>
                     </Grid>
                 </Border>
             </Grid>

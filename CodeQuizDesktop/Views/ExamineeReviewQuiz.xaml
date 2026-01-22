@@ -91,9 +91,11 @@
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="{Binding SelectedQuestion.Order, StringFormat='Question {0}'}" Style="{StaticResource SectionHeader}"/>
                             <Border Grid.Column="1" Style="{StaticResource StatusBadge}" BackgroundColor="{StaticResource BackgroundDark}">
-                                <HorizontalStackLayout Spacing="8">
+                                <HorizontalStackLayout Spacing="4">
                                     <Label Text="Grade:" Style="{StaticResource CaptionText}"/>
                                     <Label Text="{Binding Grade}" Style="{StaticResource ScoreText}"/>
+                                    <Label Text=" / " Style="{StaticResource CaptionText}"/>
+                                    <Label Text="{Binding SelectedQuestion.Points}" Style="{StaticResource CaptionText}"/>
                                 </HorizontalStackLayout>
                             </Border>
                         </Grid>
@@ -132,6 +134,140 @@
                                 </CollectionView.ItemTemplate>
                             </CollectionView>
                         </VerticalStackLayout>
+                        
+                        <!-- Test Case Results (Partial Credit Breakdown) -->
+                        <Border Style="{StaticResource InnerCard}" IsVisible="{Binding HasEvaluationResults}" Padding="16">
+                            <VerticalStackLayout Spacing="12">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Text="Test Results" Style="{StaticResource SectionHeader}" FontSize="16"/>
+                                    <Border Grid.Column="1" StrokeShape="RoundRectangle 12" BackgroundColor="{StaticResource Primary}" Padding="12,6" StrokeThickness="0">
+                                        <Label Text="{Binding PassedTestCasesText}" FontSize="13" TextColor="White" FontAttributes="Bold"/>
+                                    </Border>
+                                </Grid>
+                                
+                                <CollectionView ItemsSource="{Binding CurrentSolution.EvaluationResults}">
+                                    <CollectionView.ItemsLayout>
+                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8"/>
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:EvaluationResult">
+                                            <Border StrokeShape="RoundRectangle 8" Padding="12" StrokeThickness="1" Stroke="{StaticResource BorderDefault}">
+                                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                                    <!-- Pass/Fail Icon -->
+                                                    <Border StrokeShape="RoundRectangle 4" WidthRequest="28" HeightRequest="28" StrokeThickness="0">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger TargetType="Border" Binding="{Binding IsSuccessful}" Value="True">
+                                                                        <Setter Property="BackgroundColor" Value="#22C55E"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger TargetType="Border" Binding="{Binding IsSuccessful}" Value="False">
+                                                                        <Setter Property="BackgroundColor" Value="#EF4444"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <Label Text="{Binding IsSuccessful, Converter={StaticResource BoolToPassFailConverter}}" 
+                                                               HorizontalOptions="Center" 
+                                                               VerticalOptions="Center" 
+                                                               TextColor="White" 
+                                                               FontSize="14"/>
+                                                    </Border>
+                                                    
+                                                    <!-- Test Case Description -->
+                                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                                        <Label Text="{Binding TestCase.TestCaseNumber, StringFormat='Test Case {0}'}" 
+                                                               Style="{StaticResource BodyText}" 
+                                                               FontSize="13"/>
+                                                    </VerticalStackLayout>
+                                                    
+                                                    <!-- Status Text -->
+                                                    <Label Grid.Column="2" 
+                                                           VerticalOptions="Center"
+                                                           FontSize="12">
+                                                        <Label.Style>
+                                                            <Style TargetType="Label">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger TargetType="Label" Binding="{Binding IsSuccessful}" Value="True">
+                                                                        <Setter Property="Text" Value="Passed"/>
+                                                                        <Setter Property="TextColor" Value="#22C55E"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger TargetType="Label" Binding="{Binding IsSuccessful}" Value="False">
+                                                                        <Setter Property="Text" Value="Failed"/>
+                                                                        <Setter Property="TextColor" Value="#EF4444"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Label.Style>
+                                                    </Label>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                        </Border>
+                        
+                        <!-- AI Feedback Panel (only if instructor enabled) -->
+                        <Border Style="{StaticResource InnerCard}" IsVisible="{Binding HasAiAssessment}" Padding="20">
+                            <VerticalStackLayout Spacing="16">
+                                <!-- AI Feedback Header -->
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                    <Border StrokeShape="RoundRectangle 8" 
+                                            BackgroundColor="{Binding CurrentSolution.AiAssessment.IsValid, Converter={StaticResource AiValidityToColorConverter}}" 
+                                            Padding="12,6" 
+                                            StrokeThickness="0">
+                                        <Label Text="{Binding AiValidityText}" 
+                                               FontSize="14" 
+                                               FontAttributes="Bold" 
+                                               TextColor="White"/>
+                                    </Border>
+                                    <Label Grid.Column="1" 
+                                           Text="AI Feedback" 
+                                           Style="{StaticResource SectionHeader}" 
+                                           FontSize="16" 
+                                           VerticalOptions="Center"/>
+                                </Grid>
+                                
+                                <!-- AI Reasoning -->
+                                <VerticalStackLayout Spacing="8">
+                                    <Label Text="Feedback" Style="{StaticResource CaptionText}" FontAttributes="Bold"/>
+                                    <Border Style="{StaticResource InnerCard}" BackgroundColor="{StaticResource SurfaceDark}" Padding="12">
+                                        <Label Text="{Binding CurrentSolution.AiAssessment.Reasoning}" 
+                                               Style="{StaticResource BodyText}" 
+                                               FontSize="14" 
+                                               LineBreakMode="WordWrap"/>
+                                    </Border>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                        
+                        <!-- Instructor Feedback (only if feedback exists) -->
+                        <Border Style="{StaticResource InnerCard}" IsVisible="{Binding HasInstructorFeedback}" Padding="20">
+                            <VerticalStackLayout Spacing="12">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                    <Image Source="pencil.png" WidthRequest="20" HeightRequest="20" VerticalOptions="Center">
+                                        <Image.Behaviors>
+                                            <toolkit:IconTintColorBehavior TintColor="{StaticResource Primary}"/>
+                                        </Image.Behaviors>
+                                    </Image>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                        <Label Text="Instructor Feedback" 
+                                               Style="{StaticResource SectionHeader}" 
+                                               FontSize="16"/>
+                                        <Label Text="{Binding InstructorFeedbackAuthor, StringFormat='by {0}'}" 
+                                               Style="{StaticResource CaptionText}" 
+                                               FontSize="12"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                                <Border Style="{StaticResource InnerCard}" BackgroundColor="{StaticResource SurfaceDark}" Padding="12">
+                                    <Label Text="{Binding CurrentSolution.Feedback}" 
+                                           Style="{StaticResource BodyText}" 
+                                           FontSize="14" 
+                                           LineBreakMode="WordWrap"/>
+                                </Border>
+                            </VerticalStackLayout>
+                        </Border>
                     </VerticalStackLayout>
 
                     <!-- Code Editor -->
