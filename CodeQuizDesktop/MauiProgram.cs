@@ -44,6 +44,7 @@ namespace CodeQuizDesktop
             Microsoft.Maui.Handlers.PickerHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveBorder(h.PlatformView));
             Microsoft.Maui.Handlers.DatePickerHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveBorder(h.PlatformView));
             Microsoft.Maui.Handlers.TimePickerHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveBorder(h.PlatformView));
+            Microsoft.Maui.Handlers.ButtonHandler.Mapper.AppendToMapping("NoBorder", (h, v) => RemoveButtonBorder(h.PlatformView));
 
             // Helper method to modify the Windows Native Control
             static void RemoveBorder(object platformView)
@@ -60,6 +61,24 @@ namespace CodeQuizDesktop
         
         // 3. Optional: Force the border brush to transparent just in case
         // nativeControl.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+    }
+#endif
+            }
+
+            // Helper method to remove borders from buttons on Windows
+            static void RemoveButtonBorder(object platformView)
+            {
+#if WINDOWS
+    if (platformView is Microsoft.UI.Xaml.Controls.Button nativeButton)
+    {
+        // Remove the focus visual (focus ring)
+        nativeButton.FocusVisualPrimaryThickness = new Microsoft.UI.Xaml.Thickness(0);
+        nativeButton.FocusVisualSecondaryThickness = new Microsoft.UI.Xaml.Thickness(0);
+        nativeButton.UseSystemFocusVisuals = false;
+        
+        // Remove border thickness
+        nativeButton.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+        nativeButton.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
     }
 #endif
             }

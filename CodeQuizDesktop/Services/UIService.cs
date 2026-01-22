@@ -183,6 +183,43 @@ public class UIService(IAppLogger<UIService> logger) : IUIService
         }
     }
 
+    /// <summary>
+    /// Shows a dialog displaying a quiz code with options to copy and share.
+    /// </summary>
+    public async Task<QuizCodeDialogResult> ShowQuizCodeAsync(
+        string code,
+        string? title = null,
+        string? subtitle = null,
+        bool showShareButton = true)
+    {
+        await _dialogSemaphore.WaitAsync();
+        try
+        {
+            return await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                var rootPage = GetRootPage();
+                if (rootPage == null) return QuizCodeDialogResult.Cancelled;
+
+                var dialog = new QuizCodeDialog();
+                var dialogTask = dialog.ShowAsync(code, title, subtitle, showShareButton);
+
+                // Add dialog to page
+                AddDialogToPage(rootPage, dialog);
+
+                var result = await dialogTask;
+
+                // Remove dialog from page
+                RemoveDialogFromPage(rootPage, dialog);
+
+                return result;
+            });
+        }
+        finally
+        {
+            _dialogSemaphore.Release();
+        }
+    }
+
     public async Task ShowErrorAsync(string message, string? title = null)
     {
         logger.LogError(message);

@@ -1,3 +1,5 @@
+using CodeQuizDesktop.Views;
+
 namespace CodeQuizDesktop.Services;
 
 /// <summary>
@@ -74,6 +76,20 @@ public interface IUIService : IAlertService
         string cancelText = "Cancel",
         Keyboard? keyboard = null,
         string initialValue = "");
+
+    /// <summary>
+    /// Shows a dialog displaying a quiz code with options to copy and share.
+    /// </summary>
+    /// <param name="code">The quiz code to display.</param>
+    /// <param name="title">Optional title for the dialog.</param>
+    /// <param name="subtitle">Optional subtitle for the dialog.</param>
+    /// <param name="showShareButton">Whether to show the share button.</param>
+    /// <returns>The result of the dialog interaction.</returns>
+    Task<QuizCodeDialogResult> ShowQuizCodeAsync(
+        string code,
+        string? title = null,
+        string? subtitle = null,
+        bool showShareButton = true);
 
     /// <summary>
     /// Invokes an action on the main thread.

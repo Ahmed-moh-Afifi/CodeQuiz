@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
+             x:Class="CodeQuizDesktop.Views.QuizCodeDialog"
+             x:Name="quizCodeDialogView">
+
+    <Grid BackgroundColor="#99000000" 
+          HorizontalOptions="Fill" 
+          VerticalOptions="Fill"
+          x:Name="overlayGrid">
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer Tapped="OnOverlayTapped"/>
+        </Grid.GestureRecognizers>
+
+        <!-- Dialog Container -->
+        <Border Style="{StaticResource DialogContainer}"
+                WidthRequest="480"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                x:Name="dialogContainer">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer/>
+            </Border.GestureRecognizers>
+
+            <Grid RowDefinitions="Auto,Auto,Auto">
+                <!-- Header with Quiz Icon -->
+                <Grid Style="{StaticResource DialogHeader}" ColumnDefinitions="Auto,*,Auto">
+                    <Border WidthRequest="48" 
+                            HeightRequest="48" 
+                            StrokeThickness="0" 
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{StaticResource PrimaryTransparent}">
+                        <Image Source="quiz.png" 
+                               WidthRequest="24" 
+                               HeightRequest="24" 
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center">
+                            <Image.Behaviors>
+                                <toolkit:IconTintColorBehavior TintColor="{StaticResource Primary}"/>
+                            </Image.Behaviors>
+                        </Image>
+                    </Border>
+                    
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="16,0,0,0" Spacing="4">
+                        <Label x:Name="titleLabel"
+                               Text="Quiz Code"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}"/>
+                        <Label x:Name="subtitleLabel"
+                               Text="Share this code with participants"
+                               FontSize="13"
+                               TextColor="{StaticResource TextMuted}"/>
+                    </VerticalStackLayout>
+
+                    <Border Grid.Column="2" Style="{StaticResource CloseButton}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCloseClicked"/>
+                        </Border.GestureRecognizers>
+                        <Image Source="close.png" 
+                               WidthRequest="16" 
+                               HeightRequest="16" 
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center">
+                            <Image.Behaviors>
+                                <toolkit:IconTintColorBehavior TintColor="{StaticResource TextMuted}"/>
+                            </Image.Behaviors>
+                        </Image>
+                    </Border>
+                </Grid>
+
+                <BoxView Grid.Row="0" HeightRequest="1" Color="{StaticResource BorderDefault}" VerticalOptions="End"/>
+
+                <!-- Content - Quiz Code Display -->
+                <VerticalStackLayout Grid.Row="1" Padding="24,32" Spacing="16">
+                    <!-- Large Code Display -->
+                    <Border BackgroundColor="{StaticResource BackgroundDark}"
+                            Stroke="{StaticResource BorderSubtle}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="24,20"
+                            HorizontalOptions="Center">
+                        <Label x:Name="codeLabel"
+                               Text="ABC123"
+                               FontSize="48"
+                               FontFamily="SFMonoRegular"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource Primary}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               CharacterSpacing="8"/>
+                    </Border>
+                    
+                    <!-- Hint Text -->
+                    <Label x:Name="hintLabel"
+                           Text="Participants can use this code to join the quiz"
+                           FontSize="14"
+                           TextColor="{StaticResource TextMuted}"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+
+                <!-- Footer with Action Buttons -->
+                <Border Grid.Row="2" Style="{StaticResource DialogFooter}" StrokeShape="RoundRectangle 0,0,16,16">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                        <!-- Cancel Button (Left) -->
+                        <Button x:Name="cancelButton"
+                                Grid.Column="0"
+                                Text="Close"
+                                Style="{StaticResource SecondaryButton}"
+                                MinimumWidthRequest="100"
+                                Clicked="OnCancelClicked"/>
+                        
+                        <!-- Action Buttons (Right) -->
+                        <Button x:Name="shareButton"
+                                Grid.Column="2"
+                                Text="Share"
+                                Style="{StaticResource SecondaryButton}"
+                                MinimumWidthRequest="100"
+                                Margin="0,0,12,0"
+                                Clicked="OnShareClicked">
+                            <Button.ImageSource>
+                                <FontImageSource Glyph="&#x2197;" 
+                                                 Size="16" 
+                                                 Color="{StaticResource TextPrimary}"/>
+                            </Button.ImageSource>
+                        </Button>
+                        
+                        <Button x:Name="copyButton"
+                                Grid.Column="3"
+                                Text="Copy Code"
+                                Style="{StaticResource PrimaryButton}"
+                                MinimumWidthRequest="120"
+                                Clicked="OnCopyClicked">
+                            <Button.ImageSource>
+                                <FontImageSource Glyph="&#x2398;" 
+                                                 Size="16" 
+                                                 Color="{StaticResource TextPrimary}"/>
+                            </Button.ImageSource>
+                        </Button>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentView>

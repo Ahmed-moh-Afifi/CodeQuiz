@@ -260,6 +260,9 @@
                                             
                                             <!-- Quiz Code -->
                                             <Border Grid.Row="2" Style="{StaticResource StatusBadge}" Padding="12,10">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardVM}}, Path=ShowQuizCodeCommand}" CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
                                                 <HorizontalStackLayout Spacing="8">
                                                     <Label Text="Code:" Style="{StaticResource CaptionText}"/>
                                                     <Label Text="{Binding Code}" FontFamily="SFMonoRegular" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>

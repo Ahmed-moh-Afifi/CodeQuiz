@@ -99,6 +99,15 @@ namespace CodeQuizDesktop.Viewmodels
 
         public ICommand ViewCreatedQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await ViewCreatedQuizAsync(q)); }
         public ICommand DeleteCreatedQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await DeleteCreatedQuizAsync(q)); }
+        public ICommand ShowQuizCodeCommand { get => new Command<ExaminerQuiz>(async (q) => await ShowQuizCodeAsync(q)); }
+
+        private async Task ShowQuizCodeAsync(ExaminerQuiz quiz)
+        {
+            await _uiService.ShowQuizCodeAsync(
+                quiz.Code,
+                "Quiz Code",
+                $"Share this code to let participants join \"{quiz.Title}\"");
+        }
 
         // Navigation commands for "View All" and "Manage All" links
         public ICommand ViewAllJoinedCommand { get => new Command(ViewAllJoined); }

@@ -30,6 +30,15 @@ namespace CodeQuizDesktop.Viewmodels
         public ICommand EditQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await OnEditQuiz(q)); }
         public ICommand DeleteQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await OnDeleteQuizAsync(q)); }
         public ICommand ViewQuizCommand { get => new Command<ExaminerQuiz>(async (q) => await OnViewQuiz(q)); }
+        public ICommand ShowQuizCodeCommand { get => new Command<ExaminerQuiz>(async (q) => await ShowQuizCodeAsync(q)); }
+
+        private async Task ShowQuizCodeAsync(ExaminerQuiz quiz)
+        {
+            await _uiService.ShowQuizCodeAsync(
+                quiz.Code,
+                "Quiz Code",
+                $"Share this code to let participants join \"{quiz.Title}\"");
+        }
 
         public async Task OnCreateQuizPage()
         {

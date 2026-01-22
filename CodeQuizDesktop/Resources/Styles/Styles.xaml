@@ -197,18 +197,35 @@
         <Setter Property="TextColor" Value="{StaticResource Primary}"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Padding" Value="8"/>
+        <Setter Property="BorderWidth" Value="0"/>
+        <Setter Property="BorderColor" Value="Transparent"/>
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
-                    <VisualState x:Name="Normal"/>
+                    <VisualState x:Name="Normal">
+                        <VisualState.Setters>
+                            <Setter Property="BorderWidth" Value="0"/>
+                            <Setter Property="BorderColor" Value="Transparent"/>
+                        </VisualState.Setters>
+                    </VisualState>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
                             <Setter Property="TextColor" Value="{StaticResource PrimaryHover}"/>
+                            <Setter Property="BorderWidth" Value="0"/>
+                            <Setter Property="BorderColor" Value="Transparent"/>
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="Pressed">
                         <VisualState.Setters>
                             <Setter Property="TextColor" Value="{StaticResource PrimaryPressed}"/>
+                            <Setter Property="BorderWidth" Value="0"/>
+                            <Setter Property="BorderColor" Value="Transparent"/>
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="Focused">
+                        <VisualState.Setters>
+                            <Setter Property="BorderWidth" Value="0"/>
+                            <Setter Property="BorderColor" Value="Transparent"/>
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
