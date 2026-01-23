@@ -535,7 +535,7 @@ namespace CodeQuizDesktop.Viewmodels
                     ContainOutput = SelectedQuestion!.QuestionConfiguration.ShowOutput,
                     ContainError = SelectedQuestion!.QuestionConfiguration.ShowError,
                     Code = CodeInEditor,
-                    Input = (this.Input).Split(['\n', ' ', '\r']).ToList()
+                    Input = (this.Input).Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries).ToList()
                 };
 
                 var response = await _executionRepository.RunCode(runCodeRequest);

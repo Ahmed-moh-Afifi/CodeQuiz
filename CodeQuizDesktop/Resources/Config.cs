@@ -9,7 +9,7 @@ namespace CodeQuizDesktop.Resources
     public static class Config
     {
         public static string Server { get; set; } = "http://129.151.234.105";
-        // public static string Server { get; set; } = "http://localhost:5062";
+        //public static string Server { get; set; } = "http://localhost:5062";
         public static string API { get; set; } = $"{Server}/api";
         public static string HUB { get; set; } = $"{Server}/hubs";
     }

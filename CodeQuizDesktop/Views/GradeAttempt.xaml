@@ -341,7 +341,7 @@
                                                 <VisualState x:Name="Normal"/>
                                                 <VisualState x:Name="PointerOver">
                                                     <VisualState.Setters>
-                                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryDark}"/>
+                                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryHover}"/>
                                                     </VisualState.Setters>
                                                 </VisualState>
                                             </VisualStateGroup>

@@ -29,7 +29,7 @@ public class AuthenticationRepository(IAuthAPI authAPI, ITokenService tokenServi
         {
             var loginResult = (await authAPI.Login(loginModel)).Data;
             await tokenService.SaveTokens(loginResult!.TokenModel);
-            loggedInUser = loginResult?.User;
+            LoggedInUser = loginResult?.User;
             return loginResult!;
         }
         catch (Exception ex)

@@ -6,11 +6,38 @@ public class GlobalExceptionHandler
 {
     private readonly IAlertService _alertService;
     private readonly IAppLogger<GlobalExceptionHandler> _logger;
+    private static readonly string LogFilePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "CodeQuizDesktop",
+        "error_log.txt");
 
     public GlobalExceptionHandler(IAlertService alertService, IAppLogger<GlobalExceptionHandler> logger)
     {
         _alertService = alertService;
         _logger = logger;
+
+        // Ensure directory exists
+        var dir = Path.GetDirectoryName(LogFilePath);
+        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
+    }
+
+    private static void LogExceptionToFile(string source, Exception? ex)
+    {
+        try
+        {
+            var message = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{source}]\n" +
+                         $"Type: {ex?.GetType().FullName}\n" +
+                         $"Message: {ex?.Message}\n" +
+                         $"StackTrace: {ex?.StackTrace}\n" +
+                         $"InnerException: {ex?.InnerException?.Message}\n" +
+                         $"InnerStackTrace: {ex?.InnerException?.StackTrace}\n" +
+                         $"---\n";
+            File.AppendAllText(LogFilePath, message);
+        }
+        catch { /* Ignore logging errors */ }
     }
 
     public void Initialize()
@@ -38,26 +65,29 @@ public class GlobalExceptionHandler
     private static bool IsKnownLiveChartsException(Exception? exception)
     {
         if (exception == null) return false;
-        
+
         // Check for the ContentPanel cast exception from LiveCharts2
         if (exception.Message.Contains("Unable to cast to ContentPanel") &&
             exception.StackTrace?.Contains("LiveChartsCore") == true)
         {
             return true;
         }
-        
+
         // Check inner exceptions for AggregateException
         if (exception is AggregateException aggregateException)
         {
             return aggregateException.InnerExceptions.Any(IsKnownLiveChartsException);
         }
-        
+
         return exception.InnerException != null && IsKnownLiveChartsException(exception.InnerException);
     }
 
 #if WINDOWS
     private void OnWindowsUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
+        // Log to file for Release debugging
+        LogExceptionToFile("WindowsUnhandled", e.Exception);
+        
         // Filter out known LiveCharts2 disposal exceptions
         if (IsKnownLiveChartsException(e.Exception))
         {
@@ -128,7 +158,7 @@ public class GlobalExceptionHandler
                 _logger.LogWarning("Suppressed known LiveCharts2 disposal exception");
                 return;
             }
-            
+
             _logger.LogError("Unhandled exception occurred", exception);
             MainThread.BeginInvokeOnMainThread(async () =>
             {
@@ -146,10 +176,10 @@ public class GlobalExceptionHandler
             e.SetObserved();
             return;
         }
-        
+
         _logger.LogError("Unobserved task exception", e.Exception);
         e.SetObserved(); // Prevent the app from crashing
-        
+
         MainThread.BeginInvokeOnMainThread(async () =>
         {
             await _alertService.ShowErrorAsync(e.Exception.InnerException ?? e.Exception);

@@ -121,6 +121,8 @@ namespace CodeQuizDesktop
             builder.Services.AddTransient<CreateQuiz>();
             builder.Services.AddTransient<JoinQuiz>();
             builder.Services.AddTransient<ExaminerViewQuiz>();
+            builder.Services.AddTransient<GradeAttempt>();
+            builder.Services.AddTransient<ExamineeReviewQuiz>();
             builder.Services.AddTransient<ProfilePage>();
 
             //ViewModels

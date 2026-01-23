@@ -41,6 +41,9 @@
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
 		<WindowsPackageType>None</WindowsPackageType>
+		<!-- Disable trimming to prevent issues with reflection-based code (DI, MVVM bindings, Refit, etc.) -->
+		<PublishTrimmed>false</PublishTrimmed>
+		<TrimMode>partial</TrimMode>
 	</PropertyGroup>
 
 	<ItemGroup>

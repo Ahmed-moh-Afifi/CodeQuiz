@@ -40,6 +40,7 @@ namespace CodeQuizDesktop.Services
         public async Task SaveTokens(TokenModel tokenModel)
         {
             await secureStorage.SetAsync("token-model", JsonSerializer.Serialize(tokenModel, TokenJsonContext.Default.TokenModel));
+            savedTokens = tokenModel;
         }
 
         public async Task<bool> HasValidTokens()
