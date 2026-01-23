@@ -254,6 +254,22 @@ namespace CodeQuizDesktop.Repositories
             }
         }
 
+        /// <summary>
+        /// Gets a specific attempt by ID for the examiner view.
+        /// </summary>
+        public async Task<ExaminerAttempt> GetAttemptById(int attemptId)
+        {
+            try
+            {
+                await EnsureInitializedAsync();
+                return (await attemptsAPI.GetAttemptById(attemptId)).Data!;
+            }
+            catch (Exception ex)
+            {
+                throw ApiServiceException.FromException(ex, "Failed to load attempt.");
+            }
+        }
+
         public async Task<ExamineeAttempt> SubmitAttempt(int attemptId)
         {
             try
@@ -293,6 +309,36 @@ namespace CodeQuizDesktop.Repositories
             catch (Exception ex)
             {
                 throw ApiServiceException.FromException(ex, "Failed to update solution grade.");
+            }
+        }
+
+        /// <summary>
+        /// Batch updates grades and feedback for multiple solutions at once.
+        /// </summary>
+        public async Task<List<Solution>> BatchUpdateSolutionGrades(BatchUpdateSolutionGradesRequest request)
+        {
+            try
+            {
+                return (await attemptsAPI.BatchUpdateSolutionGrades(request)).Data!;
+            }
+            catch (Exception ex)
+            {
+                throw ApiServiceException.FromException(ex, "Failed to update solution grades.");
+            }
+        }
+
+        /// <summary>
+        /// Re-runs AI assessment for a specific solution.
+        /// </summary>
+        public async Task<Solution> RerunAiAssessment(int solutionId)
+        {
+            try
+            {
+                return (await attemptsAPI.RerunAiAssessment(solutionId)).Data!;
+            }
+            catch (Exception ex)
+            {
+                throw ApiServiceException.FromException(ex, "Failed to queue AI reassessment.");
             }
         }
 

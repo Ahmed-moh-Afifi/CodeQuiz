@@ -130,6 +130,11 @@ namespace CodeQuizDesktop.Viewmodels
                 OnPropertyChanged(nameof(HasFlags));
                 OnPropertyChanged(nameof(AiValidityText));
                 OnPropertyChanged(nameof(AiConfidenceText));
+                // Notify suggested grade properties
+                OnPropertyChanged(nameof(SuggestedGrade));
+                OnPropertyChanged(nameof(SuggestedGradeActual));
+                OnPropertyChanged(nameof(HasSuggestedGrade));
+                OnPropertyChanged(nameof(SuggestedGradeText));
             }
         }
 
@@ -226,13 +231,7 @@ namespace CodeQuizDesktop.Viewmodels
             }
 
             CurrentSolution = Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion.Id);
-            CurrentAiAssessment = CurrentSolution?.AiAssessment;
-
-            // Notify about suggested grade properties
-            OnPropertyChanged(nameof(SuggestedGrade));
-            OnPropertyChanged(nameof(SuggestedGradeActual));
-            OnPropertyChanged(nameof(HasSuggestedGrade));
-            OnPropertyChanged(nameof(SuggestedGradeText));
+            CurrentAiAssessment = CurrentSolution?.AiAssessment; // This triggers OnPropertyChanged for suggested grade properties
         }
 
         #endregion
@@ -391,6 +390,60 @@ namespace CodeQuizDesktop.Viewmodels
         public ICommand SpecificQuestionCommand { get => new Command<Question>(SpecificQuestion); }
         public ICommand RunCommand { get => new Command(async () => await Run()); }
         public ICommand SaveAllGradesCommand { get => new Command(async () => await SaveAllGradesAndGoBack()); }
+        public ICommand RerunAiAssessmentCommand { get => new Command(async () => await RerunAiAssessment(), () => CanRerunAiAssessment); }
+
+        private bool _isRerunningAiAssessment;
+        /// <summary>
+        /// Whether an AI re-assessment is currently in progress.
+        /// </summary>
+        public bool IsRerunningAiAssessment
+        {
+            get => _isRerunningAiAssessment;
+            set
+            {
+                _isRerunningAiAssessment = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(CanRerunAiAssessment));
+            }
+        }
+
+        /// <summary>
+        /// Whether the AI re-assessment command can be executed.
+        /// </summary>
+        public bool CanRerunAiAssessment => CurrentSolution != null && !IsRerunningAiAssessment;
+
+        /// <summary>
+        /// Re-runs AI assessment for the current solution.
+        /// </summary>
+        private async Task RerunAiAssessment()
+        {
+            if (CurrentSolution == null) return;
+
+            try
+            {
+                IsRerunningAiAssessment = true;
+                EvaluationStatus = "Queuing AI reassessment...";
+
+                await _attemptsRepository.RerunAiAssessment(CurrentSolution.Id);
+
+                EvaluationStatus = "AI reassessment in progress...";
+                System.Diagnostics.Debug.WriteLine($"AI reassessment queued for solution {CurrentSolution.Id}");
+            }
+            catch (Exception ex)
+            {
+                EvaluationStatus = $"AI reassessment failed: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Failed to queue AI reassessment: {ex.Message}");
+
+                // Clear status after delay on error
+                await Task.Delay(3000);
+                if (EvaluationStatus?.Contains("failed") == true)
+                    EvaluationStatus = null;
+            }
+            finally
+            {
+                IsRerunningAiAssessment = false;
+            }
+        }
 
         public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
@@ -492,6 +545,8 @@ namespace CodeQuizDesktop.Viewmodels
                             break;
                         case "AiAssessmentComplete":
                             EvaluationStatus = "AI assessment complete";
+                            // Refresh the attempt to get the new AI assessment data
+                            _ = RefreshAttemptDataAsync();
                             // Clear status after a delay
                             Task.Delay(3000).ContinueWith(_ =>
                             {
@@ -512,6 +567,40 @@ namespace CodeQuizDesktop.Viewmodels
             };
 
             _attemptsRepository.SubscribeEvaluationStatus(_evaluationStatusHandler);
+        }
+
+        /// <summary>
+        /// Refreshes the attempt data from the server to get updated AI assessments.
+        /// </summary>
+        private async Task RefreshAttemptDataAsync()
+        {
+            if (Attempt == null) return;
+
+            try
+            {
+                var refreshedAttempt = await _attemptsRepository.GetAttemptById(Attempt.Id);
+                if (refreshedAttempt != null)
+                {
+                    Attempt = refreshedAttempt;
+
+                    // Update the current solution and AI assessment for the selected question
+                    if (SelectedQuestion != null)
+                    {
+                        var solution = Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion.Id);
+                        if (solution != null)
+                        {
+                            CurrentSolution = solution;
+                            CurrentAiAssessment = solution.AiAssessment; // This will trigger OnPropertyChanged for suggested grade properties
+                        }
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"Refreshed attempt {Attempt.Id} with updated AI assessment data");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to refresh attempt data: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -554,56 +643,80 @@ namespace CodeQuizDesktop.Viewmodels
         /// <summary>
         /// Saves all changed grades and feedback for all solutions and navigates back.
         /// Only solutions with actually changed values are updated.
+        /// Uses batch endpoint to send a single email notification.
         /// </summary>
         public async Task SaveAllGradesAndGoBack()
         {
-            // First save current question's values to tracking dictionaries
-            if (SelectedQuestion != null && Attempt != null)
+            await ExecuteAsync(async () =>
             {
-                var currentSol = Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion.Id);
-                if (currentSol != null)
+                // First save current question's values to tracking dictionaries
+                if (SelectedQuestion != null && Attempt != null)
                 {
-                    _currentGrades[currentSol.Id] = Grade;
-                    _currentFeedback[currentSol.Id] = Feedback;
-                }
-            }
-
-            // Save only solutions that have changed grades or feedback
-            foreach (var solution in Attempt!.Solutions)
-            {
-                var originalGrade = _originalGrades.GetValueOrDefault(solution.Id);
-                var currentGrade = _currentGrades.GetValueOrDefault(solution.Id, solution.ReceivedGrade);
-                var originalFeedbackVal = _originalFeedback.GetValueOrDefault(solution.Id);
-                var currentFeedbackVal = _currentFeedback.GetValueOrDefault(solution.Id, solution.Feedback);
-
-                bool gradeChanged = currentGrade != originalGrade;
-                bool feedbackChanged = currentFeedbackVal != originalFeedbackVal;
-
-                if (gradeChanged || feedbackChanged)
-                {
-                    var request = new UpdateSolutionGradeRequest
+                    var currentSol = Attempt.Solutions.Find(s => s.QuestionId == SelectedQuestion.Id);
+                    if (currentSol != null)
                     {
-                        SolutionId = solution.Id,
-                        ReceivedGrade = currentGrade,
-                        Feedback = currentFeedbackVal,
-                        EvaluatedBy = _authRepository.LoggedInUser?.FullName ?? "Instructor"
-                    };
+                        _currentGrades[currentSol.Id] = Grade;
+                        _currentFeedback[currentSol.Id] = Feedback;
+                    }
+                }
 
+                // Collect all changed solutions for batch update
+                var updates = new List<SolutionGradeUpdate>();
+
+                foreach (var solution in Attempt!.Solutions)
+                {
+                    var originalGrade = _originalGrades.GetValueOrDefault(solution.Id);
+                    var currentGrade = _currentGrades.GetValueOrDefault(solution.Id, solution.ReceivedGrade);
+                    var originalFeedbackVal = _originalFeedback.GetValueOrDefault(solution.Id);
+                    var currentFeedbackVal = _currentFeedback.GetValueOrDefault(solution.Id, solution.Feedback);
+
+                    bool gradeChanged = currentGrade != originalGrade;
+                    bool feedbackChanged = currentFeedbackVal != originalFeedbackVal;
+
+                    if (gradeChanged || feedbackChanged)
+                    {
+                        // Find the question for this solution to get the question number
+                        var question = Quiz?.Questions.Find(q => q.Id == solution.QuestionId);
+
+                        updates.Add(new SolutionGradeUpdate
+                        {
+                            SolutionId = solution.Id,
+                            QuestionNumber = question?.Order ?? 0,
+                            TotalPoints = question?.Points ?? 0,
+                            ReceivedGrade = currentGrade,
+                            OldGrade = originalGrade,
+                            Feedback = currentFeedbackVal,
+                            OldFeedback = originalFeedbackVal,
+                            EvaluatedBy = _authRepository.LoggedInUser?.FullName ?? "Instructor"
+                        });
+                    }
+                }
+
+                // If there are changes, send them all in a single batch request
+                if (updates.Count > 0)
+                {
                     try
                     {
-                        await _attemptsRepository.UpdateSolutionGrade(request);
-                        System.Diagnostics.Debug.WriteLine($"Saved grade/feedback for solution {solution.Id}: Grade={currentGrade}, Feedback changed={feedbackChanged}");
+                        var batchRequest = new BatchUpdateSolutionGradesRequest
+                        {
+                            AttemptId = Attempt.Id,
+                            Updates = updates
+                        };
+
+                        await _attemptsRepository.BatchUpdateSolutionGrades(batchRequest);
+                        System.Diagnostics.Debug.WriteLine($"Saved {updates.Count} grade/feedback updates in batch for attempt {Attempt.Id}");
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Failed to save grade for solution {solution.Id}: {ex.Message}");
+                        System.Diagnostics.Debug.WriteLine($"Failed to save batch grades: {ex.Message}");
+                        throw; // Re-throw to let ExecuteAsync handle it properly
                     }
                 }
-            }
 
-            HasUnsavedChanges = false;
-            UnsubscribeFromUpdates();
-            await _navigationService.GoToAsync("..");
+                HasUnsavedChanges = false;
+                UnsubscribeFromUpdates();
+                await _navigationService.GoToAsync("..");
+            }, "Saving grades...");
         }
 
         public void NextQuestion()

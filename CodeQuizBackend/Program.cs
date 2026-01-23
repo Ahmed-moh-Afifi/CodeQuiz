@@ -113,7 +113,7 @@ builder.Services.AddRateLimiter(options =>
             factory: partition => new FixedWindowRateLimiterOptions
             {
                 AutoReplenishment = true,
-                PermitLimit = 25,
+                PermitLimit = 200,
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0,
             }));
@@ -121,7 +121,7 @@ builder.Services.AddRateLimiter(options =>
     // Can be applied to specific endpoints
     options.AddFixedWindowLimiter("StrictPolicy", opt =>
     {
-        opt.PermitLimit = 5;
+        opt.PermitLimit = 10;
         opt.Window = TimeSpan.FromMinutes(1);
         opt.QueueLimit = 2;
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;

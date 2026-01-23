@@ -273,6 +273,161 @@ namespace CodeQuizBackend.Quiz.Services
             return sol.ToDTO();
         }
 
+        /// <summary>
+        /// Batch updates grades and feedback for multiple solutions at once.
+        /// Sends a single email notification to the examinee with all changes.
+        /// </summary>
+        public async Task<List<SolutionDTO>> BatchUpdateSolutionGrades(BatchUpdateSolutionGradesRequest request)
+        {
+            // First validate the attempt exists
+            var attempt = await dbContext.Attempts
+                .Include(a => a.Quiz)
+                .ThenInclude(q => q.Examiner)
+                .Include(a => a.Examinee)
+                .Include(a => a.Solutions)
+                .ThenInclude(s => s.AiAssessment)
+                .Include(a => a.Quiz)
+                .ThenInclude(q => q.Questions)
+                .FirstOrDefaultAsync(a => a.Id == request.AttemptId)
+                ?? throw new ResourceNotFoundException("Attempt not found.");
+
+            var updatedSolutions = new List<SolutionDTO>();
+            var gradeUpdatesForEmail = new List<GradeUpdateInfo>();
+            string? evaluatedBy = null;
+
+            foreach (var update in request.Updates)
+            {
+                var sol = attempt.Solutions.FirstOrDefault(s => s.Id == update.SolutionId)
+                    ?? throw new ResourceNotFoundException($"Solution {update.SolutionId} not found.");
+
+                bool hasChanges = false;
+
+                // Track if grade changed
+                if (update.ReceivedGrade.HasValue && sol.ReceivedGrade != update.ReceivedGrade.Value)
+                {
+                    sol.ReceivedGrade = update.ReceivedGrade.Value;
+                    hasChanges = true;
+                }
+
+                // Track if feedback changed
+                if (update.Feedback != null && sol.Feedback != update.Feedback)
+                {
+                    sol.Feedback = update.Feedback;
+                    hasChanges = true;
+                }
+
+                if (hasChanges)
+                {
+                    sol.EvaluatedBy = update.EvaluatedBy;
+                    evaluatedBy = update.EvaluatedBy;
+
+                    gradeUpdatesForEmail.Add(new GradeUpdateInfo
+                    {
+                        QuestionNumber = update.QuestionNumber,
+                        OldGrade = update.OldGrade,
+                        NewGrade = update.ReceivedGrade,
+                        TotalPoints = update.TotalPoints,
+                        OldFeedback = update.OldFeedback,
+                        NewFeedback = update.Feedback
+                    });
+                }
+
+                updatedSolutions.Add(sol.ToDTO());
+            }
+
+            await dbContext.SaveChangesAsync();
+
+            // Send email notification if there were actual changes
+            if (gradeUpdatesForEmail.Count > 0 && !string.IsNullOrEmpty(attempt.Examinee.Email))
+            {
+                await mailService.SendGradeUpdateEmailAsync(
+                    attempt.Examinee.Email,
+                    attempt.Examinee.FirstName,
+                    attempt.Quiz.Title,
+                    evaluatedBy ?? "Instructor",
+                    gradeUpdatesForEmail);
+            }
+
+            // Reload attempt for SignalR notification
+            var fullAttempt = await dbContext.Attempts
+                .Where(a => a.Id == attempt.Id)
+                .Include(a => a.Quiz)
+                .ThenInclude(q => q.Examiner)
+                .Include(a => a.Quiz)
+                .ThenInclude(q => q.Questions)
+                .Include(a => a.Solutions)
+                .ThenInclude(s => s.AiAssessment)
+                .Include(a => a.Examinee)
+                .FirstAsync();
+
+            var examinerAttempt = fullAttempt.ToExaminerAttempt();
+            var examineeAttempt = fullAttempt.ToExamineeAttempt();
+
+            // Notify the examinee about their grade
+            await attemptsHubContext.Clients.Group($"user_{attempt.ExamineeId}")
+                .SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
+
+            // Notify the examiner
+            await attemptsHubContext.Clients.Group($"examiner_{attempt.Quiz.ExaminerId}")
+                .SendAsync("AttemptUpdated", examinerAttempt, examineeAttempt);
+
+            // Send updated quiz statistics
+            await NotifyQuizStatisticsUpdatedAsync(attempt.QuizId, attempt.Quiz.ExaminerId);
+
+            return updatedSolutions;
+        }
+
+        /// <summary>
+        /// Re-runs AI assessment for a specific solution.
+        /// Used when the automatic assessment fails or needs to be re-evaluated.
+        /// </summary>
+        public async Task<SolutionDTO> RerunAiAssessment(int solutionId)
+        {
+            var sol = await dbContext.Solutions
+                .Include(s => s.Attempt)
+                .ThenInclude(a => a.Quiz)
+                .ThenInclude(q => q.Examiner)
+                .Include(s => s.Attempt)
+                .ThenInclude(a => a.Quiz)
+                .ThenInclude(q => q.Questions)
+                .ThenInclude(q => q.QuestionConfiguration)
+                .Include(s => s.Attempt)
+                .ThenInclude(a => a.Quiz)
+                .ThenInclude(q => q.GlobalQuestionConfiguration)
+                .Include(s => s.Attempt)
+                .ThenInclude(a => a.Examinee)
+                .Include(s => s.AiAssessment)
+                .Include(s => s.EvaluationResults)
+                .ThenInclude(er => er.TestCase)
+                .FirstOrDefaultAsync(s => s.Id == solutionId)
+                ?? throw new ResourceNotFoundException("Solution not found.");
+
+            var attempt = sol.Attempt;
+            var question = attempt.Quiz.Questions.First(q => q.Id == sol.QuestionId);
+            var questionConfig = question.QuestionConfiguration ?? attempt.Quiz.GlobalQuestionConfiguration;
+
+            // Remove existing AI assessment if present
+            if (sol.AiAssessment != null)
+            {
+                dbContext.Set<AiAssessment>().Remove(sol.AiAssessment);
+                sol.AiAssessment = null;
+            }
+
+            // Queue the AI assessment job
+            var job = new EvaluationJob(
+                attempt.Id,
+                attempt.QuizId,
+                attempt.ExamineeId,
+                attempt.Quiz.ExaminerId,
+                solutionId);
+
+            evaluationQueue.QueueAiReassessment(job);
+
+            await dbContext.SaveChangesAsync();
+
+            return sol.ToDTO();
+        }
+
         public async Task EvaluateAttempt(int attemptId)
         {
             var attempt = await dbContext.Attempts
@@ -403,6 +558,24 @@ namespace CodeQuizBackend.Quiz.Services
                 }
             }
             return true;
+        }
+
+        /// <summary>
+        /// Gets a specific attempt by ID for the examiner view.
+        /// </summary>
+        public async Task<ExaminerAttempt> GetAttemptById(int attemptId)
+        {
+            var attempt = await dbContext.Attempts
+                .Where(a => a.Id == attemptId)
+                .Include(a => a.Solutions)
+                .ThenInclude(s => s.AiAssessment)
+                .Include(a => a.Examinee)
+                .Include(a => a.Quiz)
+                .ThenInclude(q => q.Questions)
+                .FirstOrDefaultAsync()
+                ?? throw new ResourceNotFoundException($"Attempt with ID {attemptId} not found");
+
+            return attempt.ToExaminerAttempt();
         }
     }
 }

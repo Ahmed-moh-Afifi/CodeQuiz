@@ -70,7 +70,7 @@ namespace CodeQuizBackend.Quiz.Services
             var aiAssessmentService = scope.ServiceProvider.GetRequiredService<IAiAssessmentService>();
             var mailService = scope.ServiceProvider.GetRequiredService<IMailService>();
 
-            _logger.LogInfo($"Processing evaluation job for attempt {job.AttemptId}");
+            _logger.LogInfo($"Processing evaluation job for attempt {job.AttemptId}{(job.IsAiReassessmentOnly ? $" (AI reassessment for solution {job.SpecificSolutionId})" : "")}");
 
             // Notify that evaluation has started
             await NotifyEvaluationStatusAsync(job, "EvaluationStarted", null);
@@ -99,6 +99,13 @@ namespace CodeQuizBackend.Quiz.Services
                 {
                     _logger.LogWarning($"Attempt {job.AttemptId} has not been submitted yet");
                     await NotifyEvaluationStatusAsync(job, "EvaluationFailed", "Attempt not submitted");
+                    return;
+                }
+
+                // Check if this is an AI-only reassessment
+                if (job.IsAiReassessmentOnly)
+                {
+                    await ProcessAiReassessmentAsync(job, attempt, aiAssessmentService, dbContext, stoppingToken);
                     return;
                 }
 
@@ -196,6 +203,86 @@ namespace CodeQuizBackend.Quiz.Services
             }
 
             return new SystemGradingResult { AllGraded = gradedCount == attempt.Solutions.Count };
+        }
+
+        /// <summary>
+        /// Processes an AI-only reassessment for a specific solution.
+        /// </summary>
+        private async Task ProcessAiReassessmentAsync(
+            EvaluationJob job,
+            Attempt attempt,
+            IAiAssessmentService aiAssessmentService,
+            ApplicationDbContext dbContext,
+            CancellationToken stoppingToken)
+        {
+            var solution = attempt.Solutions.FirstOrDefault(s => s.Id == job.SpecificSolutionId);
+            if (solution == null)
+            {
+                _logger.LogWarning($"Solution {job.SpecificSolutionId} not found for AI reassessment");
+                await NotifyEvaluationStatusAsync(job, "EvaluationFailed", "Solution not found");
+                return;
+            }
+
+            // Load solution with evaluation results
+            solution = await dbContext.Solutions
+                .Include(s => s.EvaluationResults)
+                .ThenInclude(er => er.TestCase)
+                .Include(s => s.AiAssessment)
+                .FirstOrDefaultAsync(s => s.Id == job.SpecificSolutionId, stoppingToken);
+
+            if (solution == null)
+            {
+                await NotifyEvaluationStatusAsync(job, "EvaluationFailed", "Solution not found");
+                return;
+            }
+
+            // Remove existing AI assessment if present
+            if (solution.AiAssessment != null)
+            {
+                dbContext.Set<AiAssessment>().Remove(solution.AiAssessment);
+                solution.AiAssessment = null;
+                await dbContext.SaveChangesAsync(stoppingToken);
+            }
+
+            var question = attempt.Quiz.Questions.First(q => q.Id == solution.QuestionId);
+            var questionConfig = question.QuestionConfiguration ?? attempt.Quiz.GlobalQuestionConfiguration;
+
+            try
+            {
+                _logger.LogInfo($"Starting AI reassessment for solution {solution.Id}");
+
+                var assessment = await aiAssessmentService.AssessSolutionAsync(
+                    solution, question, questionConfig, stoppingToken);
+
+                assessment.SolutionId = solution.Id;
+                dbContext.Set<AiAssessment>().Add(assessment);
+                solution.AiAssessment = assessment;
+
+                await dbContext.SaveChangesAsync(stoppingToken);
+
+                // Reload attempt with all data for notification
+                attempt = await dbContext.Attempts
+                    .Where(a => a.Id == job.AttemptId)
+                    .Include(a => a.Examinee)
+                    .Include(a => a.Quiz)
+                    .ThenInclude(q => q.Questions)
+                    .Include(a => a.Solutions)
+                    .ThenInclude(s => s.AiAssessment)
+                    .Include(a => a.Quiz)
+                    .ThenInclude(q => q.Examiner)
+                    .FirstAsync(stoppingToken);
+
+                var examinerAttempt = attempt.ToExaminerAttempt();
+                var examineeAttempt = attempt.ToExamineeAttempt();
+
+                await NotifyEvaluationStatusAsync(job, "AiAssessmentComplete", null, examinerAttempt, examineeAttempt);
+                _logger.LogInfo($"AI reassessment complete for solution {solution.Id}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AI reassessment failed for solution {solution.Id}: {ex.Message}", ex);
+                await NotifyEvaluationStatusAsync(job, "EvaluationFailed", $"AI assessment failed: {ex.Message}");
+            }
         }
 
         private async Task PerformAiAssessmentAsync(

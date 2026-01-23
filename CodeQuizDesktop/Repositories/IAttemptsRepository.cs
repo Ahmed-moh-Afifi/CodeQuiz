@@ -19,7 +19,20 @@ namespace CodeQuizDesktop.Repositories
         /// Updates a solution's grade (instructor grading)
         /// </summary>
         public Task<Solution> UpdateSolutionGrade(UpdateSolutionGradeRequest request);
+        /// <summary>
+        /// Batch updates grades and feedback for multiple solutions at once.
+        /// </summary>
+        public Task<List<Solution>> BatchUpdateSolutionGrades(BatchUpdateSolutionGradesRequest request);
+        /// <summary>
+        /// Re-runs AI assessment for a specific solution.
+        /// </summary>
+        public Task<Solution> RerunAiAssessment(int solutionId);
         public Task<List<ExamineeAttempt>> GetUserAttempts();
+
+        /// <summary>
+        /// Gets a specific attempt by ID for the examiner view.
+        /// </summary>
+        public Task<ExaminerAttempt> GetAttemptById(int attemptId);
 
         /// <summary>
         /// Join a quiz-specific SignalR group to receive real-time updates for attempts in that quiz.

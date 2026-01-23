@@ -16,6 +16,11 @@ namespace CodeQuizBackend.Quiz.Services
         /// Dequeues the next evaluation job. Blocks until a job is available.
         /// </summary>
         ValueTask<EvaluationJob> DequeueAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Enqueues an AI reassessment job for a specific solution.
+        /// </summary>
+        void QueueAiReassessment(EvaluationJob job);
     }
 
     /// <summary>
@@ -43,6 +48,11 @@ namespace CodeQuizBackend.Quiz.Services
         public async ValueTask<EvaluationJob> DequeueAsync(CancellationToken cancellationToken)
         {
             return await _channel.Reader.ReadAsync(cancellationToken);
+        }
+
+        public void QueueAiReassessment(EvaluationJob job)
+        {
+            _channel.Writer.TryWrite(job);
         }
     }
 }

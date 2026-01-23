@@ -140,11 +140,12 @@
                         <Border Style="{StaticResource InnerCard}" IsVisible="{Binding HasAiAssessment}" Padding="20">
                             <VerticalStackLayout Spacing="16">
                                 <!-- AI Assessment Header -->
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                     <Border StrokeShape="RoundRectangle 8" 
                                             BackgroundColor="{Binding CurrentAiAssessment.IsValid, Converter={StaticResource AiValidityToColorConverter}}" 
                                             Padding="12,6" 
-                                            StrokeThickness="0">
+                                            StrokeThickness="0"
+                                            VerticalOptions="Center">
                                         <Label Text="{Binding AiValidityText}" 
                                                FontSize="14" 
                                                FontAttributes="Bold" 
@@ -155,6 +156,46 @@
                                            Style="{StaticResource SectionHeader}" 
                                            FontSize="16" 
                                            VerticalOptions="Center"/>
+                                    <!-- Re-run AI Assessment Button -->
+                                    <Border Grid.Column="2" 
+                                            StrokeShape="RoundRectangle 8" 
+                                            BackgroundColor="{StaticResource SurfaceDark}" 
+                                            Stroke="{StaticResource BorderDefault}"
+                                            StrokeThickness="1"
+                                            Padding="10"
+                                            WidthRequest="40"
+                                            HeightRequest="40"
+                                            IsVisible="{Binding IsRerunningAiAssessment, Converter={StaticResource InverseBoolConverter}}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding RerunAiAssessmentCommand}"/>
+                                        </Border.GestureRecognizers>
+                                        <Image Source="restart.png" 
+                                               WidthRequest="18" 
+                                               HeightRequest="18" 
+                                               HorizontalOptions="Center" 
+                                               VerticalOptions="Center">
+                                            <Image.Behaviors>
+                                                <toolkit:IconTintColorBehavior TintColor="{StaticResource TextPrimary}"/>
+                                            </Image.Behaviors>
+                                        </Image>
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal"/>
+                                                <VisualState x:Name="PointerOver">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="{StaticResource Secondary}"/>
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                    </Border>
+                                    <!-- Loading indicator when re-running AI -->
+                                    <ActivityIndicator Grid.Column="2"
+                                                       IsRunning="{Binding IsRerunningAiAssessment}"
+                                                       IsVisible="{Binding IsRerunningAiAssessment}"
+                                                       WidthRequest="24"
+                                                       HeightRequest="24"
+                                                       Color="{StaticResource Primary}"/>
                                 </Grid>
                                 
                                 <!-- Flags Section -->
@@ -259,17 +300,61 @@
                         <Border Style="{StaticResource InnerCard}" 
                                 IsVisible="{Binding HasAiAssessment, Converter={StaticResource InverseBoolConverter}}" 
                                 Padding="16">
-                            <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
-                                <ActivityIndicator IsRunning="{Binding IsEvaluating}" 
-                                                   IsVisible="{Binding IsEvaluating}"
-                                                   HeightRequest="20" 
-                                                   WidthRequest="20" 
-                                                   Color="{StaticResource Primary}"/>
-                                <Label Text="{Binding EvaluationStatus, TargetNullValue='AI assessment pending...'}" 
-                                       Style="{StaticResource CaptionText}" 
-                                       FontSize="14" 
-                                       VerticalOptions="Center"/>
-                            </HorizontalStackLayout>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                <HorizontalStackLayout Spacing="12" HorizontalOptions="Start">
+                                    <ActivityIndicator IsRunning="{Binding IsEvaluating}" 
+                                                       IsVisible="{Binding IsEvaluating}"
+                                                       HeightRequest="20" 
+                                                       WidthRequest="20" 
+                                                       Color="{StaticResource Primary}"/>
+                                    <Label Text="{Binding EvaluationStatus, TargetNullValue='AI assessment not available'}" 
+                                           Style="{StaticResource CaptionText}" 
+                                           FontSize="14" 
+                                           VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                <!-- Run AI Assessment Button (when no assessment exists) -->
+                                <Grid Grid.Column="1" IsVisible="{Binding IsEvaluating, Converter={StaticResource InverseBoolConverter}}">
+                                    <Border StrokeShape="RoundRectangle 8" 
+                                            BackgroundColor="{StaticResource Primary}" 
+                                            Padding="12,8"
+                                            StrokeThickness="0"
+                                            IsVisible="{Binding IsRerunningAiAssessment, Converter={StaticResource InverseBoolConverter}}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding RerunAiAssessmentCommand}"/>
+                                        </Border.GestureRecognizers>
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Image Source="robot.png" 
+                                                   WidthRequest="18" 
+                                                   HeightRequest="18" 
+                                                   VerticalOptions="Center">
+                                                <Image.Behaviors>
+                                                    <toolkit:IconTintColorBehavior TintColor="White"/>
+                                                </Image.Behaviors>
+                                            </Image>
+                                            <Label Text="Run AI Assessment" 
+                                                   FontSize="12" 
+                                                   TextColor="White" 
+                                                   VerticalOptions="Center"/>
+                                        </HorizontalStackLayout>
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal"/>
+                                                <VisualState x:Name="PointerOver">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryDark}"/>
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                    </Border>
+                                    <ActivityIndicator IsRunning="{Binding IsRerunningAiAssessment}"
+                                                       IsVisible="{Binding IsRerunningAiAssessment}"
+                                                       WidthRequest="24"
+                                                       HeightRequest="24"
+                                                       Color="{StaticResource Primary}"
+                                                       HorizontalOptions="Center"/>
+                                </Grid>
+                            </Grid>
                         </Border>
 
                         <!-- Instructor Feedback Section -->

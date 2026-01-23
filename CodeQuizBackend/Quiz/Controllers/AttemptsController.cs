@@ -84,6 +84,39 @@ namespace CodeQuizBackend.Quiz.Controllers
         }
 
         /// <summary>
+        /// Batch updates grades and feedback for multiple solutions at once.
+        /// Sends a single email notification to the examinee with all changes.
+        /// </summary>
+        [HttpPut("solutions/grades/batch")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<List<SolutionDTO>>>> BatchUpdateSolutionGrades([FromBody] BatchUpdateSolutionGradesRequest request)
+        {
+            var updatedSolutions = await attemptsService.BatchUpdateSolutionGrades(request);
+            return Ok(new ApiResponse<List<SolutionDTO>>()
+            {
+                Success = true,
+                Data = updatedSolutions,
+                Message = "Solution grades updated successfully"
+            });
+        }
+
+        /// <summary>
+        /// Re-runs AI assessment for a specific solution.
+        /// </summary>
+        [HttpPost("solutions/{solutionId}/ai-reassess")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<SolutionDTO>>> RerunAiAssessment(int solutionId)
+        {
+            var solution = await attemptsService.RerunAiAssessment(solutionId);
+            return Ok(new ApiResponse<SolutionDTO>()
+            {
+                Success = true,
+                Data = solution,
+                Message = "AI reassessment queued successfully"
+            });
+        }
+
+        /// <summary>
         /// Gets all attempts for the authenticated user
         /// </summary>
         [HttpGet("user")]
@@ -101,6 +134,21 @@ namespace CodeQuizBackend.Quiz.Controllers
             {
                 Success = true,
                 Data = attempts
+            });
+        }
+
+        /// <summary>
+        /// Gets a specific attempt by ID for the examiner view.
+        /// </summary>
+        [HttpGet("{attemptId}")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<ExaminerAttempt>>> GetAttemptById(int attemptId)
+        {
+            var attempt = await attemptsService.GetAttemptById(attemptId);
+            return Ok(new ApiResponse<ExaminerAttempt>
+            {
+                Success = true,
+                Data = attempt
             });
         }
 

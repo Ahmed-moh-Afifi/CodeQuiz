@@ -246,7 +246,7 @@
                         <Border Style="{StaticResource InnerCard}" IsVisible="{Binding HasInstructorFeedback}" Padding="20">
                             <VerticalStackLayout Spacing="12">
                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                    <Image Source="pencil.png" WidthRequest="20" HeightRequest="20" VerticalOptions="Center">
+                                    <Image Source="feedback.png" WidthRequest="20" HeightRequest="20" VerticalOptions="Center">
                                         <Image.Behaviors>
                                             <toolkit:IconTintColorBehavior TintColor="{StaticResource Primary}"/>
                                         </Image.Behaviors>

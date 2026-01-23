@@ -1,26 +1,79 @@
 <app-reset-password *ngIf="resetToken" [token]="resetToken"></app-reset-password>
 
 <div *ngIf="!resetToken">
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <div class="nav-logo">
+        <img src="assets/icons/widelogo.png" alt="CodeQuiz" class="logo-image" />
+      </div>
+      <div class="nav-links">
+        <a (click)="scrollToSection('features')">Features</a>
+        <a (click)="scrollToSection('ai')">AI</a>
+        <a (click)="scrollToSection('security')">Security</a>
+        <a (click)="scrollToSection('download')">Download</a>
+        <a href="https://github.com/Ahmed-moh-Afifi/CodeQuiz" target="_blank" class="github-link">
+          <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
+            <path
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+            />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
   <div class="hero">
     <div class="container">
-      <div class="logo">
-        <span>&lt;CodeQuiz /&gt;</span>
+      <!-- <div class="hero-badge">
+        <img src="assets/icons/codequizicon.png" class="badge-icon" alt="" />
+        <span>The Modern Coding Assessment Platform</span>
+      </div> -->
+      <h1>Master Coding Assessments<br />with <span class="gradient-text">CodeQuiz</span></h1>
+      <p class="hero-subtitle">
+        Create, manage, and grade coding assessments with AI-powered insights, real-time
+        collaboration, and secure sandboxed execution.
+      </p>
+
+      <div class="hero-highlights">
+        <div class="highlight-item" *ngFor="let item of heroHighlights">
+          <img [src]="item.icon" class="highlight-icon" alt="" />
+          <div class="highlight-text">
+            <strong>{{ item.title }}</strong>
+            <span>{{ item.description }}</span>
+          </div>
+        </div>
       </div>
-      <h1>Master Coding with CodeQuiz</h1>
-      <p>The ultimate platform for creating and taking coding assessments.</p>
 
       <div class="cta-group">
         <a [href]="downloadUrl()" class="btn btn-primary" target="_blank">
-          <span class="icon"></span> Download {{ latestVersion() || 'Latest' }}
+          <img src="assets/icons/download.svg" class="btn-icon" alt="" /> Download
+          {{ latestVersion() || 'Latest' }}
         </a>
-        <p class="meta">Available for Windows</p>
+        <a
+          href="https://github.com/Ahmed-moh-Afifi/CodeQuiz"
+          target="_blank"
+          class="btn btn-secondary"
+        >
+          <img src="assets/icons/book.svg" class="btn-icon" alt="" /> View Documentation
+        </a>
       </div>
+      <p class="meta">Available for Windows • Free & Open Source</p>
     </div>
   </div>
 
-  <div class="features-section">
+  <!-- Features Section -->
+  <div id="features" class="features-section">
     <div class="container">
-      <h2 class="section-title">Features</h2>
+      <div class="section-header">
+        <span class="section-badge">Features</span>
+        <h2 class="section-title">Everything You Need for Coding Assessments</h2>
+        <p class="section-subtitle">
+          From quiz creation to intelligent grading, CodeQuiz provides a complete solution for
+          educators and students.
+        </p>
+      </div>
 
       <div class="timeline">
         <div class="timeline-line"></div>
@@ -46,10 +99,217 @@
     </div>
   </div>
 
+  <!-- AI Section -->
+  <div id="ai" class="ai-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">AI-Powered</span>
+        <h2 class="section-title">Intelligent Assessment at Your Fingertips</h2>
+        <p class="section-subtitle">
+          Leverage cutting-edge AI to generate test cases, detect cheating, and provide smart grade
+          suggestions.
+        </p>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card" *ngFor="let feature of aiFeatures">
+          <img [src]="feature.icon" class="feature-icon" alt="" />
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.description }}</p>
+        </div>
+      </div>
+
+      <div class="ai-demo">
+        <div class="demo-card">
+          <div class="demo-header">
+            <span class="demo-badge">AI Assessment</span>
+            <span class="demo-status valid">✓ Valid Solution</span>
+          </div>
+          <div class="demo-content">
+            <div class="demo-row">
+              <span class="demo-label">Confidence</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 92%"></div>
+              </div>
+              <span class="demo-value">92%</span>
+            </div>
+            <div class="demo-row">
+              <span class="demo-label">Suggested Grade</span>
+              <span class="demo-grade">85%</span>
+            </div>
+            <div class="demo-reasoning">
+              <strong>Reasoning:</strong> The solution correctly implements the algorithm with
+              proper edge case handling. Code structure is clean and follows best practices.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real-Time Section -->
+  <div id="realtime" class="realtime-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Real-Time</span>
+        <h2 class="section-title">Stay Connected, Stay Informed</h2>
+        <p class="section-subtitle">
+          Experience seamless collaboration with live updates powered by SignalR technology.
+        </p>
+      </div>
+
+      <div class="feature-grid four-columns">
+        <div class="feature-card compact" *ngFor="let feature of realtimeFeatures">
+          <img [src]="feature.icon" class="feature-icon" alt="" />
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security Section -->
+  <div id="security" class="security-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Security</span>
+        <h2 class="section-title">Enterprise-Grade Security</h2>
+        <p class="section-subtitle">
+          Your code executes in a secure, isolated environment with multiple layers of protection.
+        </p>
+      </div>
+
+      <div class="security-grid">
+        <div class="security-main">
+          <div class="security-card featured">
+            <img src="assets/icons/docker.svg" class="security-icon-large" alt="Docker" />
+            <h3>Sandboxed Code Execution</h3>
+            <p>
+              Every code submission runs in an isolated Docker container with strict resource
+              limits. This ensures:
+            </p>
+            <ul class="security-list">
+              <li><span class="check">✓</span> Complete isolation from the host system</li>
+              <li><span class="check">✓</span> Memory limits prevent resource exhaustion</li>
+              <li><span class="check">✓</span> CPU throttling for fair resource allocation</li>
+              <li><span class="check">✓</span> Network isolation prevents unauthorized access</li>
+              <li><span class="check">✓</span> Automatic container cleanup after execution</li>
+            </ul>
+          </div>
+        </div>
+        <div class="security-side">
+          <div class="security-card" *ngFor="let feature of securityFeatures.slice(1)">
+            <img [src]="feature.icon" class="security-icon" alt="" />
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Download Section -->
+  <div id="download" class="download-section">
+    <div class="container">
+      <div
+        class="download-card"
+        (mousemove)="onDownloadCardMove($event)"
+        (mouseleave)="onDownloadCardLeave()"
+        [style.transform]="'perspective(1000px) rotateX(' + tiltX() + ') rotateY(' + tiltY() + ')'"
+      >
+        <div class="download-content">
+          <h2>Ready to Get Started?</h2>
+          <p>Download CodeQuiz and transform how you create and manage coding assessments.</p>
+          <div class="download-features">
+            <span>✓ Free & Open Source</span>
+            <span>✓ Regular Updates</span>
+          </div>
+        </div>
+        <div class="download-action">
+          <a [href]="downloadUrl()" class="btn btn-primary btn-large" target="_blank">
+            <img src="assets/icons/download.svg" class="btn-icon" alt="" />
+            <div class="btn-text">
+              <span class="btn-main">Download for Windows</span>
+              <span class="btn-sub">{{ latestVersion() || 'Latest Release' }}</span>
+            </div>
+          </a>
+          <a
+            href="https://github.com/Ahmed-moh-Afifi/CodeQuiz/releases"
+            target="_blank"
+            class="link-muted"
+          >
+            View all releases →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tech Stack Section -->
+  <div class="tech-section">
+    <div class="container">
+      <h3>Built With Modern Technologies</h3>
+      <div class="tech-grid">
+        <div class="tech-item">
+          <img src="assets/icons/aspnetcore.png" class="tech-icon" alt="ASP.NET Core" />
+          <span class="tech-name">ASP.NET Core</span>
+        </div>
+        <div class="tech-item">
+          <img src="assets/icons/maui.png" class="tech-icon" alt=".NET MAUI" />
+          <span class="tech-name">.NET MAUI</span>
+        </div>
+        <div class="tech-item">
+          <img src="assets/icons/docker.svg" class="tech-icon" alt="Docker" />
+          <span class="tech-name">Docker</span>
+        </div>
+        <div class="tech-item">
+          <img src="assets/icons/signalr.png" class="tech-icon" alt="SignalR" />
+          <span class="tech-name">SignalR</span>
+        </div>
+        <div class="tech-item">
+          <img src="assets/icons/groq.svg" class="tech-icon" alt="Groq AI" />
+          <span class="tech-name">Groq AI</span>
+        </div>
+        <div class="tech-item">
+          <img src="assets/icons/mysql.png" class="tech-icon" alt="MySQL" />
+          <span class="tech-name">MySQL</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
   <footer>
     <div class="container">
-      <p>&copy; 2026 CodeQuiz. All rights reserved.</p>
-      <a href="https://github.com/Ahmed-moh-Afifi/CodeQuiz" target="_blank">View on GitHub</a>
+      <div class="footer-content">
+        <div class="footer-brand">
+          <img src="assets/icons/widelogo.png" alt="CodeQuiz" class="url-logo logo-image" />
+          <p>The modern platform for coding assessments.</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>Product</h4>
+            <a (click)="scrollToSection('features')">Features</a>
+            <a (click)="scrollToSection('ai')">AI Capabilities</a>
+            <a (click)="scrollToSection('security')">Security</a>
+            <a (click)="scrollToSection('download')">Download</a>
+          </div>
+          <div class="footer-column">
+            <h4>Resources</h4>
+            <a href="https://github.com/Ahmed-moh-Afifi/CodeQuiz" target="_blank">GitHub</a>
+            <a href="https://github.com/Ahmed-moh-Afifi/CodeQuiz/releases" target="_blank"
+              >Releases</a
+            >
+            <a href="https://github.com/Ahmed-moh-Afifi/CodeQuiz/issues" target="_blank"
+              >Report Issue</a
+            >
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 CodeQuiz. All rights reserved.</p>
+        <a href="https://github.com/Ahmed-moh-Afifi/CodeQuiz" target="_blank">View on GitHub</a>
+      </div>
     </div>
   </footer>
 </div>

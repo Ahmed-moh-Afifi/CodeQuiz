@@ -45,6 +45,31 @@ namespace CodeQuizBackend.Services
         /// <param name="examinerName">Examiner's first name</param>
         /// <param name="stats">Quiz statistics summary</param>
         Task SendQuizEndSummaryAsync(string toEmail, string examinerName, QuizEndStatistics stats);
+
+        /// <summary>
+        /// Sends grade update notification email to an examinee when their grades/feedback are updated by an instructor.
+        /// </summary>
+        /// <param name="toEmail">Examinee's email address</param>
+        /// <param name="firstName">Examinee's first name</param>
+        /// <param name="quizTitle">Title of the quiz</param>
+        /// <param name="instructorName">Name of the instructor who made the update</param>
+        /// <param name="gradeUpdates">List of grade updates with question numbers, old grades, and new grades</param>
+        Task SendGradeUpdateEmailAsync(string toEmail, string firstName, string quizTitle, string instructorName, List<GradeUpdateInfo> gradeUpdates);
+    }
+
+    /// <summary>
+    /// Information about a single grade update for email notification.
+    /// </summary>
+    public class GradeUpdateInfo
+    {
+        public required int QuestionNumber { get; set; }
+        public float? OldGrade { get; set; }
+        public float? NewGrade { get; set; }
+        public float TotalPoints { get; set; }
+        public string? OldFeedback { get; set; }
+        public string? NewFeedback { get; set; }
+        public bool GradeChanged => OldGrade != NewGrade;
+        public bool FeedbackChanged => OldFeedback != NewFeedback;
     }
 
     /// <summary>

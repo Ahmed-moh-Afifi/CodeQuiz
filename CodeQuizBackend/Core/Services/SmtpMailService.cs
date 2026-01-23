@@ -287,5 +287,83 @@ namespace CodeQuizBackend.Services
 
             await SendEmailAsync(toEmail, subject, body, isHtml: true);
         }
+
+        public async Task SendGradeUpdateEmailAsync(string toEmail, string firstName, string quizTitle, string instructorName, List<GradeUpdateInfo> gradeUpdates)
+        {
+            var subject = $"Grade Update: {quizTitle}";
+
+            // Build the grade updates HTML
+            var updatesHtml = new System.Text.StringBuilder();
+            foreach (var update in gradeUpdates)
+            {
+                var gradeChangeHtml = "";
+                var feedbackChangeHtml = "";
+
+                if (update.GradeChanged)
+                {
+                    var oldGradeStr = update.OldGrade.HasValue ? $"{update.OldGrade:0.##}" : "Not graded";
+                    var newGradeStr = update.NewGrade.HasValue ? $"{update.NewGrade:0.##}" : "Not graded";
+                    var changeColor = (update.NewGrade ?? 0) >= (update.OldGrade ?? 0) ? "#4CAF50" : "#F44336";
+                    gradeChangeHtml = $"""
+                        <p style="margin: 4px 0; color: {TextColor};">
+                            <strong>Grade:</strong> 
+                            <span style="color: {MutedTextColor}; text-decoration: line-through;">{oldGradeStr}</span> 
+                            → <span style="color: {changeColor}; font-weight: bold;">{newGradeStr}</span> / {update.TotalPoints:0.##}
+                        </p>
+                        """;
+                }
+
+                if (update.FeedbackChanged)
+                {
+                    var feedbackText = !string.IsNullOrEmpty(update.NewFeedback)
+                        ? update.NewFeedback
+                        : "<em style=\"color: " + MutedTextColor + ";\">No feedback</em>";
+                    feedbackChangeHtml = $"""
+                        <div style="margin-top: 8px; padding: 10px; background-color: {BackgroundDarker}; border-radius: 6px; border-left: 3px solid {PrimaryColor};">
+                            <p style="margin: 0; font-size: 12px; color: {MutedTextColor}; margin-bottom: 4px;">Instructor Feedback:</p>
+                            <p style="margin: 0; color: {TextColor}; font-size: 14px;">{feedbackText}</p>
+                        </div>
+                        """;
+                }
+
+                updatesHtml.Append($"""
+                    <div style="background-color: {BackgroundDarker}; padding: 16px; border-radius: 8px; margin-bottom: 12px; border: 1px solid {BorderColor};">
+                        <h4 style="margin: 0 0 8px 0; color: {TextColor};">Question {update.QuestionNumber}</h4>
+                        {gradeChangeHtml}
+                        {feedbackChangeHtml}
+                    </div>
+                    """);
+            }
+
+            var body = $"""
+                <html>
+                <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: {TextColor}; margin: 0; padding: 0; background-color: {BackgroundDarker};">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <div style="background: linear-gradient(135deg, {PrimaryLightColor}, {PrimaryColor}); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+                            <h1 style="color: white; margin: 0; font-size: 28px;">CodeQuiz</h1>
+                            <p style="color: {TextColor}; margin: 10px 0 0 0; font-size: 14px;">Grade Update Notification</p>
+                        </div>
+                        <div style="background-color: {BackgroundDark}; padding: 30px; border-radius: 0 0 12px 12px; border: 1px solid {BorderColor}; border-top: none;">
+                            <h2 style="color: {TextColor}; margin-top: 0;">Hello {firstName},</h2>
+                            <p style="color: {TextColor};">Your grades for <strong style="color: white;">{quizTitle}</strong> have been updated by <strong style="color: white;">{instructorName}</strong>.</p>
+                            
+                            <h3 style="color: {TextColor}; margin-top: 24px; margin-bottom: 16px;">Updates:</h3>
+                            {updatesHtml}
+
+                            <div style="text-align: center; margin: 30px 0;">
+                                <p style="color: {MutedTextColor};">Log in to CodeQuiz to view the full details of your submission.</p>
+                            </div>
+                            <hr style="border: none; border-top: 1px solid {BorderColor}; margin: 20px 0;">
+                            <p style="font-size: 12px; color: {MutedTextColor}; text-align: center;">
+                                This is an automated message from CodeQuiz. Please do not reply to this email.
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """;
+
+            await SendEmailAsync(toEmail, subject, body, isHtml: true);
+        }
     }
 }

@@ -153,7 +153,7 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             await _viewModel.ReturnToPreviousPage();
 
             // Assert - no save should occur, just navigate back
-            _attemptsRepoMock.Verify(x => x.UpdateSolutionGrade(It.IsAny<UpdateSolutionGradeRequest>()), Times.Never);
+            _attemptsRepoMock.Verify(x => x.BatchUpdateSolutionGrades(It.IsAny<BatchUpdateSolutionGradesRequest>()), Times.Never);
             _navServiceMock.Verify(x => x.GoToAsync(".."), Times.Once);
         }
 
@@ -168,7 +168,7 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             _viewModel.NextQuestion();
 
             // Assert - no save should occur, just move to next question
-            _attemptsRepoMock.Verify(x => x.UpdateSolutionGrade(It.IsAny<UpdateSolutionGradeRequest>()), Times.Never);
+            _attemptsRepoMock.Verify(x => x.BatchUpdateSolutionGrades(It.IsAny<BatchUpdateSolutionGradesRequest>()), Times.Never);
             _viewModel.SelectedQuestion.Order.Should().Be(2);
             _viewModel.Grade.Should().Be(8); // Grade for Q2
         }
@@ -185,7 +185,7 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             _viewModel.PreviousQuestion();
 
             // Assert - no save should occur, just move to previous question
-            _attemptsRepoMock.Verify(x => x.UpdateSolutionGrade(It.IsAny<UpdateSolutionGradeRequest>()), Times.Never);
+            _attemptsRepoMock.Verify(x => x.BatchUpdateSolutionGrades(It.IsAny<BatchUpdateSolutionGradesRequest>()), Times.Never);
             _viewModel.SelectedQuestion.Order.Should().Be(1);
             _viewModel.Grade.Should().Be(5); // Grade for Q1
         }
@@ -209,9 +209,11 @@ namespace CodeQuizDesktop.Tests.Viewmodels
             // Act
             await _viewModel.SaveAllGradesAndGoBack();
 
-            // Assert - should save only the changed grade (solution ID 201)
-            _attemptsRepoMock.Verify(x => x.UpdateSolutionGrade(It.Is<UpdateSolutionGradeRequest>(r =>
-                r.SolutionId == 201 && r.ReceivedGrade == 10)), Times.Once);
+            // Assert - should save only the changed grade (solution ID 201) via batch update
+            _attemptsRepoMock.Verify(x => x.BatchUpdateSolutionGrades(It.Is<BatchUpdateSolutionGradesRequest>(r =>
+                r.AttemptId == 1 &&
+                r.Updates.Count == 1 &&
+                r.Updates.Any(u => u.SolutionId == 201 && u.ReceivedGrade == 10))), Times.Once);
             _navServiceMock.Verify(x => x.GoToAsync(".."), Times.Once);
         }
 
