@@ -47,6 +47,7 @@
 
 .demo-section {
   margin-bottom: 48px;
+  position: relative;
 }
 
 .demo-section-title {
@@ -80,7 +81,267 @@
   gap: 24px;
 }
 
-// Color swatches
+// ========== Section header row with code icon ==========
+.demo-section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+
+.demo-section-with-code {
+  .demo-section-title {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  .demo-section-header-row {
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--cq-border-default);
+  }
+}
+
+// ========== Code button & popover ==========
+.demo-code-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: transparent;
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-sm);
+  cursor: pointer;
+  transition: all var(--cq-transition-fast);
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: var(--cq-secondary);
+    border-color: var(--cq-border-subtle);
+
+    .cq-mask-icon {
+      background-color: var(--cq-text-primary);
+    }
+  }
+}
+
+.demo-code-popover {
+  background-color: var(--cq-elevated-surface);
+  border: 1px solid var(--cq-border-subtle);
+  border-radius: var(--cq-radius-lg);
+  box-shadow: var(--cq-shadow-xl);
+  margin-bottom: 20px;
+  overflow: hidden;
+  animation: cq-code-slide-in 200ms ease-out;
+}
+
+@keyframes cq-code-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.demo-code-popover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: var(--cq-background-dark);
+  border-bottom: 1px solid var(--cq-border-default);
+}
+
+.demo-code-popover-close {
+  background: none;
+  border: none;
+  color: var(--cq-text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: var(--cq-radius-sm);
+  transition: all var(--cq-transition-fast);
+
+  &:hover {
+    color: var(--cq-text-primary);
+    background-color: var(--cq-secondary);
+  }
+}
+
+.demo-code-popover-body {
+  padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.demo-snippet {
+  margin-bottom: 16px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.demo-snippet-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cq-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.demo-code-block {
+  background-color: var(--cq-background-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-sm);
+  padding: 12px 16px;
+  margin: 0;
+  overflow-x: auto;
+  font-family: var(--cq-font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--cq-text-primary);
+  white-space: pre;
+  tab-size: 2;
+
+  code {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    background: none;
+    padding: 0;
+  }
+}
+
+.demo-code-css {
+  margin-top: 8px;
+  border-color: var(--cq-primary-transparent);
+}
+
+// ========== Inline code icon in intro text ==========
+.inline-code-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--cq-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cq-text-muted);
+  background-color: var(--cq-secondary);
+  border: 1px solid var(--cq-border-default);
+  border-radius: 4px;
+  padding: 1px 5px;
+  vertical-align: middle;
+}
+
+// ========== Quick Start Guide ==========
+.demo-guide-section {
+  .demo-section-title {
+    margin-bottom: 20px;
+  }
+}
+
+.demo-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+// ========== Background & Surface / Font Sizes ==========
+.demo-reset-btn {
+  font-size: 13px;
+  padding: 6px 14px;
+}
+
+// ========== Font Size Controls ==========
+.demo-font-size-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.demo-font-size-control {
+  background-color: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-md);
+  padding: 12px 16px;
+}
+
+.demo-font-size-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.demo-font-size-value {
+  font-family: var(--cq-font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cq-primary);
+  min-width: 42px;
+  text-align: right;
+}
+
+// ========== Range Slider ==========
+.demo-range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--cq-border-default);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  margin-bottom: 6px;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--cq-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid var(--cq-surface-dark);
+    box-shadow: var(--cq-shadow-sm);
+    transition: transform var(--cq-transition-fast);
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+
+  &::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: var(--cq-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid var(--cq-surface-dark);
+    box-shadow: var(--cq-shadow-sm);
+  }
+
+  &::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+  }
+
+  &::-moz-range-track {
+    height: 6px;
+    background: var(--cq-border-default);
+    border-radius: 3px;
+  }
+}
+
+// ========== Color swatches ==========
 .color-swatch {
   display: flex;
   flex-direction: column;

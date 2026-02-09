@@ -3,7 +3,7 @@
 
 // Page Title - 32px bold
 .cq-page-title {
-  font-size: 32px;
+  font-size: var(--cq-font-size-page-title);
   font-weight: 700;
   color: var(--cq-text-primary);
   font-family: var(--cq-font-sans);
@@ -12,7 +12,7 @@
 
 // Section Header - 22px bold
 .cq-section-header {
-  font-size: 22px;
+  font-size: var(--cq-font-size-section-header);
   font-weight: 700;
   color: var(--cq-text-primary);
   font-family: var(--cq-font-sans);
@@ -21,7 +21,7 @@
 
 // Card Title - 40px extra bold
 .cq-card-title {
-  font-size: 40px;
+  font-size: var(--cq-font-size-card-title);
   font-weight: 900;
   color: var(--cq-text-primary);
   font-family: var(--cq-font-sans);
@@ -30,7 +30,7 @@
 
 // Item Title - 17px bold
 .cq-item-title {
-  font-size: 17px;
+  font-size: var(--cq-font-size-item-title);
   font-weight: 700;
   color: var(--cq-text-primary);
   font-family: var(--cq-font-sans);
@@ -39,7 +39,7 @@
 
 // Body Text - 15px secondary color
 .cq-body-text {
-  font-size: 15px;
+  font-size: var(--cq-font-size-body);
   font-weight: 400;
   color: var(--cq-text-secondary);
   font-family: var(--cq-font-sans);
@@ -48,7 +48,7 @@
 
 // Caption Text - 14px muted color
 .cq-caption-text {
-  font-size: 14px;
+  font-size: var(--cq-font-size-caption);
   font-weight: 400;
   color: var(--cq-text-muted);
   font-family: var(--cq-font-sans);
@@ -56,7 +56,7 @@
 
 // Table Header - 12px bold uppercase
 .cq-table-header {
-  font-size: 12px;
+  font-size: var(--cq-font-size-table-header);
   font-weight: 700;
   color: var(--cq-text-muted);
   font-family: var(--cq-font-sans);
@@ -66,7 +66,7 @@
 
 // Code Label - 14px monospace
 .cq-code-label {
-  font-size: 14px;
+  font-size: var(--cq-font-size-code);
   font-weight: 400;
   color: var(--cq-code-keyword);
   font-family: var(--cq-font-mono);
@@ -74,7 +74,7 @@
 
 // Score Text - 14px bold warning color
 .cq-score-text {
-  font-size: 14px;
+  font-size: var(--cq-font-size-caption);
   font-weight: 700;
   color: var(--cq-warning);
   font-family: var(--cq-font-sans);
@@ -82,7 +82,7 @@
 
 // Success Text - 14px bold success color
 .cq-success-text {
-  font-size: 14px;
+  font-size: var(--cq-font-size-caption);
   font-weight: 700;
   color: var(--cq-success);
   font-family: var(--cq-font-sans);
@@ -90,7 +90,7 @@
 
 // Error Text - 14px bold error color
 .cq-error-text {
-  font-size: 14px;
+  font-size: var(--cq-font-size-caption);
   font-weight: 700;
   color: var(--cq-error);
   font-family: var(--cq-font-sans);

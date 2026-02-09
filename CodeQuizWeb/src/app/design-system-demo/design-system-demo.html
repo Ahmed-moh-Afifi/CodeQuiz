@@ -21,24 +21,124 @@
   <h1 class="cq-page-title cq-mb-sm">CodeQuiz Design System</h1>
   <p class="cq-body-text cq-mb-xl">
     A comprehensive design system ported from the MAUI desktop app. Toggle between dark and light
-    modes using the button above.
+    modes using the button above. Click the
+    <span class="inline-code-icon">&lt;/&gt;</span> icon on any section to see usage code.
   </p>
 
+  <!-- ========== QUICK GUIDE ========== -->
+  <section class="demo-section demo-guide-section">
+    <h2 class="demo-section-title">Quick Start Guide</h2>
+    <div class="demo-guide-grid">
+      <div class="cq-card">
+        <h4 class="cq-item-title cq-mb-sm">1. Import the design system</h4>
+        <pre class="demo-code-block"><code>// In your styles.scss
+&#64;use 'styles/design-system';</code></pre>
+      </div>
+      <div class="cq-card">
+        <h4 class="cq-item-title cq-mb-sm">2. Theme support</h4>
+        <pre class="demo-code-block"><code>// Toggle via data-theme attribute
+document.documentElement
+  .setAttribute('data-theme', 'light');
+// Default is dark theme</code></pre>
+      </div>
+      <div class="cq-card">
+        <h4 class="cq-item-title cq-mb-sm">3. Customize variables</h4>
+        <pre class="demo-code-block"><code>// Override any CSS variable
+:root &#123;
+  --cq-primary: #your-color;
+  --cq-font-size-body: 16px;
+  --cq-background-dark: #1a1a2e;
+&#125;</code></pre>
+      </div>
+      <div class="cq-card">
+        <h4 class="cq-item-title cq-mb-sm">4. Use classes in HTML</h4>
+        <pre class="demo-code-block"><code>&lt;button class="cq-btn-primary"&gt;
+  Click Me
+&lt;/button&gt;
+&lt;div class="cq-card"&gt;
+  &lt;p class="cq-body-text"&gt;Hi&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
   <!-- ========== COLORS ========== -->
-  <section class="demo-section">
-    <div
-      class="demo-header-row"
-      style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-      "
-    >
-      <h2 class="demo-section-title" style="margin-bottom: 0">Colors</h2>
-      <span class="cq-body-text" style="font-size: 13px; color: var(--cq-text-secondary)"
-        >Click any swatch to edit</span
-      >
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <div style="display: flex; align-items: center; gap: 16px; flex: 1">
+        <h2 class="demo-section-title" style="margin-bottom: 0">Colors</h2>
+        <span class="cq-caption-text">Click any swatch to edit</span>
+      </div>
+      <button class="cq-btn-ghost demo-reset-btn" (click)="resetAllColors()">Reset</button>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('colors')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+
+    @if (activeCodeTooltip === 'colors') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">Colors — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          @for (snippet of codeSnippets['colors']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              @if (snippet.html) {
+                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+              }
+              @if (snippet.css) {
+                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="demo-label">Background &amp; Surface</div>
+    <div class="demo-row cq-mb-lg">
+      <div class="color-swatch-wrapper">
+        <label class="color-swatch interactive">
+          <input
+            type="color"
+            [value]="backgroundColor"
+            (input)="updateBackground($event)"
+            class="color-input-hidden"
+          />
+          <div class="color-box" style="background-color: var(--cq-background-dark)"></div>
+          <div class="color-info">
+            <span class="color-name">Background</span>
+            <span class="color-value">--cq-background-dark</span>
+            <span class="color-hex">{{ backgroundColor }}</span>
+          </div>
+        </label>
+      </div>
+      <div class="color-swatch-wrapper">
+        <label class="color-swatch interactive">
+          <input
+            type="color"
+            [value]="surfaceColor"
+            (input)="updateSurface($event)"
+            class="color-input-hidden"
+          />
+          <div class="color-box" style="background-color: var(--cq-surface-dark)"></div>
+          <div class="color-info">
+            <span class="color-name">Surface / Cards</span>
+            <span class="color-value">--cq-surface-dark</span>
+            <span class="color-hex">{{ surfaceColor }}</span>
+          </div>
+        </label>
+      </div>
     </div>
 
     @for (group of colorGroups; track group.name) {
@@ -67,30 +167,119 @@
   </section>
 
   <!-- ========== TYPOGRAPHY ========== -->
-  <section class="demo-section">
-    <h2 class="demo-section-title">Typography</h2>
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <h2 class="demo-section-title" style="margin-bottom: 0">Typography</h2>
+      <button class="cq-btn-ghost demo-reset-btn" (click)="resetFontSizes()">Reset Sizes</button>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('typography')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+
+    @if (activeCodeTooltip === 'typography') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">Typography — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          @for (snippet of codeSnippets['typography']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              @if (snippet.html) {
+                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+              }
+              @if (snippet.css) {
+                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <div class="cq-card">
-      <h1 class="cq-page-title cq-mb-md">Page Title (32px Bold)</h1>
-      <h2 class="cq-section-header cq-mb-md">Section Header (22px Bold)</h2>
-      <h3 class="cq-card-title cq-mb-md">Card Title (40px Black)</h3>
-      <h4 class="cq-item-title cq-mb-md">Item Title (17px Bold)</h4>
+      <h1 class="cq-page-title cq-mb-md">Page Title</h1>
+      <h2 class="cq-section-header cq-mb-md">Section Header</h2>
+      <h3 class="cq-card-title cq-mb-md">Card Title</h3>
+      <h4 class="cq-item-title cq-mb-md">Item Title</h4>
       <p class="cq-body-text cq-mb-md">
         Body Text - This is the standard paragraph text used for content throughout the application.
-        It uses 15px size with secondary color.
       </p>
-      <p class="cq-caption-text cq-mb-md">
-        Caption Text - Smaller helper text in muted color (14px)
-      </p>
+      <p class="cq-caption-text cq-mb-md">Caption Text - Smaller helper text in muted color</p>
       <p class="cq-code-label cq-mb-md">const codeLabel = "Monospace code styling";</p>
       <p class="cq-success-text">Success Text</p>
       <p class="cq-score-text">Score: 85/100</p>
     </div>
+
+    <div class="demo-label cq-mt-lg">Font Size Controls</div>
+    <div class="demo-font-size-grid">
+      @for (fs of fontSizes; track fs.variable) {
+        <div class="demo-font-size-control">
+          <div class="demo-font-size-label">
+            <span class="cq-body-text">{{ fs.name }}</span>
+            <span class="demo-font-size-value">{{ fs.value }}px</span>
+          </div>
+          <input
+            type="range"
+            class="demo-range-slider"
+            [min]="fs.min"
+            [max]="fs.max"
+            [value]="fs.value"
+            (input)="updateFontSize(fs, $event)"
+          />
+          <span class="color-value">{{ fs.variable }}</span>
+        </div>
+      }
+    </div>
   </section>
 
   <!-- ========== BUTTONS ========== -->
-  <section class="demo-section">
-    <h2 class="demo-section-title">Buttons</h2>
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <h2 class="demo-section-title" style="margin-bottom: 0">Buttons</h2>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('buttons')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+
+    @if (activeCodeTooltip === 'buttons') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">Buttons — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          @for (snippet of codeSnippets['buttons']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              @if (snippet.html) {
+                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+              }
+              @if (snippet.css) {
+                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <div class="demo-label">Standard Buttons</div>
     <div class="demo-row cq-mb-lg">
@@ -192,8 +381,43 @@
   </section>
 
   <!-- ========== CARDS ========== -->
-  <section class="demo-section">
-    <h2 class="demo-section-title">Cards</h2>
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <h2 class="demo-section-title" style="margin-bottom: 0">Cards</h2>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('cards')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+
+    @if (activeCodeTooltip === 'cards') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">Cards — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          @for (snippet of codeSnippets['cards']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              @if (snippet.html) {
+                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+              }
+              @if (snippet.css) {
+                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <div class="demo-grid">
       <div class="cq-card">
@@ -221,8 +445,43 @@
   </section>
 
   <!-- ========== INPUTS ========== -->
-  <section class="demo-section">
-    <h2 class="demo-section-title">Form Inputs</h2>
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <h2 class="demo-section-title" style="margin-bottom: 0">Form Inputs</h2>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('inputs')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+
+    @if (activeCodeTooltip === 'inputs') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">Form Inputs — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          @for (snippet of codeSnippets['inputs']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              @if (snippet.html) {
+                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+              }
+              @if (snippet.css) {
+                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <div class="demo-grid">
       <div class="cq-form-group">
@@ -276,8 +535,43 @@
   </section>
 
   <!-- ========== BADGES ========== -->
-  <section class="demo-section">
-    <h2 class="demo-section-title">Badges</h2>
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <h2 class="demo-section-title" style="margin-bottom: 0">Badges</h2>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('badges')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+
+    @if (activeCodeTooltip === 'badges') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">Badges — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          @for (snippet of codeSnippets['badges']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              @if (snippet.html) {
+                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+              }
+              @if (snippet.css) {
+                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <div class="demo-row">
       <span class="cq-badge-status">Status</span>
@@ -313,8 +607,43 @@
   </section>
 
   <!-- ========== TABLE ========== -->
-  <section class="demo-section">
-    <h2 class="demo-section-title">Table</h2>
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <h2 class="demo-section-title" style="margin-bottom: 0">Table</h2>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('table')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+
+    @if (activeCodeTooltip === 'table') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">Table — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          @for (snippet of codeSnippets['table']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              @if (snippet.html) {
+                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+              }
+              @if (snippet.css) {
+                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <div class="cq-table-container">
       <table class="cq-table">
@@ -363,8 +692,43 @@
   </section>
 
   <!-- ========== DIALOGS ========== -->
-  <section class="demo-section">
-    <h2 class="demo-section-title">Dialogs</h2>
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <h2 class="demo-section-title" style="margin-bottom: 0">Dialogs</h2>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('dialogs')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+
+    @if (activeCodeTooltip === 'dialogs') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">Dialogs — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          @for (snippet of codeSnippets['dialogs']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              @if (snippet.html) {
+                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+              }
+              @if (snippet.css) {
+                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <div class="demo-row">
       <button class="cq-btn-primary" (click)="openQuestionDialog()">Question Dialog</button>
@@ -549,8 +913,43 @@
   </section>
 
   <!-- ========== PAGE LAYOUT ========== -->
-  <section class="demo-section">
-    <h2 class="demo-section-title">Page Layout (MAUI-style)</h2>
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <h2 class="demo-section-title" style="margin-bottom: 0">Page Layout (MAUI-style)</h2>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('layout')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+
+    @if (activeCodeTooltip === 'layout') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">Page Layout — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          @for (snippet of codeSnippets['layout']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              @if (snippet.html) {
+                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+              }
+              @if (snippet.css) {
+                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <div class="cq-card" style="padding: 0; overflow: hidden">
       <!-- Page Header Demo -->
@@ -645,8 +1044,43 @@
   </section>
 
   <!-- ========== MESSAGES ========== -->
-  <section class="demo-section">
-    <h2 class="demo-section-title">Messages</h2>
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <h2 class="demo-section-title" style="margin-bottom: 0">Messages</h2>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('messages')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+
+    @if (activeCodeTooltip === 'messages') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">Messages — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          @for (snippet of codeSnippets['messages']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              @if (snippet.html) {
+                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+              }
+              @if (snippet.css) {
+                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <div class="cq-message cq-message-info">
       <div class="cq-message-icon">
@@ -695,8 +1129,43 @@
   </section>
 
   <!-- ========== UTILITIES & ICONS ========== -->
-  <section class="demo-section">
-    <h2 class="demo-section-title">Utilities</h2>
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <h2 class="demo-section-title" style="margin-bottom: 0">Utilities</h2>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('utilities')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+
+    @if (activeCodeTooltip === 'utilities') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">Utilities — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          @for (snippet of codeSnippets['utilities']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              @if (snippet.html) {
+                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+              }
+              @if (snippet.css) {
+                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <div class="demo-grid">
       <div class="cq-card">

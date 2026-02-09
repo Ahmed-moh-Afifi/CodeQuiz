@@ -97,6 +97,17 @@
   --cq-font-sans: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
   --cq-font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
 
+  // ========== Font Size Tokens ==========
+  --cq-font-size-page-title: 32px;
+  --cq-font-size-section-header: 22px;
+  --cq-font-size-card-title: 40px;
+  --cq-font-size-item-title: 17px;
+  --cq-font-size-body: 15px;
+  --cq-font-size-caption: 14px;
+  --cq-font-size-code: 14px;
+  --cq-font-size-small: 13px;
+  --cq-font-size-table-header: 12px;
+
   // ========== Shadows ==========
   --cq-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
   --cq-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.25);
