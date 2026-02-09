@@ -1,0 +1,476 @@
+// CodeQuiz Design System - Utilities
+// Ported from MAUI Styles.xaml utility styles
+
+// ========== ICON UTILITY ==========
+// Use this class on img/svg elements to make them use the current text color
+.cq-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+
+  // In dark mode, icons are light
+  filter: brightness(0) saturate(100%) invert(93%) sepia(4%) saturate(102%) hue-rotate(169deg)
+    brightness(95%) contrast(92%);
+}
+
+// Icon color variants
+.cq-icon-primary {
+  filter: brightness(0) saturate(100%) invert(17%) sepia(45%) saturate(2358%) hue-rotate(330deg)
+    brightness(97%) contrast(89%);
+}
+
+.cq-icon-muted {
+  filter: brightness(0) saturate(100%) invert(55%) sepia(0%) saturate(0%) hue-rotate(0deg)
+    brightness(95%) contrast(90%);
+}
+
+.cq-icon-light {
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg)
+    brightness(100%) contrast(100%);
+}
+
+// Light mode icon adjustments
+[data-theme='light'] {
+  .cq-icon {
+    filter: brightness(0) saturate(100%) invert(20%) sepia(10%) saturate(300%) hue-rotate(180deg)
+      brightness(95%) contrast(90%);
+  }
+
+  .cq-icon-primary {
+    filter: brightness(0) saturate(100%) invert(25%) sepia(60%) saturate(1500%) hue-rotate(330deg)
+      brightness(85%) contrast(95%);
+  }
+
+  .cq-icon-muted {
+    filter: brightness(0) saturate(100%) invert(45%) sepia(5%) saturate(100%) hue-rotate(0deg)
+      brightness(90%) contrast(85%);
+  }
+}
+
+// Utility for dynamic colored icons using mask-image
+// Usage: <div class="cq-mask-icon" style="--mask-url: url(...)"></div>
+.cq-mask-icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-color: currentColor; // Inherit color from parent or set explicitly
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+
+  // Default binding to CSS var, can be overridden
+  mask-image: var(--mask-url);
+  -webkit-mask-image: var(--mask-url);
+}
+
+// Helper to set specific colors on the mask
+.cq-mask-icon-primary {
+  background-color: var(--cq-primary);
+}
+
+.cq-mask-icon-error {
+  background-color: var(--cq-error);
+}
+
+.cq-mask-icon-success {
+  background-color: var(--cq-success);
+}
+
+.cq-mask-icon-warning {
+  background-color: var(--cq-warning);
+}
+
+.cq-mask-icon-info {
+  background-color: var(--cq-info);
+}
+
+// ========== FAB (Floating Action Button) ==========
+.cq-fab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background-color: var(--cq-primary);
+  border: none;
+  border-radius: 28px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all var(--cq-transition-fast);
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+
+  &:hover {
+    background-color: var(--cq-primary-hover);
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  img,
+  svg {
+    width: 24px;
+    height: 24px;
+    // Always white icon on colored background
+    filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg)
+      brightness(100%) contrast(100%);
+  }
+}
+
+// ========== Back Button ==========
+.cq-back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: transparent;
+  border: 1px solid var(--cq-border-subtle);
+  border-radius: var(--cq-radius-md);
+  cursor: pointer;
+  transition: all var(--cq-transition-fast);
+
+  &:hover {
+    background-color: var(--cq-secondary);
+  }
+
+  img,
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// ========== Progress Bar ==========
+.cq-progress {
+  width: 100%;
+  height: 8px;
+  background-color: var(--cq-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+
+  &-bar {
+    height: 100%;
+    background-color: var(--cq-primary);
+    border-radius: 4px;
+    transition: width var(--cq-transition-slow);
+  }
+
+  &-success .cq-progress-bar {
+    background-color: var(--cq-success);
+  }
+
+  &-warning .cq-progress-bar {
+    background-color: var(--cq-warning);
+  }
+
+  &-error .cq-progress-bar {
+    background-color: var(--cq-error);
+  }
+}
+
+// ========== Add Item Button (Dashed Border) ==========
+.cq-add-item-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: var(--cq-spacing-md);
+  background-color: transparent;
+  border: 2px dashed var(--cq-primary);
+  border-radius: var(--cq-radius-md);
+  color: var(--cq-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--cq-transition-fast);
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--cq-primary), transparent 85%);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  img,
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// Add Item Button icon uses primary color
+:root .cq-add-item-button img,
+[data-theme='dark'] .cq-add-item-button img {
+  filter: brightness(0) saturate(100%) invert(10%) sepia(43%) saturate(4649%) hue-rotate(334deg)
+    brightness(92%) contrast(89%);
+}
+
+[data-theme='light'] .cq-add-item-button img {
+  filter: brightness(0) saturate(100%) invert(26%) sepia(46%) saturate(2253%) hue-rotate(328deg)
+    brightness(86%) contrast(91%);
+}
+
+// ========== Divider ==========
+.cq-divider {
+  height: 1px;
+  background-color: var(--cq-border-default);
+  border: none;
+  margin: var(--cq-spacing-md) 0;
+
+  &-vertical {
+    width: 1px;
+    height: auto;
+    margin: 0 var(--cq-spacing-md);
+  }
+}
+
+// ========== Activity Indicator / Spinner ==========
+.cq-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--cq-secondary);
+  border-top-color: var(--cq-primary);
+  border-radius: 50%;
+  animation: cq-spin 0.8s linear infinite;
+
+  &-sm {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+  }
+
+  &-lg {
+    width: 40px;
+    height: 40px;
+    border-width: 4px;
+  }
+}
+
+@keyframes cq-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ========== Avatar ==========
+.cq-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: var(--cq-primary);
+  border-radius: 50%;
+  color: var(--cq-text-on-primary);
+  font-size: 16px;
+  font-weight: 700;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  &-lg {
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
+  }
+}
+
+// ========== Tooltip ==========
+.cq-tooltip {
+  position: relative;
+
+  &::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 12px;
+    background-color: var(--cq-gray-900);
+    color: #ffffff;
+    font-size: 12px;
+    border-radius: var(--cq-radius-sm);
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--cq-transition-fast);
+    z-index: 1000;
+    margin-bottom: 8px;
+  }
+
+  &:hover::after {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+// Light mode tooltip adjustment
+[data-theme='light'] {
+  .cq-tooltip::after {
+    background-color: var(--cq-gray-800);
+    color: #ffffff;
+  }
+}
+
+// ========== Skeleton Loading ==========
+.cq-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--cq-secondary) 25%,
+    var(--cq-secondary-hover) 50%,
+    var(--cq-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: cq-shimmer 1.5s infinite;
+  border-radius: var(--cq-radius-sm);
+}
+
+.cq-skeleton-text {
+  @extend .cq-skeleton;
+  height: 14px;
+  margin-bottom: 8px;
+
+  &:last-child {
+    width: 70%;
+  }
+}
+
+.cq-skeleton-circle {
+  @extend .cq-skeleton;
+  border-radius: 50%;
+}
+
+@keyframes cq-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// ========== Spacing Utilities ==========
+.cq-mt-0 {
+  margin-top: 0;
+}
+.cq-mt-xs {
+  margin-top: var(--cq-spacing-xs);
+}
+.cq-mt-sm {
+  margin-top: var(--cq-spacing-sm);
+}
+.cq-mt-md {
+  margin-top: var(--cq-spacing-md);
+}
+.cq-mt-lg {
+  margin-top: var(--cq-spacing-lg);
+}
+.cq-mt-xl {
+  margin-top: var(--cq-spacing-xl);
+}
+
+.cq-mb-0 {
+  margin-bottom: 0;
+}
+.cq-mb-xs {
+  margin-bottom: var(--cq-spacing-xs);
+}
+.cq-mb-sm {
+  margin-bottom: var(--cq-spacing-sm);
+}
+.cq-mb-md {
+  margin-bottom: var(--cq-spacing-md);
+}
+.cq-mb-lg {
+  margin-bottom: var(--cq-spacing-lg);
+}
+.cq-mb-xl {
+  margin-bottom: var(--cq-spacing-xl);
+}
+
+.cq-gap-xs {
+  gap: var(--cq-spacing-xs);
+}
+.cq-gap-sm {
+  gap: var(--cq-spacing-sm);
+}
+.cq-gap-md {
+  gap: var(--cq-spacing-md);
+}
+.cq-gap-lg {
+  gap: var(--cq-spacing-lg);
+}
+.cq-gap-xl {
+  gap: var(--cq-spacing-xl);
+}
+
+// ========== Flex Utilities ==========
+.cq-flex {
+  display: flex;
+}
+.cq-flex-col {
+  flex-direction: column;
+}
+.cq-flex-row {
+  flex-direction: row;
+}
+.cq-flex-wrap {
+  flex-wrap: wrap;
+}
+.cq-flex-1 {
+  flex: 1;
+}
+.cq-items-center {
+  align-items: center;
+}
+.cq-items-start {
+  align-items: flex-start;
+}
+.cq-items-end {
+  align-items: flex-end;
+}
+.cq-justify-center {
+  justify-content: center;
+}
+.cq-justify-between {
+  justify-content: space-between;
+}
+.cq-justify-end {
+  justify-content: flex-end;
+}
+
+// ========== Text Utilities ==========
+.cq-text-center {
+  text-align: center;
+}
+.cq-text-left {
+  text-align: left;
+}
+.cq-text-right {
+  text-align: right;
+}
+.cq-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

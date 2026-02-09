@@ -1,0 +1,254 @@
+// CodeQuiz Design System - Inputs
+// Ported from MAUI Styles.xaml input styles
+
+// Input Wrapper - Border container for inputs
+.cq-input-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: var(--cq-background-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-md);
+  padding: 0 12px;
+  height: 44px;
+  transition: border-color var(--cq-transition-fast);
+
+  &:focus-within {
+    border-color: var(--cq-border-focus);
+  }
+
+  &.cq-input-error {
+    border-color: var(--cq-error);
+  }
+}
+
+// Text Input
+.cq-input {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+  color: var(--cq-text-primary);
+  font-size: 14px;
+  font-family: var(--cq-font-sans);
+
+  &::placeholder {
+    color: var(--cq-text-muted);
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:disabled {
+    color: var(--cq-text-disabled);
+    cursor: not-allowed;
+  }
+}
+
+// Code Input - Orange text for code
+.cq-input-code {
+  @extend .cq-input;
+  font-family: var(--cq-font-mono);
+  color: var(--cq-code-string);
+}
+
+// Textarea Wrapper
+.cq-textarea-wrapper {
+  background-color: var(--cq-background-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-md);
+  padding: 12px;
+  transition: border-color var(--cq-transition-fast);
+
+  &:focus-within {
+    border-color: var(--cq-border-focus);
+  }
+}
+
+// Textarea
+.cq-textarea {
+  width: 100%;
+  min-height: 100px;
+  background-color: transparent;
+  border: none;
+  color: var(--cq-text-primary);
+  font-size: 14px;
+  font-family: var(--cq-font-sans);
+  resize: vertical;
+
+  &::placeholder {
+    color: var(--cq-text-muted);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+// Switch Toggle
+.cq-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  appearance: none;
+  background-color: var(--cq-switch-track);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color var(--cq-transition-fast);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: var(--cq-switch-knob);
+    border-radius: 50%;
+    transition:
+      transform var(--cq-transition-fast),
+      background-color var(--cq-transition-fast);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  &:checked {
+    background-color: var(--cq-primary);
+
+    &::before {
+      transform: translateX(20px);
+      background-color: var(--cq-switch-knob);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--cq-border-focus);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Checkbox
+.cq-checkbox {
+  width: 18px;
+  height: 18px;
+  appearance: none;
+  background-color: transparent;
+  border: 2px solid var(--cq-border-subtle);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--cq-transition-fast);
+  position: relative;
+  flex-shrink: 0;
+
+  &:checked {
+    background-color: var(--cq-primary);
+    border-color: var(--cq-primary);
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 7px;
+      border: solid var(--cq-checkbox-check);
+      border-width: 0 2px 2px 0;
+      border-radius: 0 0 1px 0;
+      transform: translate(-50%, -60%) rotate(45deg);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--cq-border-focus);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Select/Picker
+.cq-select-wrapper {
+  @extend .cq-input-wrapper;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--cq-text-muted);
+    pointer-events: none;
+  }
+}
+
+.cq-select {
+  @extend .cq-input;
+  appearance: none;
+  padding-right: 32px;
+  cursor: pointer;
+
+  // Firefox dropdown styling
+  &:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 var(--cq-text-primary);
+  }
+
+  // Style the dropdown options
+  option {
+    background-color: var(--cq-surface-dark);
+    color: var(--cq-text-primary);
+    padding: 12px;
+  }
+}
+
+// Search Bar
+.cq-search-wrapper {
+  @extend .cq-input-wrapper;
+  gap: 8px;
+}
+
+.cq-search {
+  @extend .cq-input;
+}
+
+.cq-search-icon {
+  color: var(--cq-text-muted);
+  flex-shrink: 0;
+}
+
+// Form Label
+.cq-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cq-text-secondary);
+  margin-bottom: 8px;
+}
+
+// Form Group
+.cq-form-group {
+  margin-bottom: var(--cq-spacing-md);
+}
+
+// Helper Text
+.cq-helper-text {
+  font-size: 12px;
+  color: var(--cq-text-muted);
+  margin-top: 4px;
+}
+
+.cq-error-text {
+  font-size: 12px;
+  color: var(--cq-error);
+  margin-top: 4px;
+}

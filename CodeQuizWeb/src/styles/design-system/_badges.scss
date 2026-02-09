@@ -1,0 +1,121 @@
+// CodeQuiz Design System - Badges
+// Ported from MAUI Styles.xaml badge styles
+
+// Base Badge - Pill shape
+.cq-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--cq-radius-2xl);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--cq-font-sans);
+  white-space: nowrap;
+}
+
+// Status Badge - Gray
+.cq-badge-status {
+  @extend .cq-badge;
+  background-color: var(--cq-secondary);
+  color: var(--cq-text-secondary);
+}
+
+// Live Badge - Blue (running/active)
+.cq-badge-live {
+  @extend .cq-badge;
+  background-color: var(--cq-info);
+  color: #ffffff;
+}
+
+// Success Badge - Green
+.cq-badge-success {
+  @extend .cq-badge;
+  background-color: var(--cq-success);
+  color: #ffffff;
+}
+
+// Warning Badge - Yellow/Orange
+.cq-badge-warning {
+  @extend .cq-badge;
+  background-color: var(--cq-warning);
+  color: #ffffff;
+}
+
+// Error Badge - Red
+.cq-badge-error {
+  @extend .cq-badge;
+  background-color: var(--cq-error);
+  color: #ffffff;
+}
+
+// Info Badge - Blue
+.cq-badge-info {
+  @extend .cq-badge;
+  background-color: var(--cq-info);
+  color: #ffffff;
+}
+
+// Action Badge - Clickable primary badge
+.cq-badge-action {
+  @extend .cq-badge;
+  background-color: var(--cq-primary);
+  color: var(--cq-text-on-primary);
+  padding: 8px 14px;
+  border-radius: var(--cq-radius-sm);
+  cursor: pointer;
+  transition: all var(--cq-transition-fast);
+  border: none;
+
+  &:hover {
+    background-color: var(--cq-primary-hover);
+    transform: scale(1.02);
+  }
+
+  &:active {
+    background-color: var(--cq-primary-pressed);
+  }
+}
+
+// Small Badge variant
+.cq-badge-sm {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+// Dot indicator (for status dots)
+.cq-badge-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--cq-text-muted);
+
+  &.cq-badge-dot-success {
+    background-color: var(--cq-success);
+  }
+
+  &.cq-badge-dot-error {
+    background-color: var(--cq-error);
+  }
+
+  &.cq-badge-dot-warning {
+    background-color: var(--cq-warning);
+  }
+
+  &.cq-badge-dot-live {
+    background-color: var(--cq-info);
+    animation: cq-pulse 2s infinite;
+  }
+}
+
+@keyframes cq-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

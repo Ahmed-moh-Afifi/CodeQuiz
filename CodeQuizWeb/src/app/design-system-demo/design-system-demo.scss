@@ -1,0 +1,150 @@
+// Design System Demo Styles
+
+.demo-page {
+  min-height: 100vh;
+  background-color: var(--cq-background-dark);
+  padding: 48px;
+  padding-bottom: 120px;
+}
+
+.demo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cq-text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--cq-text-primary);
+  }
+
+  img {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// Theme-aware back link icon
+:root .back-link img,
+:host-context([data-theme='dark']) .back-link img {
+  filter: brightness(0) saturate(100%) invert(75%) sepia(5%) saturate(150%) hue-rotate(180deg)
+    brightness(95%) contrast(90%);
+}
+
+:host-context([data-theme='light']) .back-link img {
+  filter: brightness(0) saturate(100%) invert(35%) sepia(5%) saturate(200%) hue-rotate(180deg)
+    brightness(95%) contrast(90%);
+}
+
+.demo-section {
+  margin-bottom: 48px;
+}
+
+.demo-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--cq-border-default);
+}
+
+.demo-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cq-text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+// Color swatches
+.color-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+
+  &.interactive {
+    cursor: pointer;
+
+    &:hover {
+      .color-box {
+        transform: scale(1.05);
+        box-shadow: var(--cq-shadow-md);
+      }
+
+      .color-name {
+        color: var(--cq-primary);
+      }
+    }
+  }
+}
+
+.color-input-hidden {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.color-box {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  box-shadow: var(--cq-shadow-sm);
+  border: 1px solid var(--cq-border-default);
+  transition: all var(--cq-transition-fast);
+}
+
+.color-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.color-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cq-text-primary);
+  transition: color var(--cq-transition-fast);
+}
+
+.color-value {
+  font-size: 11px;
+  font-family: var(--cq-font-mono);
+  color: var(--cq-text-muted);
+}
+
+.color-hex {
+  font-size: 11px;
+  font-family: var(--cq-font-mono);
+  color: var(--cq-text-secondary);
+  opacity: 0.8;
+}

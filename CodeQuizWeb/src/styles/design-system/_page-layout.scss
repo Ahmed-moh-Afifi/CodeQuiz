@@ -1,0 +1,259 @@
+// CodeQuiz Design System - Page Layout
+// Based on MAUI page structure (ExaminerViewQuiz pattern)
+
+// ========== PAGE CONTAINER ==========
+
+.cq-page {
+  min-height: 100vh;
+  background-color: var(--cq-background-dark);
+  display: flex;
+  flex-direction: column;
+}
+
+// ========== PAGE HEADER ==========
+
+.cq-page-header {
+  display: flex;
+  align-items: center;
+  gap: var(--cq-spacing-md);
+  padding: var(--cq-spacing-md) var(--cq-spacing-lg);
+  background-color: var(--cq-background-dark);
+  border-bottom: 1px solid var(--cq-border-default);
+  flex-shrink: 0;
+}
+
+.cq-page-header-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: transparent;
+  border: 1px solid var(--cq-border-subtle);
+  border-radius: var(--cq-radius-md);
+  cursor: pointer;
+  transition: all var(--cq-transition-fast);
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: var(--cq-secondary);
+  }
+
+  img,
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// Dark mode back button icons
+:root .cq-page-header-back img,
+[data-theme='dark'] .cq-page-header-back img {
+  filter: brightness(0) saturate(100%) invert(93%) sepia(4%) saturate(102%) hue-rotate(169deg)
+    brightness(95%) contrast(92%);
+}
+
+// Light mode back button icons
+[data-theme='light'] .cq-page-header-back img {
+  filter: brightness(0) saturate(100%) invert(15%) sepia(5%) saturate(500%) hue-rotate(180deg)
+    brightness(95%) contrast(90%);
+}
+
+.cq-page-header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.cq-page-header-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cq-page-header-subtitle {
+  font-size: 14px;
+  color: var(--cq-text-muted);
+  margin: 4px 0 0;
+}
+
+.cq-page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--cq-spacing-sm);
+  flex-shrink: 0;
+}
+
+// ========== PAGE BODY ==========
+
+.cq-page-body {
+  flex: 1;
+  padding: var(--cq-spacing-lg);
+  overflow-y: auto;
+}
+
+// Grid layout for sidebar + content
+.cq-page-body-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--cq-spacing-lg);
+  height: 100%;
+}
+
+// Full width content
+.cq-page-body-full {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+// ========== SIDEBAR ==========
+
+.cq-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+.cq-sidebar-card {
+  background-color: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--cq-shadow-md);
+}
+
+.cq-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: var(--cq-spacing-sm);
+  padding: var(--cq-spacing-md) var(--cq-spacing-lg);
+  background-color: var(--cq-background-dark);
+  border-bottom: 1px solid var(--cq-border-default);
+}
+
+.cq-sidebar-header-icon {
+  width: 20px;
+  height: 20px;
+}
+
+// Icon coloring for sidebar header - use primary color
+:root .cq-sidebar-header-icon,
+[data-theme='dark'] .cq-sidebar-header-icon {
+  filter: brightness(0) saturate(100%) invert(17%) sepia(45%) saturate(2358%) hue-rotate(330deg)
+    brightness(97%) contrast(89%);
+}
+
+[data-theme='light'] .cq-sidebar-header-icon {
+  filter: brightness(0) saturate(100%) invert(25%) sepia(60%) saturate(1500%) hue-rotate(330deg)
+    brightness(85%) contrast(95%);
+}
+
+.cq-sidebar-header-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+  margin: 0;
+}
+
+.cq-sidebar-content {
+  padding: var(--cq-spacing-md);
+}
+
+// ========== CONTENT AREA ==========
+
+.cq-content-card {
+  background-color: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--cq-shadow-md);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+// ========== STAT CARDS (for dashboards) ==========
+
+.cq-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--cq-spacing-sm);
+}
+
+.cq-stat-card {
+  background-color: var(--cq-background-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-lg);
+  padding: var(--cq-spacing-md);
+}
+
+.cq-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+  line-height: 1.2;
+}
+
+.cq-stat-value-success {
+  color: var(--cq-success);
+}
+
+.cq-stat-value-warning {
+  color: var(--cq-warning);
+}
+
+.cq-stat-value-error {
+  color: var(--cq-error);
+}
+
+.cq-stat-label {
+  font-size: 13px;
+  color: var(--cq-text-muted);
+  margin-top: 4px;
+}
+
+// ========== EMPTY STATE ==========
+
+.cq-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--cq-spacing-2xl);
+  text-align: center;
+}
+
+.cq-empty-state-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--cq-spacing-md);
+  opacity: 0.4;
+}
+
+// Empty state icon coloring
+:root .cq-empty-state-icon,
+[data-theme='dark'] .cq-empty-state-icon {
+  filter: brightness(0) saturate(100%) invert(55%) sepia(0%) saturate(0%) hue-rotate(0deg)
+    brightness(95%) contrast(90%);
+}
+
+[data-theme='light'] .cq-empty-state-icon {
+  filter: brightness(0) saturate(100%) invert(45%) sepia(5%) saturate(100%) hue-rotate(0deg)
+    brightness(85%) contrast(85%);
+}
+
+.cq-empty-state-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--cq-text-muted);
+  margin: 0 0 var(--cq-spacing-xs);
+}
+
+.cq-empty-state-message {
+  font-size: 14px;
+  color: var(--cq-text-disabled);
+  margin: 0;
+}

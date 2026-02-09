@@ -1,0 +1,72 @@
+// CodeQuiz Design System - Messages/Alerts
+// Used for displaying inline feedback, warnings, and errors
+
+.cq-message {
+  display: flex;
+  align-items: flex-start;
+  padding: var(--cq-spacing-md);
+  border-radius: var(--cq-radius-md);
+  margin-bottom: var(--cq-spacing-md);
+  border: 1px solid transparent;
+  gap: var(--cq-spacing-md);
+
+  // Icon wrapper to ensure alignment
+  .cq-message-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 2px; // Visual alignment with text line-height
+  }
+
+  // Content wrapper
+  .cq-message-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cq-message-title {
+    font-weight: 700;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .cq-message-text {
+    font-size: 14px;
+    margin: 0;
+    line-height: 1.5;
+    color: var(--cq-text-primary); // Ensure readability
+  }
+}
+
+// Info Message
+.cq-message-info {
+  background-color: color-mix(in srgb, var(--cq-info), transparent 90%);
+  border-color: color-mix(in srgb, var(--cq-info), transparent 80%);
+
+  .cq-message-title {
+    color: var(--cq-info);
+  }
+}
+
+// Warning Message
+.cq-message-warning {
+  background-color: color-mix(in srgb, var(--cq-warning), transparent 90%);
+  border-color: color-mix(in srgb, var(--cq-warning), transparent 80%);
+
+  .cq-message-title {
+    color: var(--cq-warning);
+  }
+}
+
+// Error Message
+.cq-message-error {
+  background-color: color-mix(in srgb, var(--cq-error), transparent 90%);
+  border-color: color-mix(in srgb, var(--cq-error), transparent 80%);
+
+  .cq-message-title {
+    color: var(--cq-error);
+  }
+}

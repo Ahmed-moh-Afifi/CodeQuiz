@@ -1,0 +1,282 @@
+// CodeQuiz Design System - Dialogs
+// Ported from MAUI Styles.xaml dialog styles
+
+// Dialog Overlay - Semi-transparent backdrop
+.cq-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--cq-spacing-lg);
+  animation: cq-fade-in 150ms ease-out;
+}
+
+// Dialog Container
+.cq-dialog {
+  background-color: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-xl);
+  box-shadow: var(--cq-shadow-xl);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: cq-scale-in 150ms ease-out;
+}
+
+// Dialog Header
+.cq-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--cq-background-dark);
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--cq-border-default);
+}
+
+.cq-dialog-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+  margin: 0;
+}
+
+// Dialog Content
+.cq-dialog-content {
+  padding: var(--cq-spacing-lg);
+  overflow-y: auto;
+  flex: 1;
+}
+
+// Dialog Footer
+.cq-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  background-color: var(--cq-background-dark);
+  padding: 16px 24px;
+  border-top: 1px solid var(--cq-border-default);
+}
+
+// Close Button
+.cq-dialog-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: var(--cq-secondary);
+  border: none;
+  border-radius: var(--cq-radius-sm);
+  cursor: pointer;
+  transition: background-color var(--cq-transition-fast);
+
+  &:hover {
+    background-color: var(--cq-secondary-hover);
+  }
+
+  svg,
+  img {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// Theme-aware close button icons
+:root .cq-dialog-close img,
+[data-theme='dark'] .cq-dialog-close img {
+  filter: brightness(0) saturate(100%) invert(93%) sepia(4%) saturate(102%) hue-rotate(169deg)
+    brightness(95%) contrast(92%);
+}
+
+[data-theme='light'] .cq-dialog-close img {
+  filter: brightness(0) saturate(100%) invert(15%) sepia(5%) saturate(500%) hue-rotate(180deg)
+    brightness(95%) contrast(90%);
+}
+
+// Dialog Size Variants
+.cq-dialog-sm {
+  max-width: 360px;
+}
+
+.cq-dialog-lg {
+  max-width: 720px;
+}
+
+.cq-dialog-xl {
+  max-width: 960px;
+}
+
+.cq-dialog-fullscreen {
+  max-width: 100%;
+  max-height: 100%;
+  height: 100%;
+  border-radius: 0;
+  margin: 0;
+}
+
+// Animations
+@keyframes cq-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cq-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// ========== DIALOG ICON VARIANTS ==========
+
+// Base Dialog Icon
+.cq-dialog-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 0 auto var(--cq-spacing-md);
+  flex-shrink: 0;
+
+  img,
+  svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+// Warning Dialog Icon
+.cq-dialog-icon-warning {
+  background-color: color-mix(in srgb, var(--cq-warning), transparent 85%);
+}
+
+// Danger Dialog Icon
+.cq-dialog-icon-danger {
+  background-color: color-mix(in srgb, var(--cq-error), transparent 85%);
+}
+
+:root .cq-dialog-icon-warning img,
+:root .cq-dialog-icon-danger img,
+[data-theme='dark'] .cq-dialog-icon-warning img,
+[data-theme='dark'] .cq-dialog-icon-danger img {
+  filter: brightness(0) saturate(100%) invert(20%) sepia(80%) saturate(2000%) hue-rotate(350deg)
+    brightness(90%) contrast(100%);
+}
+
+[data-theme='light'] .cq-dialog-icon-warning img,
+[data-theme='light'] .cq-dialog-icon-danger img {
+  filter: brightness(0) saturate(100%) invert(25%) sepia(90%) saturate(2500%) hue-rotate(345deg)
+    brightness(95%) contrast(105%);
+}
+
+// Success Dialog Icon
+.cq-dialog-icon-success {
+  background-color: color-mix(in srgb, var(--cq-success), transparent 85%);
+}
+
+:root .cq-dialog-icon-success img,
+[data-theme='dark'] .cq-dialog-icon-success img {
+  filter: brightness(0) saturate(100%) invert(35%) sepia(50%) saturate(500%) hue-rotate(100deg)
+    brightness(95%) contrast(90%);
+}
+
+[data-theme='light'] .cq-dialog-icon-success img {
+  filter: brightness(0) saturate(100%) invert(40%) sepia(70%) saturate(600%) hue-rotate(110deg)
+    brightness(90%) contrast(100%);
+}
+
+// Info Dialog Icon (Primary/Info)
+.cq-dialog-icon-info {
+  background-color: color-mix(in srgb, var(--cq-info), transparent 85%);
+}
+
+:root .cq-dialog-icon-info img,
+[data-theme='dark'] .cq-dialog-icon-info img {
+  filter: brightness(0) saturate(100%) invert(17%) sepia(45%) saturate(2358%) hue-rotate(330deg)
+    brightness(97%) contrast(89%);
+}
+
+[data-theme='light'] .cq-dialog-icon-info img {
+  filter: brightness(0) saturate(100%) invert(25%) sepia(60%) saturate(1500%) hue-rotate(330deg)
+    brightness(85%) contrast(95%);
+}
+
+// Question Dialog Icon (Info color usually, or primary?)
+// User asked for "question mark is green -> background green".
+// Our question dialog uses Primary (Blue/Red) currently.
+// Let's stick// Question Dialog Icon
+.cq-dialog-icon-question {
+  background-color: color-mix(in srgb, var(--cq-primary), transparent 85%);
+}
+
+:root .cq-dialog-icon-question img,
+[data-theme='dark'] .cq-dialog-icon-question img {
+  filter: brightness(0) saturate(100%) invert(25%) sepia(90%) saturate(2500%) hue-rotate(220deg)
+    brightness(95%) contrast(100%);
+}
+
+[data-theme='light'] .cq-dialog-icon-question img {
+  filter: brightness(0) saturate(100%) invert(30%) sepia(95%) saturate(2000%) hue-rotate(215deg)
+    brightness(90%) contrast(105%);
+}
+
+// ========== ALERT DIALOG (Simplified, icon-centered) ==========
+
+.cq-alert-dialog {
+  text-align: center;
+  padding: var(--cq-spacing-xl) var(--cq-spacing-lg);
+}
+
+.cq-alert-dialog-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+  margin: 0 0 var(--cq-spacing-sm);
+}
+
+.cq-alert-dialog-message {
+  font-size: 14px;
+  color: var(--cq-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.cq-alert-dialog-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: var(--cq-spacing-lg);
+}
+
+// ========== CONFIRMATION DIALOG ==========
+
+.cq-confirm-dialog {
+  text-align: center;
+}
+
+.cq-confirm-dialog-content {
+  padding: var(--cq-spacing-xl) var(--cq-spacing-lg) var(--cq-spacing-lg);
+}
+
+// ========== FORM DIALOG (With header) ==========
+
+.cq-form-dialog-body {
+  padding: var(--cq-spacing-lg);
+}

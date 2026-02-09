@@ -1,0 +1,67 @@
+// CodeQuiz Design System - Cards
+// Ported from MAUI Styles.xaml card styles
+
+// Base Card - Surface background with border
+.cq-card {
+  background-color: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-xl);
+  padding: var(--cq-spacing-lg);
+}
+
+// Elevated Card - With shadow
+.cq-card-elevated {
+  @extend .cq-card;
+  box-shadow: var(--cq-shadow-lg);
+}
+
+// Inner Card - Nested card with smaller styling
+.cq-card-inner {
+  background-color: var(--cq-background-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-lg);
+  padding: var(--cq-spacing-md);
+}
+
+// Highlighted Card - With primary border
+.cq-card-highlighted {
+  @extend .cq-card-inner;
+  border-color: var(--cq-primary);
+}
+
+// Clickable Card - With hover state
+.cq-card-clickable {
+  @extend .cq-card;
+  cursor: pointer;
+  transition: all var(--cq-transition-fast);
+
+  &:hover {
+    border-color: var(--cq-border-subtle);
+    transform: translateY(-2px);
+    box-shadow: var(--cq-shadow-md);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Card Header - For card with header sections
+.cq-card-header {
+  background-color: var(--cq-background-dark);
+  padding: var(--cq-spacing-md) var(--cq-spacing-lg);
+  margin: calc(var(--cq-spacing-lg) * -1);
+  margin-bottom: var(--cq-spacing-lg);
+  border-radius: var(--cq-radius-xl) var(--cq-radius-xl) 0 0;
+  border-bottom: 1px solid var(--cq-border-default);
+}
+
+// Card Footer
+.cq-card-footer {
+  background-color: var(--cq-background-dark);
+  padding: var(--cq-spacing-md) var(--cq-spacing-lg);
+  margin: calc(var(--cq-spacing-lg) * -1);
+  margin-top: var(--cq-spacing-lg);
+  border-radius: 0 0 var(--cq-radius-xl) var(--cq-radius-xl);
+  border-top: 1px solid var(--cq-border-default);
+}

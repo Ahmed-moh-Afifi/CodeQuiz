@@ -1,0 +1,107 @@
+// CodeQuiz Design System - Typography
+// Ported from MAUI Styles.xaml typography styles
+
+// Page Title - 32px bold
+.cq-page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+  font-family: var(--cq-font-sans);
+  margin: 0;
+}
+
+// Section Header - 22px bold
+.cq-section-header {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+  font-family: var(--cq-font-sans);
+  margin: 0;
+}
+
+// Card Title - 40px extra bold
+.cq-card-title {
+  font-size: 40px;
+  font-weight: 900;
+  color: var(--cq-text-primary);
+  font-family: var(--cq-font-sans);
+  margin: 0;
+}
+
+// Item Title - 17px bold
+.cq-item-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+  font-family: var(--cq-font-sans);
+  margin: 0;
+}
+
+// Body Text - 15px secondary color
+.cq-body-text {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--cq-text-secondary);
+  font-family: var(--cq-font-sans);
+  line-height: 1.5;
+}
+
+// Caption Text - 14px muted color
+.cq-caption-text {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--cq-text-muted);
+  font-family: var(--cq-font-sans);
+}
+
+// Table Header - 12px bold uppercase
+.cq-table-header {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cq-text-muted);
+  font-family: var(--cq-font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// Code Label - 14px monospace
+.cq-code-label {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--cq-code-keyword);
+  font-family: var(--cq-font-mono);
+}
+
+// Score Text - 14px bold warning color
+.cq-score-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cq-warning);
+  font-family: var(--cq-font-sans);
+}
+
+// Success Text - 14px bold success color
+.cq-success-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cq-success);
+  font-family: var(--cq-font-sans);
+}
+
+// Error Text - 14px bold error color
+.cq-error-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cq-error);
+  font-family: var(--cq-font-sans);
+}
+
+// Muted Text utility
+.cq-text-muted {
+  color: var(--cq-text-muted);
+}
+
+// Disabled Text utility
+.cq-text-disabled {
+  color: var(--cq-text-disabled);
+}

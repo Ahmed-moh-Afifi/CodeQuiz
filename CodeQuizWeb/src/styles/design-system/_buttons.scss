@@ -1,0 +1,376 @@
+// CodeQuiz Design System - Buttons
+// Ported from MAUI Styles.xaml button styles
+
+// Base button reset and shared styles
+.cq-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--cq-font-sans);
+  border-radius: var(--cq-radius-md);
+  padding: 12px 18px;
+  border: none;
+  cursor: pointer;
+  transition: all var(--cq-transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--cq-border-focus);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+// Primary Button - Dark red with hover/pressed states
+.cq-btn-primary {
+  @extend .cq-btn;
+  background-color: var(--cq-primary);
+  color: var(--cq-text-on-primary);
+
+  &:hover:not(:disabled) {
+    background-color: var(--cq-primary-hover);
+    transform: scale(1.02);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--cq-primary-pressed);
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    background-color: var(--cq-secondary);
+    color: var(--cq-text-disabled);
+  }
+}
+
+// Secondary Button - Gray
+.cq-btn-secondary {
+  @extend .cq-btn;
+  background-color: var(--cq-secondary);
+  color: var(--cq-text-primary);
+
+  &:hover:not(:disabled) {
+    background-color: var(--cq-secondary-hover);
+    transform: scale(1.02);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--cq-secondary-pressed);
+    transform: scale(0.98);
+  }
+}
+
+// Outlined Button - Transparent with primary border
+// Outlined Button - Neutral/Gray by default
+.cq-btn-outlined {
+  @extend .cq-btn;
+  background-color: transparent;
+  color: var(--cq-text-primary);
+  border: 1px solid var(--cq-border-subtle);
+
+  &:hover:not(:disabled) {
+    background-color: var(--cq-secondary);
+    border-color: var(--cq-border-default);
+    transform: scale(1.02);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--cq-secondary-pressed);
+    transform: scale(0.98);
+  }
+}
+
+// Outlined Primary Button - Red outline
+.cq-btn-outlined-primary {
+  @extend .cq-btn;
+  background-color: transparent;
+  color: var(--cq-primary);
+  border: 1px solid var(--cq-primary);
+
+  &:hover:not(:disabled) {
+    background-color: var(--cq-primary-transparent);
+    transform: scale(1.02);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--cq-primary);
+    color: var(--cq-text-primary);
+    transform: scale(0.98);
+  }
+}
+
+// Danger Button - Error colored outline
+.cq-btn-danger {
+  @extend .cq-btn;
+  background-color: transparent;
+  color: var(--cq-error);
+  border: 1px solid var(--cq-error);
+
+  &:hover:not(:disabled) {
+    background-color: var(--cq-error-transparent);
+    transform: scale(1.02);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--cq-error);
+    color: var(--cq-text-primary);
+    transform: scale(0.98);
+  }
+}
+
+// Warning Button - Orange/Yellow filled
+.cq-btn-warning {
+  @extend .cq-btn;
+  background-color: var(--cq-warning);
+  color: #ffffff;
+  border: 1px solid transparent;
+
+  &:hover:not(:disabled) {
+    background-color: var(--cq-warning-light);
+    transform: scale(1.02);
+    box-shadow: var(--cq-shadow-md);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+    box-shadow: var(--cq-shadow-sm);
+  }
+}
+
+// Ghost Button - Text only
+.cq-btn-ghost {
+  @extend .cq-btn;
+  background-color: transparent;
+  color: var(--cq-primary);
+  padding: 8px;
+  border: none;
+
+  &:hover:not(:disabled) {
+    color: var(--cq-primary-hover);
+  }
+
+  &:active:not(:disabled) {
+    color: var(--cq-primary-pressed);
+  }
+}
+
+// Icon Button Base - 36x36px square
+.cq-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  border-radius: var(--cq-radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: all var(--cq-transition-fast);
+  background-color: var(--cq-secondary);
+
+  &:hover:not(:disabled) {
+    background-color: var(--cq-secondary-hover);
+    transform: scale(1.05);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--cq-border-focus);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  svg,
+  img {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// Icon colors for secondary button (adapts to theme)
+:root .cq-btn-icon img,
+[data-theme='dark'] .cq-btn-icon img {
+  filter: brightness(0) saturate(100%) invert(93%) sepia(4%) saturate(102%) hue-rotate(169deg)
+    brightness(95%) contrast(92%);
+}
+
+[data-theme='light'] .cq-btn-icon img {
+  filter: brightness(0) saturate(100%) invert(15%) sepia(5%) saturate(500%) hue-rotate(180deg)
+    brightness(95%) contrast(90%);
+}
+
+// Primary Icon Button
+.cq-btn-icon-primary {
+  @extend .cq-btn-icon;
+  background-color: var(--cq-primary);
+
+  &:hover:not(:disabled) {
+    background-color: var(--cq-primary-hover);
+  }
+
+  // Always white icon on primary background
+  img,
+  svg {
+    filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg)
+      brightness(100%) contrast(100%) !important;
+  }
+}
+
+// Outlined Icon Button
+.cq-btn-icon-outlined {
+  @extend .cq-btn-icon;
+  background-color: transparent;
+  border: 1px solid var(--cq-primary);
+
+  &:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--cq-primary), transparent 85%);
+  }
+}
+
+// Outlined icon button uses primary color
+:root .cq-btn-icon-outlined img,
+[data-theme='dark'] .cq-btn-icon-outlined img {
+  filter: brightness(0) saturate(100%) invert(17%) sepia(45%) saturate(2358%) hue-rotate(330deg)
+    brightness(97%) contrast(89%) !important;
+}
+
+[data-theme='light'] .cq-btn-icon-outlined img {
+  filter: brightness(0) saturate(100%) invert(25%) sepia(60%) saturate(1500%) hue-rotate(330deg)
+    brightness(85%) contrast(95%) !important;
+}
+
+// Danger Icon Button
+.cq-btn-icon-danger {
+  @extend .cq-btn-icon;
+  background-color: transparent;
+  border: 1px solid var(--cq-error);
+
+  &:hover:not(:disabled) {
+    background-color: var(--cq-error-transparent);
+  }
+}
+
+// Danger icon button uses error color
+:root .cq-btn-icon-danger img,
+[data-theme='dark'] .cq-btn-icon-danger img {
+  filter: brightness(0) saturate(100%) invert(20%) sepia(80%) saturate(2000%) hue-rotate(350deg)
+    brightness(80%) contrast(100%) !important;
+}
+
+[data-theme='light'] .cq-btn-icon-danger img {
+  filter: brightness(0) saturate(100%) invert(25%) sepia(80%) saturate(2500%) hue-rotate(345deg)
+    brightness(90%) contrast(105%) !important;
+}
+
+// ========== LOADING BUTTONS ==========
+
+// Loading state modifier - adds spinner
+.cq-btn-loading {
+  position: relative;
+  pointer-events: none;
+
+  // Show the spinner when loading
+  .cq-btn-spinner {
+    display: inline-block;
+  }
+
+  // Hide original content when loading (use opacity on text wrapper instead of color:transparent)
+  &.cq-btn-loading-replace {
+    .cq-btn-text {
+      opacity: 0;
+    }
+  }
+}
+
+// Loading spinner inside button - hidden by default
+.cq-btn-spinner {
+  display: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: cq-btn-spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+// Larger spinner for icon buttons
+.cq-btn-spinner-lg {
+  width: 20px;
+  height: 20px;
+}
+
+@keyframes cq-btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Loading button with text
+.cq-btn-loading-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// Centered spinner (for when hiding button text)
+.cq-btn-spinner-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  // Use margins for centering to avoid conflict with rotation transform
+  margin-top: -8px;
+  margin-left: -8px;
+  transform: none;
+}
+
+// Success Button - Green filled
+.cq-btn-success {
+  @extend .cq-btn;
+  background-color: var(--cq-success);
+  color: var(--cq-text-on-primary);
+
+  &:hover:not(:disabled) {
+    background-color: var(--cq-success-light);
+    transform: scale(1.02);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--cq-success);
+    transform: scale(0.98);
+  }
+}
+
+// Danger Filled Button
+.cq-btn-danger-filled {
+  @extend .cq-btn;
+  background-color: var(--cq-error);
+  color: var(--cq-text-on-primary);
+
+  &:hover:not(:disabled) {
+    background-color: var(--cq-error-light);
+    transform: scale(1.02);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--cq-error);
+    transform: scale(0.98);
+  }
+}

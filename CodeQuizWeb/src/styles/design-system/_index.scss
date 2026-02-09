@@ -1,0 +1,17 @@
+// CodeQuiz Design System - Main Entry Point
+// This file exports all design system partials
+
+// Core variables (colors, spacing, etc.)
+@use 'variables';
+
+// Component styles
+@use 'typography';
+@use 'buttons';
+@use 'cards';
+@use 'inputs';
+@use 'badges';
+@use 'tables';
+@use 'dialogs';
+@use 'messages';
+@use 'page-layout';
+@use 'utilities';

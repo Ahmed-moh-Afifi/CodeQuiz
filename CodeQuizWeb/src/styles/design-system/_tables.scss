@@ -1,0 +1,110 @@
+// CodeQuiz Design System - Tables
+// Ported from MAUI Styles.xaml table styles
+
+// Table Container - Wrapper with border
+.cq-table-container {
+  background-color: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-lg);
+  overflow: hidden;
+}
+
+// Base Table
+.cq-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--cq-font-sans);
+  font-size: 14px;
+}
+
+// Table Header Row
+.cq-table thead,
+.cq-table-header-row {
+  background-color: var(--cq-background-dark);
+
+  th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--cq-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--cq-border-default);
+  }
+}
+
+// Table Body Row
+.cq-table tbody tr,
+.cq-table-row {
+  transition: background-color var(--cq-transition-fast);
+
+  &:hover {
+    background-color: var(--cq-elevated-surface);
+  }
+
+  td {
+    padding: 14px 20px;
+    color: var(--cq-text-primary);
+    border-bottom: 1px solid var(--cq-border-default);
+  }
+
+  &:last-child td {
+    border-bottom: none;
+  }
+}
+
+// Clickable Row
+.cq-table-row-clickable {
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--cq-elevated-surface);
+  }
+}
+
+// Table Divider
+.cq-table-divider {
+  height: 1px;
+  background-color: var(--cq-border-default);
+  border: none;
+  margin: 0;
+}
+
+// Table Cell Variants
+.cq-table-cell-muted {
+  color: var(--cq-text-muted) !important;
+}
+
+.cq-table-cell-success {
+  color: var(--cq-success) !important;
+}
+
+.cq-table-cell-error {
+  color: var(--cq-error) !important;
+}
+
+.cq-table-cell-warning {
+  color: var(--cq-warning) !important;
+}
+
+// Table Cell with code styling
+.cq-table-cell-code {
+  font-family: var(--cq-font-mono);
+  color: var(--cq-code-keyword);
+}
+
+// Empty State
+.cq-table-empty {
+  padding: var(--cq-spacing-2xl);
+  text-align: center;
+  color: var(--cq-text-muted);
+}
+
+// Compact Table variant
+.cq-table-compact {
+  th,
+  td {
+    padding: 10px 16px;
+  }
+}
