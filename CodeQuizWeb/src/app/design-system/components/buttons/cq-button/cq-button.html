@@ -1,0 +1,17 @@
+<button
+  [class]="buttonClass"
+  [disabled]="disabled() || loading()"
+  [class.cq-btn-loading]="loading()"
+  (click)="onClick($event)"
+>
+  @if (loading()) {
+    <span class="cq-btn-spinner"></span>
+    @if (loadingText()) {
+      <span>{{ loadingText() }}</span>
+    } @else {
+      <ng-content></ng-content>
+    }
+  } @else {
+    <ng-content></ng-content>
+  }
+</button>

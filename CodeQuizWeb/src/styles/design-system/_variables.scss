@@ -37,6 +37,11 @@
   --cq-text-on-primary: #ededed;
   --cq-text-on-surface: #ededed;
 
+  // ========== Typography Colors ==========
+  --cq-code-color: #e06c75;
+  --cq-link-color: var(--cq-primary);
+  --cq-heading-color: var(--cq-text-primary);
+
   // ========== Status Colors ==========
   --cq-success: #1f7a4d;
   --cq-success-light: #2d9d66;
@@ -154,6 +159,11 @@
   // ========== Inverted Text (for buttons on colored backgrounds) ==========
   --cq-text-on-primary: #ffffff;
   --cq-text-on-surface: #212529;
+
+  // ========== Typography Colors ==========
+  --cq-code-color: #d63384;
+  --cq-link-color: var(--cq-primary);
+  --cq-heading-color: var(--cq-text-primary);
 
   // ========== Status Colors (vibrant for light backgrounds) ==========
   --cq-success: #198754;

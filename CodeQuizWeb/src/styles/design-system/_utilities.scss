@@ -474,3 +474,38 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+// ========== Programmatic Tooltip (used by CqTooltipDirective) ==========
+.cq-tooltip {
+  position: absolute;
+  z-index: 10001;
+  padding: 6px 12px;
+  border-radius: var(--cq-radius-md);
+  background-color: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  color: var(--cq-text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  box-shadow: var(--cq-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.2));
+  pointer-events: none;
+  animation: cq-tooltip-enter 0.15s ease-out;
+}
+
+[data-theme='light'] .cq-tooltip {
+  background-color: #1a1a2e;
+  color: #ededed;
+  border-color: #2a2a3a;
+}
+
+@keyframes cq-tooltip-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

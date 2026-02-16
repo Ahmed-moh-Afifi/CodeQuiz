@@ -1,5 +1,5 @@
 <div class="demo-page cq-theme-transition">
-  <!-- Theme Toggle Header -->
+  <!-- Header -->
   <div class="demo-header">
     <a href="/" class="back-link">
       <div
@@ -13,16 +13,42 @@
       ></div>
       Back to Homepage
     </a>
-    <button class="cq-btn-secondary" (click)="toggleTheme()">
-      {{ currentTheme() === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode' }}
-    </button>
+    <div class="demo-header-actions">
+      <button class="cq-btn-outlined" (click)="openColorConfig()">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/pencil.svg');
+            background-color: var(--cq-text-primary);
+            width: 16px;
+            height: 16px;
+          "
+        ></div>
+        Configure Colors
+      </button>
+      <button class="cq-btn-primary" (click)="saveConfiguration()">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/save.svg');
+            background-color: var(--cq-text-on-primary);
+            width: 16px;
+            height: 16px;
+          "
+        ></div>
+        Save Config
+      </button>
+      <button class="cq-btn-secondary" (click)="toggleTheme()">
+        {{ currentTheme() === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode' }}
+      </button>
+    </div>
   </div>
 
   <h1 class="cq-page-title cq-mb-sm">CodeQuiz Design System</h1>
   <p class="cq-body-text cq-mb-xl">
-    A comprehensive design system ported from the MAUI desktop app. Toggle between dark and light
-    modes using the button above. Click the
-    <span class="inline-code-icon">&lt;/&gt;</span> icon on any section to see usage code.
+    A comprehensive design system ported from the MAUI desktop app. Each section shows both
+    <strong>CSS class</strong> and <strong>Angular component</strong> usage via tabs. Click
+    <span class="inline-code-icon">&lt;/&gt;</span> to see code snippets.
   </p>
 
   <!-- ========== QUICK GUIDE ========== -->
@@ -35,135 +61,28 @@
 &#64;use 'styles/design-system';</code></pre>
       </div>
       <div class="cq-card">
-        <h4 class="cq-item-title cq-mb-sm">2. Theme support</h4>
-        <pre class="demo-code-block"><code>// Toggle via data-theme attribute
-document.documentElement
+        <h4 class="cq-item-title cq-mb-sm">2. Import components</h4>
+        <pre class="demo-code-block"><code>import &lbrace; CqButton, CqCard,
+  CqInput, CqDialog
+&rbrace; from './design-system';</code></pre>
+      </div>
+      <div class="cq-card">
+        <h4 class="cq-item-title cq-mb-sm">3. Theme support</h4>
+        <pre class="demo-code-block"><code>document.documentElement
   .setAttribute('data-theme', 'light');
 // Default is dark theme</code></pre>
       </div>
       <div class="cq-card">
-        <h4 class="cq-item-title cq-mb-sm">3. Customize variables</h4>
-        <pre class="demo-code-block"><code>// Override any CSS variable
-:root &#123;
-  --cq-primary: #your-color;
-  --cq-font-size-body: 16px;
-  --cq-background-dark: #1a1a2e;
-&#125;</code></pre>
-      </div>
-      <div class="cq-card">
-        <h4 class="cq-item-title cq-mb-sm">4. Use classes in HTML</h4>
-        <pre class="demo-code-block"><code>&lt;button class="cq-btn-primary"&gt;
+        <h4 class="cq-item-title cq-mb-sm">4. Use components</h4>
+        <pre class="demo-code-block"><code>&lt;cq-button type="primary"&gt;
   Click Me
-&lt;/button&gt;
-&lt;div class="cq-card"&gt;
-  &lt;p class="cq-body-text"&gt;Hi&lt;/p&gt;
-&lt;/div&gt;</code></pre>
+&lt;/cq-button&gt;
+&lt;cq-card type="elevated"&gt;
+  &lt;span slot="card-title"&gt;Hi&lt;/span&gt;
+  Content here
+&lt;/cq-card&gt;</code></pre>
       </div>
     </div>
-  </section>
-
-  <!-- ========== COLORS ========== -->
-  <section class="demo-section demo-section-with-code">
-    <div class="demo-section-header-row">
-      <div style="display: flex; align-items: center; gap: 16px; flex: 1">
-        <h2 class="demo-section-title" style="margin-bottom: 0">Colors</h2>
-        <span class="cq-caption-text">Click any swatch to edit</span>
-      </div>
-      <button class="cq-btn-ghost demo-reset-btn" (click)="resetAllColors()">Reset</button>
-      <button class="demo-code-btn" (click)="toggleCodeTooltip('colors')" title="View code">
-        <div
-          class="cq-mask-icon"
-          style="
-            --mask-url: url('assets/icons/code.svg');
-            background-color: var(--cq-text-muted);
-            width: 18px;
-            height: 18px;
-          "
-        ></div>
-      </button>
-    </div>
-
-    @if (activeCodeTooltip === 'colors') {
-      <div class="demo-code-popover">
-        <div class="demo-code-popover-header">
-          <span class="cq-item-title">Colors — Usage</span>
-          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
-        </div>
-        <div class="demo-code-popover-body">
-          @for (snippet of codeSnippets['colors']; track snippet.label) {
-            <div class="demo-snippet">
-              <span class="demo-snippet-label">{{ snippet.label }}</span>
-              @if (snippet.html) {
-                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
-              }
-              @if (snippet.css) {
-                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
-              }
-            </div>
-          }
-        </div>
-      </div>
-    }
-
-    <div class="demo-label">Background &amp; Surface</div>
-    <div class="demo-row cq-mb-lg">
-      <div class="color-swatch-wrapper">
-        <label class="color-swatch interactive">
-          <input
-            type="color"
-            [value]="backgroundColor"
-            (input)="updateBackground($event)"
-            class="color-input-hidden"
-          />
-          <div class="color-box" style="background-color: var(--cq-background-dark)"></div>
-          <div class="color-info">
-            <span class="color-name">Background</span>
-            <span class="color-value">--cq-background-dark</span>
-            <span class="color-hex">{{ backgroundColor }}</span>
-          </div>
-        </label>
-      </div>
-      <div class="color-swatch-wrapper">
-        <label class="color-swatch interactive">
-          <input
-            type="color"
-            [value]="surfaceColor"
-            (input)="updateSurface($event)"
-            class="color-input-hidden"
-          />
-          <div class="color-box" style="background-color: var(--cq-surface-dark)"></div>
-          <div class="color-info">
-            <span class="color-name">Surface / Cards</span>
-            <span class="color-value">--cq-surface-dark</span>
-            <span class="color-hex">{{ surfaceColor }}</span>
-          </div>
-        </label>
-      </div>
-    </div>
-
-    @for (group of colorGroups; track group.name) {
-      <div class="demo-label">{{ group.name }}</div>
-      <div class="demo-row cq-mb-lg">
-        @for (color of group.colors; track color.name) {
-          <div class="color-swatch-wrapper">
-            <label class="color-swatch interactive">
-              <input
-                type="color"
-                [value]="color.value"
-                (input)="updateColor(color.variable, $event)"
-                class="color-input-hidden"
-              />
-              <div class="color-box" [style.background-color]="'var(' + color.variable + ')'"></div>
-              <div class="color-info">
-                <span class="color-name">{{ color.name }}</span>
-                <span class="color-value">{{ color.variable }}</span>
-                <span class="color-hex">{{ color.value }}</span>
-              </div>
-            </label>
-          </div>
-        }
-      </div>
-    }
   </section>
 
   <!-- ========== TYPOGRAPHY ========== -->
@@ -183,7 +102,6 @@ document.documentElement
         ></div>
       </button>
     </div>
-
     @if (activeCodeTooltip === 'typography') {
       <div class="demo-code-popover">
         <div class="demo-code-popover-header">
@@ -191,35 +109,30 @@ document.documentElement
           <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
         </div>
         <div class="demo-code-popover-body">
-          @for (snippet of codeSnippets['typography']; track snippet.label) {
-            <div class="demo-snippet">
-              <span class="demo-snippet-label">{{ snippet.label }}</span>
-              @if (snippet.html) {
-                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
-              }
-              @if (snippet.css) {
-                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
-              }
-            </div>
-          }
+          <div class="demo-snippet">
+            <span class="demo-snippet-label">CSS Classes</span>
+            <pre class="demo-code-block"><code>&lt;h1 class="cq-page-title"&gt;Page Title&lt;/h1&gt;
+&lt;h2 class="cq-section-header"&gt;Section&lt;/h2&gt;
+&lt;p class="cq-body-text"&gt;Body text&lt;/p&gt;
+&lt;p class="cq-caption-text"&gt;Caption&lt;/p&gt;
+&lt;p class="cq-code-label"&gt;code_label&lt;/p&gt;</code></pre>
+          </div>
         </div>
       </div>
     }
-
     <div class="cq-card">
       <h1 class="cq-page-title cq-mb-md">Page Title</h1>
       <h2 class="cq-section-header cq-mb-md">Section Header</h2>
       <h3 class="cq-card-title cq-mb-md">Card Title</h3>
       <h4 class="cq-item-title cq-mb-md">Item Title</h4>
       <p class="cq-body-text cq-mb-md">
-        Body Text - This is the standard paragraph text used for content throughout the application.
+        Body Text — Standard paragraph text used throughout the application.
       </p>
-      <p class="cq-caption-text cq-mb-md">Caption Text - Smaller helper text in muted color</p>
+      <p class="cq-caption-text cq-mb-md">Caption Text — Smaller helper text in muted color</p>
       <p class="cq-code-label cq-mb-md">const codeLabel = "Monospace code styling";</p>
       <p class="cq-success-text">Success Text</p>
       <p class="cq-score-text">Score: 85/100</p>
     </div>
-
     <div class="demo-label cq-mt-lg">Font Size Controls</div>
     <div class="demo-font-size-grid">
       @for (fs of fontSizes; track fs.variable) {
@@ -258,7 +171,6 @@ document.documentElement
         ></div>
       </button>
     </div>
-
     @if (activeCodeTooltip === 'buttons') {
       <div class="demo-code-popover">
         <div class="demo-code-popover-header">
@@ -266,118 +178,142 @@ document.documentElement
           <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
         </div>
         <div class="demo-code-popover-body">
-          @for (snippet of codeSnippets['buttons']; track snippet.label) {
+          @for (snippet of codeSnippets['buttons']['css']; track snippet.label) {
             <div class="demo-snippet">
-              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              <span class="demo-snippet-label">CSS: {{ snippet.label }}</span>
               @if (snippet.html) {
-                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+                <cq-code-block
+                  [code]="snippet.html"
+                  [language]="snippet.language || 'html'"
+                ></cq-code-block>
               }
-              @if (snippet.css) {
-                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+            </div>
+          }
+          @for (snippet of codeSnippets['buttons']['component']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">Component: {{ snippet.label }}</span>
+              @if (snippet.html) {
+                <cq-code-block
+                  [code]="snippet.html"
+                  [language]="snippet.language || 'html'"
+                ></cq-code-block>
               }
             </div>
           }
         </div>
       </div>
     }
-
-    <div class="demo-label">Standard Buttons</div>
-    <div class="demo-row cq-mb-lg">
-      <button class="cq-btn-primary">Primary Button</button>
-      <button class="cq-btn-secondary">Secondary Button</button>
-      <button class="cq-btn-outlined">Outlined Button</button>
-      <button class="cq-btn-danger">Danger Button</button>
-      <button class="cq-btn-ghost">Ghost Button</button>
-    </div>
-
-    <div class="demo-label">Additional Button Variants</div>
-    <div class="demo-row cq-mb-lg">
-      <button class="cq-btn-success">Success Button</button>
-      <button class="cq-btn-danger-filled">Danger Filled</button>
-    </div>
-
-    <div class="demo-label">Disabled State</div>
-    <div class="demo-row cq-mb-lg">
-      <button class="cq-btn-primary" disabled>Disabled Primary</button>
-      <button class="cq-btn-secondary" disabled>Disabled Secondary</button>
-    </div>
-
-    <div class="demo-label">Loading Buttons</div>
-    <div class="demo-row cq-mb-lg">
-      <!-- Loading with text -->
-      <button
-        class="cq-btn-primary"
-        [class.cq-btn-loading]="isLoading1"
-        (click)="simulateLoading1()"
-      >
-        @if (isLoading1) {
-          <span class="cq-btn-spinner"></span>
-          <span>Saving...</span>
-        } @else {
-          <span>Save Changes</span>
-        }
-      </button>
-
-      <!-- Loading spinner only (replaces text) -->
-      <button
-        class="cq-btn-secondary"
-        [class.cq-btn-loading]="isLoading2"
-        [class.cq-btn-loading-replace]="isLoading2"
-        (click)="simulateLoading2()"
-      >
-        <span class="cq-btn-spinner cq-btn-spinner-center"></span>
-        <span class="cq-btn-text">Submit</span>
-      </button>
-
-      <!-- Static loading example -->
-      <button class="cq-btn-outlined cq-btn-loading">
-        <span class="cq-btn-spinner"></span>
-        <span>Processing...</span>
-      </button>
-    </div>
-
-    <div class="demo-label">Icon Buttons</div>
-    <div class="demo-row">
-      <button class="cq-btn-icon">
-        <div
-          class="cq-mask-icon"
-          style="
-            --mask-url: url('assets/icons/arrow_forward_ios_rounded.svg');
-            background-color: var(--cq-text-secondary);
-            width: 18px;
-            height: 18px;
-          "
-        ></div>
-      </button>
-      <button class="cq-btn-icon-primary">
-        <div
-          class="cq-mask-icon"
-          style="
-            --mask-url: url('assets/icons/save.svg');
-            background-color: var(--cq-text-on-primary);
-            width: 22px;
-            height: 22px;
-          "
-        ></div>
-      </button>
-      <button class="cq-btn-icon-outlined">
-        <div
-          class="cq-mask-icon"
-          style="
-            --mask-url: url('assets/icons/pencil.svg');
-            background-color: var(--cq-primary);
-            width: 20px;
-            height: 20px;
-          "
-        ></div>
-      </button>
-      <button class="cq-btn-icon-danger">
-        <div
-          class="cq-mask-icon cq-mask-icon-error"
-          style="--mask-url: url('assets/icons/trash.svg'); width: 20px; height: 20px"
-        ></div>
-      </button>
-    </div>
+    <cq-tab-view>
+      <cq-tab label="CSS Classes">
+        <div class="demo-label">Standard Buttons</div>
+        <div class="demo-row cq-mb-lg">
+          <button class="cq-btn-primary">Primary Button</button>
+          <button class="cq-btn-secondary">Secondary Button</button>
+          <button class="cq-btn-outlined">Outlined Button</button>
+          <button class="cq-btn-danger">Danger Button</button>
+          <button class="cq-btn-ghost">Ghost Button</button>
+        </div>
+        <div class="demo-label">Additional Variants</div>
+        <div class="demo-row cq-mb-lg">
+          <button class="cq-btn-success">Success Button</button>
+          <button class="cq-btn-danger-filled">Danger Filled</button>
+          <button class="cq-btn-warning">Warning Button</button>
+          <button class="cq-add-item-button">+ Add New Item</button>
+        </div>
+        <div class="demo-label">Disabled State</div>
+        <div class="demo-row cq-mb-lg">
+          <button class="cq-btn-primary" disabled>Disabled Primary</button>
+          <button class="cq-btn-secondary" disabled>Disabled Secondary</button>
+        </div>
+        <div class="demo-label">Loading Buttons</div>
+        <div class="demo-row cq-mb-lg">
+          <button
+            class="cq-btn-primary"
+            [class.cq-btn-loading]="isLoading1"
+            (click)="simulateLoading1()"
+          >
+            @if (isLoading1) {
+              <span class="cq-btn-spinner"></span><span>Saving...</span>
+            } @else {
+              <span>Save Changes</span>
+            }
+          </button>
+          <button class="cq-btn-outlined cq-btn-loading">
+            <span class="cq-btn-spinner"></span><span>Processing...</span>
+          </button>
+        </div>
+        <div class="demo-label">Icon Buttons</div>
+        <div class="demo-row">
+          <button class="cq-btn-icon">
+            <div
+              class="cq-mask-icon"
+              style="
+                --mask-url: url('assets/icons/arrow_forward_ios_rounded.svg');
+                background-color: var(--cq-text-secondary);
+                width: 18px;
+                height: 18px;
+              "
+            ></div>
+          </button>
+          <button class="cq-btn-icon-primary">
+            <div
+              class="cq-mask-icon"
+              style="
+                --mask-url: url('assets/icons/save.svg');
+                background-color: var(--cq-text-on-primary);
+                width: 22px;
+                height: 22px;
+              "
+            ></div>
+          </button>
+          <button class="cq-btn-icon-outlined">
+            <div
+              class="cq-mask-icon"
+              style="
+                --mask-url: url('assets/icons/pencil.svg');
+                background-color: var(--cq-primary);
+                width: 20px;
+                height: 20px;
+              "
+            ></div>
+          </button>
+          <button class="cq-btn-icon-danger">
+            <div
+              class="cq-mask-icon cq-mask-icon-error"
+              style="--mask-url: url('assets/icons/trash.svg'); width: 20px; height: 20px"
+            ></div>
+          </button>
+        </div>
+      </cq-tab>
+      <cq-tab label="Components">
+        <div class="demo-label">Standard Buttons</div>
+        <div class="demo-row cq-mb-lg">
+          <cq-button type="primary">Primary Button</cq-button>
+          <cq-button type="secondary">Secondary Button</cq-button>
+          <cq-button type="outlined">Outlined Button</cq-button>
+          <cq-button type="danger">Danger Button</cq-button>
+          <cq-button type="ghost">Ghost Button</cq-button>
+        </div>
+        <div class="demo-label">Additional Variants</div>
+        <div class="demo-row cq-mb-lg">
+          <cq-button type="success">Success Button</cq-button>
+          <cq-button type="danger-filled">Danger Filled</cq-button>
+          <cq-button type="warning">Warning Button</cq-button>
+          <cq-button type="add-item">+ Add New Item</cq-button>
+        </div>
+        <div class="demo-label">Disabled & Loading</div>
+        <div class="demo-row cq-mb-lg">
+          <cq-button type="primary" [disabled]="true">Disabled Primary</cq-button>
+          <cq-button
+            type="primary"
+            [loading]="isLoading2"
+            loadingText="Saving..."
+            (clicked)="simulateLoading2()"
+            >Save Changes</cq-button
+          >
+        </div>
+      </cq-tab>
+    </cq-tab-view>
   </section>
 
   <!-- ========== CARDS ========== -->
@@ -396,7 +332,6 @@ document.documentElement
         ></div>
       </button>
     </div>
-
     @if (activeCodeTooltip === 'cards') {
       <div class="demo-code-popover">
         <div class="demo-code-popover-header">
@@ -404,44 +339,72 @@ document.documentElement
           <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
         </div>
         <div class="demo-code-popover-body">
-          @for (snippet of codeSnippets['cards']; track snippet.label) {
+          @for (snippet of codeSnippets['cards']['css']; track snippet.label) {
             <div class="demo-snippet">
-              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              <span class="demo-snippet-label">CSS: {{ snippet.label }}</span>
               @if (snippet.html) {
-                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+                <cq-code-block
+                  [code]="snippet.html"
+                  [language]="snippet.language || 'html'"
+                ></cq-code-block>
               }
-              @if (snippet.css) {
-                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+            </div>
+          }
+          @for (snippet of codeSnippets['cards']['component']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">Component: {{ snippet.label }}</span>
+              @if (snippet.html) {
+                <cq-code-block
+                  [code]="snippet.html"
+                  [language]="snippet.language || 'html'"
+                ></cq-code-block>
               }
             </div>
           }
         </div>
       </div>
     }
-
-    <div class="demo-grid">
-      <div class="cq-card">
-        <h3 class="cq-item-title cq-mb-sm">Standard Card</h3>
-        <p class="cq-body-text">Basic card with surface background and default border.</p>
-      </div>
-
-      <div class="cq-card-elevated">
-        <h3 class="cq-item-title cq-mb-sm">Elevated Card</h3>
-        <p class="cq-body-text">Card with shadow for emphasis.</p>
-      </div>
-
-      <div class="cq-card">
-        <h3 class="cq-item-title cq-mb-md">Card with Inner Card</h3>
-        <div class="cq-card-inner">
-          <p class="cq-caption-text">Nested inner card component</p>
+    <cq-tab-view>
+      <cq-tab label="CSS Classes">
+        <div class="demo-grid">
+          <div class="cq-card">
+            <h3 class="cq-item-title cq-mb-sm">Standard Card</h3>
+            <p class="cq-body-text">Basic card with surface background and default border.</p>
+          </div>
+          <div class="cq-card-elevated">
+            <h3 class="cq-item-title cq-mb-sm">Elevated Card</h3>
+            <p class="cq-body-text">Card with shadow for emphasis.</p>
+          </div>
+          <div class="cq-card">
+            <h3 class="cq-item-title cq-mb-md">Card with Inner Card</h3>
+            <div class="cq-card-inner">
+              <p class="cq-caption-text">Nested inner card component</p>
+            </div>
+          </div>
+          <div class="cq-card-highlighted">
+            <h3 class="cq-item-title cq-mb-sm">Highlighted Card</h3>
+            <p class="cq-body-text">Card with primary border color.</p>
+          </div>
         </div>
-      </div>
-
-      <div class="cq-card-highlighted">
-        <h3 class="cq-item-title cq-mb-sm">Highlighted Card</h3>
-        <p class="cq-body-text">Card with primary border color.</p>
-      </div>
-    </div>
+      </cq-tab>
+      <cq-tab label="Components">
+        <div class="demo-grid">
+          <cq-card type="standard"
+            ><span slot="card-title">Standard Card</span>Basic card with surface background and
+            default border.</cq-card
+          >
+          <cq-card type="elevated"
+            ><span slot="card-title">Elevated Card</span>Card with shadow for emphasis.</cq-card
+          >
+          <cq-card type="inner"
+            ><span slot="card-title">Inner Card</span>Nested inner card component.</cq-card
+          >
+          <cq-card type="highlighted"
+            ><span slot="card-title">Highlighted Card</span>Card with primary border color.</cq-card
+          >
+        </div>
+      </cq-tab>
+    </cq-tab-view>
   </section>
 
   <!-- ========== INPUTS ========== -->
@@ -460,7 +423,6 @@ document.documentElement
         ></div>
       </button>
     </div>
-
     @if (activeCodeTooltip === 'inputs') {
       <div class="demo-code-popover">
         <div class="demo-code-popover-header">
@@ -468,70 +430,111 @@ document.documentElement
           <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
         </div>
         <div class="demo-code-popover-body">
-          @for (snippet of codeSnippets['inputs']; track snippet.label) {
+          @for (snippet of codeSnippets['inputs']['css']; track snippet.label) {
             <div class="demo-snippet">
-              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              <span class="demo-snippet-label">CSS: {{ snippet.label }}</span>
               @if (snippet.html) {
-                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+                <cq-code-block
+                  [code]="snippet.html"
+                  [language]="snippet.language || 'html'"
+                ></cq-code-block>
               }
-              @if (snippet.css) {
-                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+            </div>
+          }
+          @for (snippet of codeSnippets['inputs']['component']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">Component: {{ snippet.label }}</span>
+              @if (snippet.html) {
+                <cq-code-block
+                  [code]="snippet.html"
+                  [language]="snippet.language || 'html'"
+                ></cq-code-block>
               }
             </div>
           }
         </div>
       </div>
     }
-
-    <div class="demo-grid">
-      <div class="cq-form-group">
-        <label class="cq-label">Text Input</label>
-        <div class="cq-input-wrapper">
-          <input type="text" class="cq-input" placeholder="Enter text..." />
+    <cq-tab-view>
+      <cq-tab label="CSS Classes">
+        <div class="demo-grid">
+          <div class="cq-form-group">
+            <label class="cq-label">Text Input</label>
+            <div class="cq-input-wrapper">
+              <input type="text" class="cq-input" placeholder="Enter text..." />
+            </div>
+          </div>
+          <div class="cq-form-group">
+            <label class="cq-label">Code Input</label>
+            <div class="cq-input-wrapper">
+              <input type="text" class="cq-input-code" placeholder="console.log('hello')" />
+            </div>
+          </div>
+          <div class="cq-form-group">
+            <label class="cq-label">Select Dropdown</label>
+            <div class="cq-select-wrapper">
+              <select class="cq-select">
+                <option>Option 1</option>
+                <option>Option 2</option>
+                <option>Option 3</option>
+              </select>
+            </div>
+          </div>
+          <div class="cq-form-group">
+            <label class="cq-label">Textarea</label>
+            <div class="cq-textarea-wrapper">
+              <textarea class="cq-textarea" placeholder="Enter description..." rows="3"></textarea>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div class="cq-form-group">
-        <label class="cq-label">Code Input</label>
-        <div class="cq-input-wrapper">
-          <input type="text" class="cq-input-code" placeholder="console.log('hello')" />
+        <div class="demo-label cq-mt-lg">Toggle Controls</div>
+        <div class="demo-row">
+          <div class="cq-flex cq-items-center cq-gap-sm">
+            <input type="checkbox" class="cq-switch" checked /><span class="cq-body-text"
+              >Switch Toggle</span
+            >
+          </div>
+          <div class="cq-flex cq-items-center cq-gap-sm">
+            <input type="checkbox" class="cq-checkbox" checked /><span class="cq-body-text"
+              >Checkbox</span
+            >
+          </div>
+          <div class="cq-flex cq-items-center cq-gap-sm">
+            <input type="checkbox" class="cq-checkbox" /><span class="cq-body-text">Unchecked</span>
+          </div>
         </div>
-      </div>
-
-      <div class="cq-form-group">
-        <label class="cq-label">Select Dropdown (Fixed Styling)</label>
-        <div class="cq-select-wrapper">
-          <select class="cq-select">
-            <option>Option 1 - Dark Background</option>
-            <option>Option 2 - Visible Text</option>
-            <option>Option 3 - Proper Contrast</option>
-          </select>
+      </cq-tab>
+      <cq-tab label="Components">
+        <div class="demo-grid">
+          <cq-input
+            label="Text Input"
+            placeholder="Enter text..."
+            [(ngModel)]="demoInputValue"
+          ></cq-input>
+          <cq-input
+            label="Code Input"
+            placeholder="console.log('hello')"
+            inputClass="cq-input-code"
+            [(ngModel)]="demoInputValue"
+          ></cq-input>
+          <cq-select
+            label="Select Dropdown"
+            [options]="demoSelectOptions"
+            [(ngModel)]="demoSelectValue"
+          ></cq-select>
+          <cq-textarea
+            label="Textarea"
+            placeholder="Enter description..."
+            [(ngModel)]="demoTextareaValue"
+          ></cq-textarea>
         </div>
-      </div>
-
-      <div class="cq-form-group">
-        <label class="cq-label">Textarea</label>
-        <div class="cq-textarea-wrapper">
-          <textarea class="cq-textarea" placeholder="Enter description..." rows="3"></textarea>
+        <div class="demo-label cq-mt-lg">Toggle Controls</div>
+        <div class="demo-row">
+          <cq-switch label="Switch Toggle" [(ngModel)]="demoSwitchValue"></cq-switch>
+          <cq-checkbox label="Checkbox" [(ngModel)]="demoCheckboxValue"></cq-checkbox>
         </div>
-      </div>
-    </div>
-
-    <div class="demo-label cq-mt-lg">Toggle Controls (Fixed Checkbox Centering)</div>
-    <div class="demo-row">
-      <div class="cq-flex cq-items-center cq-gap-sm">
-        <input type="checkbox" class="cq-switch" checked />
-        <span class="cq-body-text">Switch Toggle</span>
-      </div>
-      <div class="cq-flex cq-items-center cq-gap-sm">
-        <input type="checkbox" class="cq-checkbox" checked />
-        <span class="cq-body-text">Checkbox (Centered ✓)</span>
-      </div>
-      <div class="cq-flex cq-items-center cq-gap-sm">
-        <input type="checkbox" class="cq-checkbox" />
-        <span class="cq-body-text">Unchecked</span>
-      </div>
-    </div>
+      </cq-tab>
+    </cq-tab-view>
   </section>
 
   <!-- ========== BADGES ========== -->
@@ -550,7 +553,6 @@ document.documentElement
         ></div>
       </button>
     </div>
-
     @if (activeCodeTooltip === 'badges') {
       <div class="demo-code-popover">
         <div class="demo-code-popover-header">
@@ -558,52 +560,99 @@ document.documentElement
           <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
         </div>
         <div class="demo-code-popover-body">
-          @for (snippet of codeSnippets['badges']; track snippet.label) {
+          @for (snippet of codeSnippets['badges']['css']; track snippet.label) {
             <div class="demo-snippet">
-              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              <span class="demo-snippet-label">CSS: {{ snippet.label }}</span>
               @if (snippet.html) {
-                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
+                <cq-code-block
+                  [code]="snippet.html"
+                  [language]="snippet.language || 'html'"
+                ></cq-code-block>
               }
-              @if (snippet.css) {
-                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+            </div>
+          }
+          @for (snippet of codeSnippets['badges']['component']; track snippet.label) {
+            <div class="demo-snippet">
+              <span class="demo-snippet-label">Component: {{ snippet.label }}</span>
+              @if (snippet.html) {
+                <cq-code-block
+                  [code]="snippet.html"
+                  [language]="snippet.language || 'html'"
+                ></cq-code-block>
               }
             </div>
           }
         </div>
       </div>
     }
-
-    <div class="demo-row">
-      <span class="cq-badge-status">Status</span>
-      <span class="cq-badge-live">Live</span>
-      <span class="cq-badge-success">Success</span>
-      <span class="cq-badge-warning">Warning</span>
-      <span class="cq-badge-error">Error</span>
-      <span class="cq-badge-info">Info</span>
-      <button class="cq-badge-action">Action Badge</button>
-    </div>
-
-    <div class="demo-label cq-mt-lg">Small Badges</div>
-    <div class="demo-row">
-      <span class="cq-badge-success cq-badge-sm">v1.2.3</span>
-      <span class="cq-badge-status cq-badge-sm">Draft</span>
-    </div>
-
-    <div class="demo-label cq-mt-lg">Status Dots</div>
-    <div class="demo-row">
-      <div class="cq-flex cq-items-center cq-gap-sm">
-        <span class="cq-badge-dot cq-badge-dot-success"></span>
-        <span class="cq-body-text">Online</span>
-      </div>
-      <div class="cq-flex cq-items-center cq-gap-sm">
-        <span class="cq-badge-dot cq-badge-dot-error"></span>
-        <span class="cq-body-text">Offline</span>
-      </div>
-      <div class="cq-flex cq-items-center cq-gap-sm">
-        <span class="cq-badge-dot cq-badge-dot-live"></span>
-        <span class="cq-body-text">Syncing</span>
-      </div>
-    </div>
+    <cq-tab-view>
+      <cq-tab label="CSS Classes">
+        <div class="demo-row cq-mb-lg">
+          <span class="cq-badge-status">Status</span>
+          <span class="cq-badge-live">Live</span>
+          <span class="cq-badge-success">Success</span>
+          <span class="cq-badge-warning">Warning</span>
+          <span class="cq-badge-error">Error</span>
+          <span class="cq-badge-info">Info</span>
+          <button class="cq-badge-action">Action Badge</button>
+        </div>
+        <div class="demo-label">Small Badges</div>
+        <div class="demo-row cq-mb-lg">
+          <span class="cq-badge-success cq-badge-sm">v1.2.3</span>
+          <span class="cq-badge-status cq-badge-sm">Draft</span>
+        </div>
+        <div class="demo-label">Status Dots</div>
+        <div class="demo-row">
+          <div class="cq-flex cq-items-center cq-gap-sm">
+            <span class="cq-badge-dot cq-badge-dot-success"></span
+            ><span class="cq-body-text">Online</span>
+          </div>
+          <div class="cq-flex cq-items-center cq-gap-sm">
+            <span class="cq-badge-dot cq-badge-dot-error"></span
+            ><span class="cq-body-text">Offline</span>
+          </div>
+          <div class="cq-flex cq-items-center cq-gap-sm">
+            <span class="cq-badge-dot cq-badge-dot-live"></span
+            ><span class="cq-body-text">Syncing</span>
+          </div>
+        </div>
+      </cq-tab>
+      <cq-tab label="Components">
+        <div class="demo-row cq-mb-lg">
+          <cq-badge type="status">Status</cq-badge>
+          <cq-badge type="live">Live</cq-badge>
+          <cq-badge type="success">Success</cq-badge>
+          <cq-badge type="warning">Warning</cq-badge>
+          <cq-badge type="error">Error</cq-badge>
+          <cq-badge type="info">Info</cq-badge>
+          <cq-badge type="action">Action Badge</cq-badge>
+        </div>
+        <div class="demo-label">Small Badges</div>
+        <div class="demo-row cq-mb-lg">
+          <cq-badge type="success" size="sm">v1.2.3</cq-badge>
+          <cq-badge type="status" size="sm">Draft</cq-badge>
+        </div>
+        <div class="demo-label">Status Dots (dot property)</div>
+        <div class="demo-row">
+          <div class="cq-flex cq-items-center cq-gap-sm">
+            <cq-badge type="success" [dot]="true"></cq-badge>
+            <span class="cq-body-text">Online</span>
+          </div>
+          <div class="cq-flex cq-items-center cq-gap-sm">
+            <cq-badge type="error" [dot]="true"></cq-badge>
+            <span class="cq-body-text">Offline</span>
+          </div>
+          <div class="cq-flex cq-items-center cq-gap-sm">
+            <cq-badge type="live" [dot]="true"></cq-badge>
+            <span class="cq-body-text">Syncing</span>
+          </div>
+          <div class="cq-flex cq-items-center cq-gap-sm">
+            <cq-badge type="warning" [dot]="true"></cq-badge>
+            <span class="cq-body-text">Idle</span>
+          </div>
+        </div>
+      </cq-tab>
+    </cq-tab-view>
   </section>
 
   <!-- ========== TABLE ========== -->
@@ -622,7 +671,6 @@ document.documentElement
         ></div>
       </button>
     </div>
-
     @if (activeCodeTooltip === 'table') {
       <div class="demo-code-popover">
         <div class="demo-code-popover-header">
@@ -630,21 +678,20 @@ document.documentElement
           <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
         </div>
         <div class="demo-code-popover-body">
-          @for (snippet of codeSnippets['table']; track snippet.label) {
+          @for (snippet of codeSnippets['table']['css']; track snippet.label) {
             <div class="demo-snippet">
               <span class="demo-snippet-label">{{ snippet.label }}</span>
               @if (snippet.html) {
-                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
-              }
-              @if (snippet.css) {
-                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+                <cq-code-block
+                  [code]="snippet.html"
+                  [language]="snippet.language || 'html'"
+                ></cq-code-block>
               }
             </div>
           }
         </div>
       </div>
     }
-
     <div class="cq-table-container">
       <table class="cq-table">
         <thead>
@@ -669,9 +716,8 @@ document.documentElement
                         ? 'cq-badge-success cq-badge-sm'
                         : 'cq-badge-status cq-badge-sm'
                   "
+                  >{{ row.status }}</span
                 >
-                  {{ row.status }}
-                </span>
               </td>
               <td
                 [class]="
@@ -707,7 +753,6 @@ document.documentElement
         ></div>
       </button>
     </div>
-
     @if (activeCodeTooltip === 'dialogs') {
       <div class="demo-code-popover">
         <div class="demo-code-popover-header">
@@ -715,332 +760,52 @@ document.documentElement
           <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
         </div>
         <div class="demo-code-popover-body">
-          @for (snippet of codeSnippets['dialogs']; track snippet.label) {
+          @for (snippet of codeSnippets['dialogs']['component']; track snippet.label) {
             <div class="demo-snippet">
-              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              <span class="demo-snippet-label">Component: {{ snippet.label }}</span>
               @if (snippet.html) {
-                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
-              }
-              @if (snippet.css) {
-                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+                <cq-code-block
+                  [code]="snippet.html"
+                  [language]="snippet.language || 'html'"
+                ></cq-code-block>
               }
             </div>
           }
         </div>
       </div>
     }
+    <cq-tab-view>
+      <cq-tab label="CSS Classes">
+        <div class="demo-row">
+          <button class="cq-btn-primary" (click)="openQuestionDialog()">Question Dialog</button>
+          <button class="cq-btn-danger" (click)="openConfirmDialog()">Danger Dialog</button>
+          <button class="cq-btn-success" (click)="openSuccessDialog()">Success Dialog</button>
+          <button class="cq-btn-warning" (click)="openWarningDialog()">Warning Dialog</button>
+          <button class="cq-btn-secondary" (click)="openInfoDialog()">Info Dialog</button>
+          <button class="cq-btn-outlined" (click)="openFormDialog()">Form Dialog</button>
+        </div>
+      </cq-tab>
+      <cq-tab label="Components">
+        <div class="demo-row">
+          <cq-button type="primary" (clicked)="openQuestionDialog()">Question Dialog</cq-button>
+          <cq-button type="danger" (clicked)="openConfirmDialog()">Danger Dialog</cq-button>
+          <cq-button type="success" (clicked)="openSuccessDialog()">Success Dialog</cq-button>
+          <cq-button type="warning" (clicked)="openWarningDialog()">Warning Dialog</cq-button>
+          <cq-button type="secondary" (clicked)="openInfoDialog()">Info Dialog</cq-button>
+          <cq-button type="outlined" (clicked)="openFormDialog()">Form Dialog</cq-button>
+        </div>
+      </cq-tab>
+    </cq-tab-view>
 
-    <div class="demo-row">
-      <button class="cq-btn-primary" (click)="openQuestionDialog()">Question Dialog</button>
-      <button class="cq-btn-danger" (click)="openConfirmDialog()">Danger Dialog</button>
-      <button class="cq-btn-success" (click)="openSuccessDialog()">Success Dialog</button>
-      <button class="cq-btn-warning" (click)="openWarningDialog()">Warning Dialog</button>
-      <button class="cq-btn-secondary" (click)="openInfoDialog()">Info Dialog</button>
-      <button class="cq-btn-outlined" (click)="openFormDialog()">Form Dialog</button>
-    </div>
-
-    <!-- Danger Dialog (formerly Confirm) -->
-    @if (showConfirmDialog) {
-      <div class="cq-dialog-overlay" (click)="closeConfirmDialog()">
-        <div class="cq-dialog cq-dialog-sm" (click)="$event.stopPropagation()">
-          <div class="cq-confirm-dialog">
-            <div class="cq-confirm-dialog-content">
-              <div class="cq-dialog-icon cq-dialog-icon-danger">
-                <div
-                  class="cq-mask-icon cq-mask-icon-error"
-                  style="--mask-url: url('assets/icons/question.svg')"
-                ></div>
-              </div>
-              <h3 class="cq-alert-dialog-title">Delete Item?</h3>
-              <p class="cq-alert-dialog-message">
-                Are you sure you want to delete this item? This action cannot be undone.
-              </p>
-              <div class="cq-alert-dialog-actions">
-                <button class="cq-btn-secondary" (click)="closeConfirmDialog()">Cancel</button>
-                <button class="cq-btn-danger-filled" (click)="closeConfirmDialog()">Delete</button>
-              </div>
-            </div>
-          </div>
+    <!-- Dialogs are opened via CqDialogService — no inline HTML needed -->
+    @if (lastDialogResult()) {
+      <div class="cq-message cq-message-info cq-mt-md">
+        <div class="cq-message-content">
+          <h4 class="cq-message-title">Last Dialog Result</h4>
+          <p class="cq-message-text">{{ lastDialogResult() }}</p>
         </div>
       </div>
     }
-
-    <!-- Question Dialog (New) -->
-    @if (showQuestionDialog) {
-      <div class="cq-dialog-overlay" (click)="closeQuestionDialog()">
-        <div class="cq-dialog cq-dialog-sm" (click)="$event.stopPropagation()">
-          <div class="cq-confirm-dialog">
-            <div class="cq-confirm-dialog-content">
-              <div class="cq-dialog-icon cq-dialog-icon-question">
-                <div
-                  class="cq-mask-icon cq-mask-icon-primary"
-                  style="--mask-url: url('assets/icons/question.svg')"
-                ></div>
-              </div>
-              <h3 class="cq-alert-dialog-title">Confirm Action</h3>
-              <p class="cq-alert-dialog-message">Do you want to proceed with this operation?</p>
-              <div class="cq-alert-dialog-actions">
-                <button class="cq-btn-secondary" (click)="closeQuestionDialog()">No</button>
-                <button class="cq-btn-primary" (click)="closeQuestionDialog()">Yes, Proceed</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    }
-
-    <!-- Success Dialog -->
-    @if (showSuccessDialog) {
-      <div class="cq-dialog-overlay" (click)="closeSuccessDialog()">
-        <div class="cq-dialog cq-dialog-sm" (click)="$event.stopPropagation()">
-          <div class="cq-alert-dialog">
-            <div class="cq-dialog-icon cq-dialog-icon-success">
-              <div
-                class="cq-mask-icon cq-mask-icon-success"
-                style="--mask-url: url('assets/icons/success.svg')"
-              ></div>
-            </div>
-            <h3 class="cq-alert-dialog-title">Success!</h3>
-            <p class="cq-alert-dialog-message">Your changes have been saved successfully.</p>
-            <div class="cq-alert-dialog-actions">
-              <button class="cq-btn-success" (click)="closeSuccessDialog()">Continue</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    }
-
-    <!-- Warning Dialog -->
-    @if (showWarningDialog) {
-      <div class="cq-dialog-overlay" (click)="closeWarningDialog()">
-        <div class="cq-dialog cq-dialog-sm" (click)="$event.stopPropagation()">
-          <div class="cq-alert-dialog">
-            <div class="cq-dialog-icon cq-dialog-icon-warning">
-              <div
-                class="cq-mask-icon cq-mask-icon-warning"
-                style="--mask-url: url('assets/icons/warning.svg')"
-              ></div>
-            </div>
-            <h3 class="cq-alert-dialog-title">Warning</h3>
-            <p class="cq-alert-dialog-message">
-              This action may have unintended consequences. Please review before proceeding.
-            </p>
-            <div class="cq-alert-dialog-actions">
-              <button class="cq-btn-secondary" (click)="closeWarningDialog()">Cancel</button>
-              <button class="cq-btn-warning" (click)="closeWarningDialog()">Proceed Anyway</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    }
-
-    <!-- Info Dialog -->
-    @if (showInfoDialog) {
-      <div class="cq-dialog-overlay" (click)="closeInfoDialog()">
-        <div class="cq-dialog cq-dialog-sm" (click)="$event.stopPropagation()">
-          <div class="cq-alert-dialog">
-            <div class="cq-dialog-icon cq-dialog-icon-info">
-              <div
-                class="cq-mask-icon cq-mask-icon-info"
-                style="--mask-url: url('assets/icons/lightbulb.svg')"
-              ></div>
-            </div>
-            <h3 class="cq-alert-dialog-title">Did You Know?</h3>
-            <p class="cq-alert-dialog-message">
-              You can use keyboard shortcuts to navigate quickly. Press Ctrl+S to save anytime.
-            </p>
-            <div class="cq-alert-dialog-actions">
-              <button class="cq-btn-primary" (click)="closeInfoDialog()">Got it!</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    }
-
-    <!-- Form Dialog -->
-    @if (showFormDialog) {
-      <div class="cq-dialog-overlay" (click)="closeFormDialog()">
-        <div class="cq-dialog" (click)="$event.stopPropagation()">
-          <div class="cq-dialog-header">
-            <h3 class="cq-dialog-title">Create New Quiz</h3>
-            <button class="cq-dialog-close" (click)="closeFormDialog()">
-              <div
-                class="cq-mask-icon"
-                style="
-                  --mask-url: url('assets/icons/close.svg');
-                  background-color: var(--cq-text-secondary);
-                  width: 18px;
-                  height: 18px;
-                "
-              ></div>
-            </button>
-          </div>
-          <div class="cq-dialog-content">
-            <div class="cq-form-group">
-              <label class="cq-label">Quiz Title</label>
-              <div class="cq-input-wrapper">
-                <input type="text" class="cq-input" placeholder="Enter quiz title..." />
-              </div>
-            </div>
-            <div class="cq-form-group">
-              <label class="cq-label">Description</label>
-              <div class="cq-textarea-wrapper">
-                <textarea
-                  class="cq-textarea"
-                  placeholder="Enter description..."
-                  rows="3"
-                ></textarea>
-              </div>
-            </div>
-            <div class="cq-form-group">
-              <label class="cq-label">Category</label>
-              <div class="cq-select-wrapper">
-                <select class="cq-select">
-                  <option>JavaScript</option>
-                  <option>Python</option>
-                  <option>C++</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="cq-dialog-footer">
-            <button class="cq-btn-secondary" (click)="closeFormDialog()">Cancel</button>
-            <button class="cq-btn-primary" (click)="closeFormDialog()">Create Quiz</button>
-          </div>
-        </div>
-      </div>
-    }
-  </section>
-
-  <!-- ========== PAGE LAYOUT ========== -->
-  <section class="demo-section demo-section-with-code">
-    <div class="demo-section-header-row">
-      <h2 class="demo-section-title" style="margin-bottom: 0">Page Layout (MAUI-style)</h2>
-      <button class="demo-code-btn" (click)="toggleCodeTooltip('layout')" title="View code">
-        <div
-          class="cq-mask-icon"
-          style="
-            --mask-url: url('assets/icons/code.svg');
-            background-color: var(--cq-text-muted);
-            width: 18px;
-            height: 18px;
-          "
-        ></div>
-      </button>
-    </div>
-
-    @if (activeCodeTooltip === 'layout') {
-      <div class="demo-code-popover">
-        <div class="demo-code-popover-header">
-          <span class="cq-item-title">Page Layout — Usage</span>
-          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
-        </div>
-        <div class="demo-code-popover-body">
-          @for (snippet of codeSnippets['layout']; track snippet.label) {
-            <div class="demo-snippet">
-              <span class="demo-snippet-label">{{ snippet.label }}</span>
-              @if (snippet.html) {
-                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
-              }
-              @if (snippet.css) {
-                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
-              }
-            </div>
-          }
-        </div>
-      </div>
-    }
-
-    <div class="cq-card" style="padding: 0; overflow: hidden">
-      <!-- Page Header Demo -->
-      <div class="cq-page-header">
-        <button class="cq-page-header-back">
-          <img src="assets/icons/arrow_back_ios_new_rounded.svg" alt="Back" />
-        </button>
-        <div class="cq-page-header-content">
-          <h1 class="cq-page-header-title">View Quiz Submissions</h1>
-          <p class="cq-page-header-subtitle">View and grade participant submissions</p>
-        </div>
-        <div class="cq-page-header-actions">
-          <button class="cq-btn-icon">
-            <img src="assets/icons/refresh.svg" alt="Refresh" />
-          </button>
-          <button class="cq-btn-icon">
-            <img src="assets/icons/download.svg" alt="Download" />
-          </button>
-          <button class="cq-btn-primary">
-            <img
-              src="assets/icons/save.svg"
-              alt="Save"
-              class="cq-icon-light"
-              style="width: 16px; height: 16px"
-            />
-            Save Report
-          </button>
-        </div>
-      </div>
-
-      <!-- Content Area Demo -->
-      <div style="padding: 24px; display: grid; grid-template-columns: 280px 1fr; gap: 24px">
-        <!-- Sidebar Demo -->
-        <div class="cq-sidebar-card">
-          <div class="cq-sidebar-header">
-            <img src="assets/icons/stats.svg" alt="Stats" class="cq-sidebar-header-icon" />
-            <h3 class="cq-sidebar-header-title">Statistics</h3>
-          </div>
-          <div class="cq-sidebar-content">
-            <div class="cq-stat-grid">
-              <div class="cq-stat-card">
-                <div class="cq-stat-value">24</div>
-                <div class="cq-stat-label">Total</div>
-              </div>
-              <div class="cq-stat-card">
-                <div class="cq-stat-value cq-stat-value-success">18</div>
-                <div class="cq-stat-label">Submitted</div>
-              </div>
-              <div class="cq-stat-card">
-                <div class="cq-stat-value cq-stat-value-warning">72.5</div>
-                <div class="cq-stat-label">Average</div>
-              </div>
-              <div class="cq-stat-card">
-                <div class="cq-stat-value cq-stat-value-success">85%</div>
-                <div class="cq-stat-label">Pass Rate</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Main Content Demo -->
-        <div class="cq-content-card">
-          <div class="cq-table-container" style="border: 0; border-radius: 0">
-            <table class="cq-table">
-              <thead>
-                <tr>
-                  <th>Participant</th>
-                  <th>Status</th>
-                  <th>Score</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>John Smith</td>
-                  <td><span class="cq-badge-success cq-badge-sm">Graded</span></td>
-                  <td class="cq-table-cell-success">92%</td>
-                  <td><button class="cq-badge-action">Review</button></td>
-                </tr>
-                <tr>
-                  <td>Jane Doe</td>
-                  <td><span class="cq-badge-status cq-badge-sm">Pending</span></td>
-                  <td>--</td>
-                  <td><button class="cq-badge-action">Grade</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
   </section>
 
   <!-- ========== MESSAGES ========== -->
@@ -1059,7 +824,6 @@ document.documentElement
         ></div>
       </button>
     </div>
-
     @if (activeCodeTooltip === 'messages') {
       <div class="demo-code-popover">
         <div class="demo-code-popover-header">
@@ -1067,68 +831,80 @@ document.documentElement
           <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
         </div>
         <div class="demo-code-popover-body">
-          @for (snippet of codeSnippets['messages']; track snippet.label) {
+          @for (snippet of codeSnippets['messages']['component']; track snippet.label) {
             <div class="demo-snippet">
-              <span class="demo-snippet-label">{{ snippet.label }}</span>
+              <span class="demo-snippet-label">Component: {{ snippet.label }}</span>
               @if (snippet.html) {
-                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
-              }
-              @if (snippet.css) {
-                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+                <cq-code-block
+                  [code]="snippet.html"
+                  [language]="snippet.language || 'html'"
+                ></cq-code-block>
               }
             </div>
           }
         </div>
       </div>
     }
-
-    <div class="cq-message cq-message-info">
-      <div class="cq-message-icon">
-        <div
-          class="cq-mask-icon cq-mask-icon-info"
-          style="--mask-url: url('assets/icons/lightbulb.svg')"
-        ></div>
-      </div>
-      <div class="cq-message-content">
-        <h4 class="cq-message-title">Info Message</h4>
-        <p class="cq-message-text">
-          This is an informational message card using the info color scheme.
-        </p>
-      </div>
-    </div>
-
-    <div class="cq-message cq-message-warning">
-      <div class="cq-message-icon">
-        <div
-          class="cq-mask-icon cq-mask-icon-warning"
-          style="--mask-url: url('assets/icons/warning.svg')"
-        ></div>
-      </div>
-      <div class="cq-message-content">
-        <h4 class="cq-message-title">Warning Message</h4>
-        <p class="cq-message-text">
-          This is a warning message card. Pay attention to the yellow accents.
-        </p>
-      </div>
-    </div>
-
-    <div class="cq-message cq-message-error">
-      <div class="cq-message-icon">
-        <div
-          class="cq-mask-icon cq-mask-icon-error"
-          style="--mask-url: url('assets/icons/error.svg')"
-        ></div>
-      </div>
-      <div class="cq-message-content">
-        <h4 class="cq-message-title">Error Message</h4>
-        <p class="cq-message-text">
-          This is an error message card indicating something went wrong.
-        </p>
-      </div>
-    </div>
+    <cq-tab-view>
+      <cq-tab label="CSS Classes">
+        <div class="cq-message cq-message-info">
+          <div class="cq-message-icon">
+            <div
+              class="cq-mask-icon cq-mask-icon-info"
+              style="--mask-url: url('assets/icons/lightbulb.svg')"
+            ></div>
+          </div>
+          <div class="cq-message-content">
+            <h4 class="cq-message-title">Info Message</h4>
+            <p class="cq-message-text">
+              This is an informational message card using the info color scheme.
+            </p>
+          </div>
+        </div>
+        <div class="cq-message cq-message-warning">
+          <div class="cq-message-icon">
+            <div
+              class="cq-mask-icon cq-mask-icon-warning"
+              style="--mask-url: url('assets/icons/warning.svg')"
+            ></div>
+          </div>
+          <div class="cq-message-content">
+            <h4 class="cq-message-title">Warning Message</h4>
+            <p class="cq-message-text">
+              This is a warning message card. Pay attention to the yellow accents.
+            </p>
+          </div>
+        </div>
+        <div class="cq-message cq-message-error">
+          <div class="cq-message-icon">
+            <div
+              class="cq-mask-icon cq-mask-icon-error"
+              style="--mask-url: url('assets/icons/error.svg')"
+            ></div>
+          </div>
+          <div class="cq-message-content">
+            <h4 class="cq-message-title">Error Message</h4>
+            <p class="cq-message-text">
+              This is an error message card indicating something went wrong.
+            </p>
+          </div>
+        </div>
+      </cq-tab>
+      <cq-tab label="Components">
+        <cq-message type="info" title="Info Message" icon="assets/icons/lightbulb.svg"
+          >This is an informational message using the cq-message component.</cq-message
+        >
+        <cq-message type="warning" title="Warning Message" icon="assets/icons/warning.svg"
+          >This is a warning message using the cq-message component.</cq-message
+        >
+        <cq-message type="error" title="Error Message" icon="assets/icons/error.svg"
+          >This is an error message using the cq-message component.</cq-message
+        >
+      </cq-tab>
+    </cq-tab-view>
   </section>
 
-  <!-- ========== UTILITIES & ICONS ========== -->
+  <!-- ========== UTILITIES ========== -->
   <section class="demo-section demo-section-with-code">
     <div class="demo-section-header-row">
       <h2 class="demo-section-title" style="margin-bottom: 0">Utilities</h2>
@@ -1144,7 +920,6 @@ document.documentElement
         ></div>
       </button>
     </div>
-
     @if (activeCodeTooltip === 'utilities') {
       <div class="demo-code-popover">
         <div class="demo-code-popover-header">
@@ -1152,21 +927,20 @@ document.documentElement
           <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
         </div>
         <div class="demo-code-popover-body">
-          @for (snippet of codeSnippets['utilities']; track snippet.label) {
+          @for (snippet of codeSnippets['utilities']['css']; track snippet.label) {
             <div class="demo-snippet">
               <span class="demo-snippet-label">{{ snippet.label }}</span>
               @if (snippet.html) {
-                <pre class="demo-code-block"><code>{{ snippet.html }}</code></pre>
-              }
-              @if (snippet.css) {
-                <pre class="demo-code-block demo-code-css"><code>{{ snippet.css }}</code></pre>
+                <cq-code-block
+                  [code]="snippet.html"
+                  [language]="snippet.language || 'html'"
+                ></cq-code-block>
               }
             </div>
           }
         </div>
       </div>
     }
-
     <div class="demo-grid">
       <div class="cq-card">
         <div class="demo-label">Progress Bars</div>
@@ -1183,7 +957,6 @@ document.documentElement
           <div class="cq-progress-bar" style="width: 25%"></div>
         </div>
       </div>
-
       <div class="cq-card">
         <div class="demo-label">Spinners</div>
         <div class="demo-row">
@@ -1192,7 +965,6 @@ document.documentElement
           <div class="cq-spinner cq-spinner-lg"></div>
         </div>
       </div>
-
       <div class="cq-card">
         <div class="demo-label">Avatars</div>
         <div class="demo-row">
@@ -1201,7 +973,6 @@ document.documentElement
           <div class="cq-avatar cq-avatar-lg">XL</div>
         </div>
       </div>
-
       <div class="cq-card">
         <div class="demo-label">Add Item Button</div>
         <button class="cq-add-item-button" style="width: 100%">
@@ -1212,7 +983,6 @@ document.documentElement
           Add New Item
         </button>
       </div>
-
       <div class="cq-card">
         <div class="demo-label">Skeleton Loading</div>
         <div class="cq-flex cq-gap-md cq-items-center cq-mb-md">
@@ -1223,7 +993,6 @@ document.documentElement
           </div>
         </div>
       </div>
-
       <div class="cq-card">
         <div class="demo-label">Tooltips</div>
         <div class="demo-row">
@@ -1232,20 +1001,262 @@ document.documentElement
           </button>
         </div>
       </div>
-
-      <div class="cq-card">
-        <div class="demo-label">Empty State</div>
-        <div class="cq-empty-state" style="padding: 24px">
-          <img src="assets/icons/quiz.svg" alt="Empty" class="cq-empty-state-icon" />
-          <h4 class="cq-empty-state-title">No quizzes yet</h4>
-          <p class="cq-empty-state-message">Create your first quiz to get started</p>
-        </div>
-      </div>
     </div>
   </section>
 
-  <!-- FAB (Fixed) -->
-  <button class="cq-fab">
-    <img src="assets/icons/save.svg" alt="Add" />
+  <!-- ========== PAGE LAYOUT ========== -->
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <h2 class="demo-section-title" style="margin-bottom: 0">Page Layout</h2>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('page')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+    @if (activeCodeTooltip === 'page') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">Page Layout — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          <div class="demo-snippet">
+            <span class="demo-snippet-label">CSS Classes</span>
+            <pre class="demo-code-block"><code>&lt;div class="cq-page"&gt;
+  &lt;div class="cq-page-header"&gt;
+    &lt;button class="cq-page-header-back"&gt;←&lt;/button&gt;
+    &lt;div class="cq-page-header-content"&gt;
+      &lt;h1 class="cq-page-header-title"&gt;My Page&lt;/h1&gt;
+      &lt;p class="cq-page-header-subtitle"&gt;Description&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="cq-page-header-actions"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="cq-page-body"&gt;Content&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+          </div>
+          <div class="demo-snippet">
+            <span class="demo-snippet-label">Component</span>
+            <pre class="demo-code-block"><code>&lt;cq-page
+  title="My Page"
+  subtitle="Page description text"
+  [hasBackButton]="true"
+  (back)="onBackClick()"
+&gt;
+  &lt;div slot="actions"&gt;
+    &lt;cq-button type="primary"&gt;Action&lt;/cq-button&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Page content goes here --&gt;
+&lt;/cq-page&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    }
+    <cq-tab-view>
+      <cq-tab label="CSS Classes">
+        <div class="cq-card" style="padding: 0; overflow: hidden">
+          <div class="cq-page">
+            <div class="cq-page-header">
+              <button class="cq-page-header-back">
+                <img src="assets/icons/arrow_back_ios_new_rounded.svg" />
+              </button>
+              <div class="cq-page-header-content">
+                <h1 class="cq-page-header-title">Quiz Manager</h1>
+                <p class="cq-page-header-subtitle">Manage your quizzes and assignments</p>
+              </div>
+              <div class="cq-page-header-actions">
+                <button class="cq-btn-primary">New Quiz</button>
+              </div>
+            </div>
+            <div class="cq-page-body" style="padding: 24px">
+              <p class="cq-body-text">Page content goes here — forms, cards, tables, etc.</p>
+            </div>
+          </div>
+        </div>
+      </cq-tab>
+      <cq-tab label="Components">
+        <div class="cq-card" style="padding: 0; overflow: hidden">
+          <cq-page
+            title="Quiz Manager"
+            subtitle="Manage your quizzes and assignments"
+            [hasBackButton]="true"
+          >
+            <div slot="actions">
+              <cq-button type="primary">New Quiz</cq-button>
+            </div>
+            <p class="cq-body-text" style="padding: 24px">
+              Page content goes here — forms, cards, tables, etc.
+            </p>
+          </cq-page>
+        </div>
+      </cq-tab>
+    </cq-tab-view>
+  </section>
+
+  <!-- ========== TAB VIEW ========== -->
+  <section class="demo-section demo-section-with-code">
+    <div class="demo-section-header-row">
+      <h2 class="demo-section-title" style="margin-bottom: 0">TabView</h2>
+      <button class="demo-code-btn" (click)="toggleCodeTooltip('tabview')" title="View code">
+        <div
+          class="cq-mask-icon"
+          style="
+            --mask-url: url('assets/icons/code.svg');
+            background-color: var(--cq-text-muted);
+            width: 18px;
+            height: 18px;
+          "
+        ></div>
+      </button>
+    </div>
+    @if (activeCodeTooltip === 'tabview') {
+      <div class="demo-code-popover">
+        <div class="demo-code-popover-header">
+          <span class="cq-item-title">TabView — Usage</span>
+          <button class="demo-code-popover-close" (click)="closeCodeTooltip()">✕</button>
+        </div>
+        <div class="demo-code-popover-body">
+          <div class="demo-snippet">
+            <span class="demo-snippet-label">Component</span>
+            <pre class="demo-code-block"><code>&lt;cq-tab-view&gt;
+  &lt;cq-tab label="Tab One"&gt;
+    Content for first tab
+  &lt;/cq-tab&gt;
+  &lt;cq-tab label="Tab Two"&gt;
+    Content for second tab
+  &lt;/cq-tab&gt;
+  &lt;cq-tab label="Tab Three"&gt;
+    Content for third tab
+  &lt;/cq-tab&gt;
+&lt;/cq-tab-view&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    }
+    <div class="cq-card">
+      <div class="demo-label">Interactive TabView Example</div>
+      <cq-tab-view>
+        <cq-tab label="Overview">
+          <div class="cq-card cq-card-inner">
+            <h4 class="cq-item-title cq-mb-sm">Welcome to TabView</h4>
+            <p class="cq-body-text">
+              The TabView component displays content in switchable tabs with a segmented control
+              header. Each tab defines a panel with its own label.
+            </p>
+          </div>
+        </cq-tab>
+        <cq-tab label="Features">
+          <div class="demo-row cq-mb-md">
+            <cq-badge type="success">Dynamic Tabs</cq-badge>
+            <cq-badge type="info">Segmented Control</cq-badge>
+            <cq-badge type="action">Content Projection</cq-badge>
+          </div>
+          <cq-message type="info" title="Flexible Content" icon="assets/icons/lightbulb.svg"
+            >Tabs support any content — forms, cards, tables, or custom components.</cq-message
+          >
+        </cq-tab>
+        <cq-tab label="Settings">
+          <cq-input label="Project Name" placeholder="Enter project name..."></cq-input>
+          <cq-switch label="Enable notifications"></cq-switch>
+          <cq-checkbox label="Auto-save changes"></cq-checkbox>
+        </cq-tab>
+      </cq-tab-view>
+    </div>
+  </section>
+
+  @if (showColorConfigDialog) {
+    <div class="cq-dialog-overlay" (click)="closeColorConfig()">
+      <div
+        class="cq-dialog cq-dialog-lg"
+        (click)="$event.stopPropagation()"
+        style="max-height: 85vh"
+      >
+        <div class="cq-dialog-header">
+          <h3 class="cq-dialog-title">Configure Design System Colors</h3>
+          <div class="cq-flex cq-gap-sm">
+            <button class="cq-btn-ghost demo-reset-btn" (click)="resetAllColors()">
+              Reset All
+            </button>
+            <button class="cq-dialog-close" (click)="closeColorConfig()">
+              <div
+                class="cq-mask-icon"
+                style="
+                  --mask-url: url('assets/icons/close.svg');
+                  background-color: var(--cq-text-secondary);
+                  width: 18px;
+                  height: 18px;
+                "
+              ></div>
+            </button>
+          </div>
+        </div>
+        <div class="cq-dialog-content" style="overflow-y: auto">
+          @for (group of colorGroups; track group.name) {
+            <div class="demo-label cq-mt-md">{{ group.name }}</div>
+            <div class="demo-color-config-grid cq-mb-lg">
+              @for (color of group.colors; track color.variable) {
+                <div class="demo-color-config-item">
+                  <label class="color-swatch interactive">
+                    <input
+                      type="color"
+                      [value]="color.value"
+                      (input)="updateColor(color.variable, $event)"
+                      class="color-input-hidden"
+                    />
+                    <div
+                      class="color-box"
+                      [style.background-color]="'var(' + color.variable + ')'"
+                      style="width: 48px; height: 48px; border-radius: 8px"
+                    ></div>
+                  </label>
+                  <div class="demo-color-config-info">
+                    <span class="color-name">{{ color.name }}</span>
+                    <span class="color-value">{{ color.variable }}</span>
+                    <span class="cq-caption-text" style="font-size: 11px; line-height: 1.3">{{
+                      color.description
+                    }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <div class="cq-dialog-footer">
+          <button class="cq-btn-secondary" (click)="closeColorConfig()">Close</button>
+          <button class="cq-btn-primary" (click)="saveConfiguration(); closeColorConfig()">
+            <div
+              class="cq-mask-icon"
+              style="
+                --mask-url: url('assets/icons/save.svg');
+                background-color: var(--cq-text-on-primary);
+                width: 16px;
+                height: 16px;
+              "
+            ></div>
+            Export CSS File
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- FAB -->
+  <button class="cq-fab" (click)="openColorConfig()">
+    <div
+      class="cq-mask-icon"
+      style="
+        --mask-url: url('assets/icons/pencil.svg');
+        background-color: #fff;
+        width: 24px;
+        height: 24px;
+      "
+    ></div>
   </button>
 </div>

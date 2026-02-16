@@ -1,0 +1,74 @@
+// CodeQuiz Design System - Dropdown Menu
+
+.cq-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.cq-dropdown-trigger {
+  cursor: pointer;
+}
+
+.cq-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  z-index: 1000;
+  min-width: 180px;
+  max-height: 320px;
+  overflow-y: auto;
+  background-color: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-lg);
+  box-shadow: var(--cq-shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.25));
+  padding: var(--cq-spacing-xs) 0;
+  animation: cq-dropdown-enter 0.15s ease-out;
+
+  &-left {
+    left: 0;
+  }
+
+  &-right {
+    right: 0;
+  }
+}
+
+.cq-dropdown-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--cq-spacing-sm);
+  width: 100%;
+  padding: var(--cq-spacing-sm) var(--cq-spacing-md);
+  background: none;
+  border: none;
+  color: var(--cq-text-primary);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--cq-transition-fast);
+
+  &:hover:not(:disabled) {
+    background-color: var(--cq-secondary);
+  }
+
+  &-disabled {
+    color: var(--cq-text-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.cq-dropdown-divider {
+  height: 1px;
+  margin: var(--cq-spacing-xs) 0;
+  background-color: var(--cq-border-default);
+}
+
+@keyframes cq-dropdown-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -93,6 +93,51 @@
   flex: 1;
   padding: var(--cq-spacing-lg);
   overflow-y: auto;
+  background-color: var(--cq-surface-dark);
+}
+
+// ========== RESPONSIVE ==========
+
+@media (max-width: 768px) {
+  .cq-page-header {
+    padding: var(--cq-spacing-sm) var(--cq-spacing-md);
+  }
+
+  .cq-page-header-title {
+    font-size: 20px;
+  }
+
+  .cq-page-body {
+    padding: var(--cq-spacing-md);
+  }
+
+  .cq-sidebar {
+    width: 100%;
+  }
+
+  .cq-page-body-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .cq-page-header {
+    padding: var(--cq-spacing-xs) var(--cq-spacing-sm);
+    gap: var(--cq-spacing-sm);
+  }
+
+  .cq-page-header-title {
+    font-size: 18px;
+  }
+
+  .cq-page-header-back {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cq-page-body {
+    padding: var(--cq-spacing-sm);
+  }
 }
 
 // Grid layout for sidebar + content
@@ -101,6 +146,7 @@
   grid-template-columns: auto 1fr;
   gap: var(--cq-spacing-lg);
   height: 100%;
+  background-color: var(--cq-surface-dark);
 }
 
 // Full width content
@@ -108,6 +154,7 @@
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  background-color: var(--cq-surface-dark);
 }
 
 // ========== SIDEBAR ==========

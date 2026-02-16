@@ -1,0 +1,16 @@
+<div class="cq-tab-view">
+  <div class="cq-tab-headers">
+    @for (tab of tabs; track tab.label()) {
+      <button
+        class="cq-tab-header"
+        [class.cq-tab-header-active]="tab.active"
+        (click)="selectTab(tab)"
+      >
+        {{ tab.label() }}
+      </button>
+    }
+  </div>
+  <div class="cq-tab-content">
+    <ng-content></ng-content>
+  </div>
+</div>

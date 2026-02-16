@@ -1,0 +1,7 @@
+@if (visible()) {
+  <div class="cq-dialog-overlay" (click)="onOverlayClick()">
+    <div [class]="'cq-dialog ' + sizeClass" (click)="$event.stopPropagation()">
+      <ng-content></ng-content>
+    </div>
+  </div>
+}

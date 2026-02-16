@@ -1,0 +1,22 @@
+<div class="cq-page">
+  <div class="cq-page-header">
+    @if (hasBackButton()) {
+      <button class="cq-page-header-back" (click)="backClick()">
+        <img src="assets/icons/arrow_back_ios_new_rounded.svg" />
+      </button>
+    }
+    <div class="cq-page-header-content">
+      <h1 class="cq-page-header-title">{{ title() }}</h1>
+      @if (subtitle()) {
+        <p class="cq-page-header-subtitle">{{ subtitle() }}</p>
+      }
+    </div>
+    <div class="cq-page-header-actions">
+      <ng-content select="[slot=actions]"></ng-content>
+    </div>
+  </div>
+
+  <div class="cq-page-body">
+    <ng-content></ng-content>
+  </div>
+</div>

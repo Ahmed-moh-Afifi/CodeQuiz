@@ -1,0 +1,150 @@
+// CodeQuiz Design System - Toasts / Snackbar Notifications
+
+.cq-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--cq-spacing-sm);
+  max-width: 420px;
+  pointer-events: none;
+
+  @media (max-width: 480px) {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    max-width: none;
+  }
+}
+
+.cq-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cq-spacing-sm);
+  padding: var(--cq-spacing-md) var(--cq-spacing-lg);
+  border-radius: var(--cq-radius-lg);
+  background-color: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  box-shadow: var(--cq-shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.25));
+  color: var(--cq-text-primary);
+  font-size: 14px;
+  pointer-events: all;
+  position: relative;
+  overflow: hidden;
+  animation: cq-toast-enter 0.3s ease-out;
+
+  &-message {
+    flex: 1;
+    line-height: 1.5;
+  }
+
+  &-action {
+    background: none;
+    border: none;
+    color: var(--cq-primary);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &-close {
+    background: none;
+    border: none;
+    color: var(--cq-text-muted);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 0 0 var(--cq-spacing-xs);
+    line-height: 1;
+    flex-shrink: 0;
+    opacity: 0.6;
+    transition: opacity var(--cq-transition-fast);
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &-timer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background-color: var(--cq-primary);
+    animation: cq-toast-timer linear forwards;
+    border-radius: 0 0 0 var(--cq-radius-lg);
+  }
+
+  // Type-specific accent borders and timer colors
+  &-success {
+    border-left: 3px solid var(--cq-success);
+    .cq-toast-timer {
+      background-color: var(--cq-success);
+    }
+  }
+
+  &-error {
+    border-left: 3px solid var(--cq-error);
+    .cq-toast-timer {
+      background-color: var(--cq-error);
+    }
+  }
+
+  &-warning {
+    border-left: 3px solid var(--cq-warning);
+    .cq-toast-timer {
+      background-color: var(--cq-warning);
+    }
+  }
+
+  &-info {
+    border-left: 3px solid var(--cq-info);
+    .cq-toast-timer {
+      background-color: var(--cq-info);
+    }
+  }
+
+  // Exit animation
+  &-exit {
+    animation: cq-toast-exit 0.3s ease-in forwards;
+  }
+}
+
+@keyframes cq-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes cq-toast-exit {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes cq-toast-timer {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
