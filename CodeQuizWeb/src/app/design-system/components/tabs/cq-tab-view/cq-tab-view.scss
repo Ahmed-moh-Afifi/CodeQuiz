@@ -44,3 +44,15 @@
 .cq-tab-content {
   width: 100%;
 }
+
+// Responsive
+@media (max-width: 768px) {
+  .cq-tab-headers {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cq-tab-header {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}

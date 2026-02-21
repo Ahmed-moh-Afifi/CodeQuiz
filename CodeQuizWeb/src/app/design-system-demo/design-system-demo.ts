@@ -17,12 +17,23 @@ import {
   CqCodeBlock,
   CqDialogService,
   CqToastService,
+  CqLoadingService,
   CqTooltipDirective,
   CqAvatar,
   CqProgressBar,
   CqDropdown,
   CqDropdownItem,
   CqDropdownDivider,
+  CqSideNav,
+  CqSideNavItem,
+  CqSideNavGroup,
+  CqAccordionItem,
+  CqChip,
+  CqBreadcrumb,
+  CqBreadcrumbItem,
+  CqSkeleton,
+  CqEmptyState,
+  CqPagination,
 } from '../design-system';
 import { CreateQuizDialog } from './dialogs/create-quiz-dialog';
 
@@ -70,6 +81,16 @@ interface ColorGroup {
     CqDropdown,
     CqDropdownItem,
     CqDropdownDivider,
+    CqSideNav,
+    CqSideNavItem,
+    CqSideNavGroup,
+    CqAccordionItem,
+    CqChip,
+    CqBreadcrumb,
+    CqBreadcrumbItem,
+    CqSkeleton,
+    CqEmptyState,
+    CqPagination,
   ],
   templateUrl: './design-system-demo.html',
   styleUrl: './design-system-demo.scss',
@@ -87,6 +108,9 @@ export class DesignSystemDemoComponent {
 
   // Color config dialog (kept inline since it modifies the page)
   showColorConfigDialog = false;
+  configTheme: 'dark' | 'light' = 'dark';
+  darkColors: Record<string, string> = {};
+  lightColors: Record<string, string> = {};
 
   // Last dialog result for demo
   lastDialogResult = signal<string>('');
@@ -97,6 +121,35 @@ export class DesignSystemDemoComponent {
 
   // Active code tooltip
   activeCodeTooltip: string | null = null;
+
+  // Side nav demo
+  sideNavCollapsed = false;
+  sideNavActiveItem = 'dashboard';
+
+  // Chip demo
+  chipList = ['Angular', 'TypeScript', 'SCSS', 'Design System'];
+
+  // Pagination demo
+  demoPaginationPage = 1;
+
+  // Quick guide code strings
+  quickGuide = {
+    import: `// In your styles.scss
+@use 'styles/design-system';`,
+    components: `import { CqButton, CqCard,
+  CqInput, CqDialog
+} from './design-system';`,
+    theme: `document.documentElement
+  .setAttribute('data-theme', 'light');
+// Default is dark theme`,
+    usage: `<cq-button type="primary">
+  Click Me
+</cq-button>
+<cq-card type="elevated">
+  <span slot="card-title">Hi</span>
+  Content here
+</cq-card>`,
+  };
 
   // Component demo form values
   demoInputValue = '';
@@ -395,6 +448,16 @@ export class DesignSystemDemoComponent {
   loadingText="Saving...">
   Save Changes
 </cq-button>`,
+        },
+        {
+          label: 'Icon Buttons',
+          html: `<button class="cq-btn-icon">
+  <div class="cq-mask-icon"
+    style="--mask-url: url('icon.svg')"></div>
+</button>
+<button class="cq-btn-icon-primary">...</button>
+<button class="cq-btn-icon-outlined">...</button>
+<button class="cq-btn-icon-danger">...</button>`,
         },
       ],
     },
@@ -824,12 +887,170 @@ this.toast.info('New version available.');`,
         },
       ],
     },
+    tabview: {
+      css: [],
+      component: [
+        {
+          label: 'TabView',
+          html: `<cq-tab-view>
+  <cq-tab label="Tab One">
+    Content for first tab
+  </cq-tab>
+  <cq-tab label="Tab Two">
+    Content for second tab
+  </cq-tab>
+  <cq-tab label="Tab Three">
+    Content for third tab
+  </cq-tab>
+</cq-tab-view>`,
+        },
+      ],
+    },
+    sideNav: {
+      css: [],
+      component: [
+        {
+          label: 'Side Navigation',
+          html: `<cq-side-nav [(collapsed)]="isCollapsed">
+  <div slot="header">
+    <span class="logo">App</span>
+  </div>
+  <cq-side-nav-item
+    label="Dashboard" icon="assets/icons/home.svg"
+    [active]="true"
+  ></cq-side-nav-item>
+  <cq-side-nav-group label="Settings">
+    <cq-side-nav-item label="Profile">
+    </cq-side-nav-item>
+  </cq-side-nav-group>
+</cq-side-nav>`,
+        },
+      ],
+    },
+    loading: {
+      css: [],
+      component: [
+        {
+          label: 'Loading Service',
+          language: 'typescript',
+          html: `// Inject the service
+constructor(private loading: CqLoadingService) {}
+
+// Show loading overlay
+const ref = this.loading.show('Saving...');
+
+// After operation completes:
+this.loading.hide(ref);
+
+// Supports stacking multiple calls
+const ref1 = this.loading.show('Step 1...');
+const ref2 = this.loading.show('Step 2...');
+this.loading.hide(ref1); // still visible
+this.loading.hide(ref2); // now hidden
+
+// Force-clear all
+this.loading.hideAll();`,
+        },
+      ],
+    },
+    accordion: {
+      css: [],
+      component: [
+        {
+          label: 'Accordion',
+          html: `<cq-accordion-item title="Section 1" [expanded]="true">
+  Content for section 1
+</cq-accordion-item>
+<cq-accordion-item title="Section 2">
+  Content for section 2
+</cq-accordion-item>`,
+        },
+      ],
+    },
+    chips: {
+      css: [],
+      component: [
+        {
+          label: 'Chips',
+          html: `<cq-chip>Default</cq-chip>
+<cq-chip type="primary">Primary</cq-chip>
+<cq-chip type="success">Active</cq-chip>
+<cq-chip [removable]="true"
+  (removed)="onRemove()">Removable</cq-chip>
+
+<!-- Opt-in selectable toggle -->
+<cq-chip [selectable]="true"
+  (selectedChange)="onSelect($event)">
+  Selectable
+</cq-chip>`,
+        },
+      ],
+    },
+    breadcrumbs: {
+      css: [],
+      component: [
+        {
+          label: 'Breadcrumb',
+          html: `<cq-breadcrumb>
+  <cq-breadcrumb-item label="Home"
+    (selected)="goHome()"></cq-breadcrumb-item>
+  <cq-breadcrumb-item label="Settings"
+    (selected)="goSettings()"></cq-breadcrumb-item>
+  <cq-breadcrumb-item label="Profile"
+    [link]="false"></cq-breadcrumb-item>
+</cq-breadcrumb>`,
+        },
+      ],
+    },
+    skeleton: {
+      css: [],
+      component: [
+        {
+          label: 'Skeleton Loader',
+          html: `<cq-skeleton variant="text"></cq-skeleton>
+<cq-skeleton variant="text" width="60%"></cq-skeleton>
+<cq-skeleton variant="circular"
+  width="48px" height="48px"></cq-skeleton>
+<cq-skeleton variant="rectangular"
+  height="120px"></cq-skeleton>`,
+        },
+      ],
+    },
+    emptyState: {
+      css: [],
+      component: [
+        {
+          label: 'Empty State',
+          html: `<cq-empty-state
+  icon="assets/icons/search.svg"
+  title="No results found"
+  message="Try adjusting your search.">
+  <cq-button type="outlined">Clear Filters</cq-button>
+</cq-empty-state>`,
+        },
+      ],
+    },
+    pagination: {
+      css: [],
+      component: [
+        {
+          label: 'Pagination',
+          html: `<cq-pagination
+  [totalItems]="150"
+  [pageSize]="10"
+  [currentPage]="1"
+  (pageChange)="onPageChange($event)">
+</cq-pagination>`,
+        },
+      ],
+    },
   };
 
   constructor(
     private dialogService: CqDialogService,
     private cdr: ChangeDetectorRef,
     private toastService: CqToastService,
+    private loadingService: CqLoadingService,
   ) {
     const savedTheme = localStorage.getItem('cq-theme') as 'dark' | 'light';
     if (savedTheme) {
@@ -849,10 +1070,82 @@ this.toast.info('New version available.');`,
     });
   }
 
+  // Read colors for a specific theme by temporarily switching to it
+  private readThemeColors(theme: 'dark' | 'light'): Record<string, string> {
+    const originalTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    // Remove inline overrides temporarily for accurate reading
+    const savedOverrides: { variable: string; value: string }[] = [];
+    this.colorGroups.forEach((group) => {
+      group.colors.forEach((color) => {
+        const inlineVal = document.documentElement.style.getPropertyValue(color.variable);
+        if (inlineVal) {
+          savedOverrides.push({ variable: color.variable, value: inlineVal });
+          document.documentElement.style.removeProperty(color.variable);
+        }
+      });
+    });
+
+    document.documentElement.setAttribute('data-theme', theme);
+    const computedStyle = getComputedStyle(document.documentElement);
+    const colors: Record<string, string> = {};
+    this.colorGroups.forEach((group) => {
+      group.colors.forEach((color) => {
+        const value = computedStyle.getPropertyValue(color.variable).trim();
+        colors[color.variable] = this.rgbToHex(value) || value;
+      });
+    });
+
+    // Restore
+    document.documentElement.setAttribute('data-theme', originalTheme);
+    savedOverrides.forEach((o) => document.documentElement.style.setProperty(o.variable, o.value));
+    return colors;
+  }
+
+  openColorConfig() {
+    // Read default theme colors for both themes
+    if (Object.keys(this.darkColors).length === 0) {
+      this.darkColors = this.readThemeColors('dark');
+    }
+    if (Object.keys(this.lightColors).length === 0) {
+      this.lightColors = this.readThemeColors('light');
+    }
+    this.configTheme = this.currentTheme();
+    this.syncConfigThemeToUI();
+    this.showColorConfigDialog = true;
+  }
+
+  closeColorConfig() {
+    this.showColorConfigDialog = false;
+  }
+
+  switchConfigTheme(theme: 'dark' | 'light') {
+    this.configTheme = theme;
+    this.syncConfigThemeToUI();
+  }
+
+  private syncConfigThemeToUI() {
+    const colors = this.configTheme === 'dark' ? this.darkColors : this.lightColors;
+    this.colorGroups.forEach((group) => {
+      group.colors.forEach((color) => {
+        color.value = colors[color.variable] || '';
+      });
+    });
+  }
+
   updateColor(variable: string, event: Event) {
     const input = event.target as HTMLInputElement;
     const value = input.value;
-    document.documentElement.style.setProperty(variable, value);
+    // Store in the correct theme map
+    if (this.configTheme === 'dark') {
+      this.darkColors[variable] = value;
+    } else {
+      this.lightColors[variable] = value;
+    }
+    // Apply live preview if editing the currently active theme
+    if (this.configTheme === this.currentTheme()) {
+      document.documentElement.style.setProperty(variable, value);
+    }
+    // Update UI
     this.colorGroups.forEach((group) => {
       const color = group.colors.find((c) => c.variable === variable);
       if (color) color.value = value;
@@ -873,6 +1166,8 @@ this.toast.info('New version available.');`,
   }
 
   resetAllColors() {
+    this.darkColors = this.readThemeColors('dark');
+    this.lightColors = this.readThemeColors('light');
     this.colorGroups.forEach((group) => {
       group.colors.forEach((color) => {
         document.documentElement.style.removeProperty(color.variable);
@@ -882,7 +1177,7 @@ this.toast.info('New version available.');`,
       fs.value = fs.default;
       document.documentElement.style.removeProperty(fs.variable);
     });
-    setTimeout(() => this.initializeAllColors(), 50);
+    this.syncConfigThemeToUI();
   }
 
   toggleCodeTooltip(sectionId: string) {
@@ -1019,44 +1314,55 @@ this.toast.info('New version available.');`,
     this.toastService.info('A new version is available.');
   }
 
-  openColorConfig() {
-    this.showColorConfigDialog = true;
+  // Loading demo
+  showLoading() {
+    const ref = this.loadingService.show('Processing your request...');
+    setTimeout(() => this.loadingService.hide(ref), 2500);
   }
-  closeColorConfig() {
-    this.showColorConfigDialog = false;
+
+  // Chip demo
+  removeChip(index: number) {
+    this.chipList = this.chipList.filter((_, i) => i !== index);
   }
 
   // Save/Export configuration
   saveConfiguration() {
     const lines: string[] = [
-      '/* CodeQuiz Design System — Custom Configuration */',
+      '/* CodeQuiz Design System — Custom Theme Configuration */',
       `/* Generated: ${new Date().toISOString()} */`,
-      `/* Theme: ${this.currentTheme()} */`,
       '',
-      ':root {',
     ];
 
-    // Collect color overrides
+    // Dark theme block
+    lines.push(':root,');
+    lines.push("[data-theme='dark'] {");
     this.colorGroups.forEach((group) => {
       lines.push(`  /* ${group.name} */`);
       group.colors.forEach((color) => {
-        if (color.value) {
-          lines.push(`  ${color.variable}: ${color.value};`);
-        }
+        const val = this.darkColors[color.variable];
+        if (val) lines.push(`  ${color.variable}: ${val};`);
       });
       lines.push('');
     });
-
-    // Collect font size overrides
-    const changedFonts = this.fontSizes.filter((fs) => fs.value !== fs.default);
-    if (changedFonts.length > 0) {
+    const changedFontsDark = this.fontSizes.filter((fs) => fs.value !== fs.default);
+    if (changedFontsDark.length > 0) {
       lines.push('  /* Font Sizes */');
-      changedFonts.forEach((fs) => {
-        lines.push(`  ${fs.variable}: ${fs.value}px;`);
-      });
+      changedFontsDark.forEach((fs) => lines.push(`  ${fs.variable}: ${fs.value}px;`));
       lines.push('');
     }
+    lines.push('}');
+    lines.push('');
 
+    // Light theme block
+    lines.push("[data-theme='light'] {");
+    this.colorGroups.forEach((group) => {
+      lines.push(`  /* ${group.name} */`);
+      group.colors.forEach((color) => {
+        const val = this.lightColors[color.variable];
+        if (val) lines.push(`  ${color.variable}: ${val};`);
+      });
+      lines.push('');
+    });
     lines.push('}');
 
     // Download as CSS file
@@ -1064,7 +1370,7 @@ this.toast.info('New version available.');`,
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `cq-design-system-config-${this.currentTheme()}.css`;
+    link.download = 'cq-design-system-theme.css';
     link.click();
     URL.revokeObjectURL(url);
   }

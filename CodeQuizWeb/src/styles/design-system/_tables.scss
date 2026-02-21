@@ -108,3 +108,19 @@
     padding: 10px 16px;
   }
 }
+
+// Responsive
+@media (max-width: 768px) {
+  .cq-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cq-table {
+    min-width: 500px;
+  }
+  .cq-table th,
+  .cq-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+}

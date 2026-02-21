@@ -1,5 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectorRef } from '@angular/core';
 
 export interface ToastConfig {
   id: number;
@@ -20,14 +19,23 @@ const ICON_MAP: Record<string, string> = {
 @Component({
   selector: 'cq-toast-container',
   standalone: true,
-  imports: [CommonModule],
   template: `
     <div class="cq-toast-container">
       @for (toast of toasts; track toast.id) {
-        <div [class]="'cq-toast cq-toast-' + toast.type + (toast.removing ? ' cq-toast-exit' : '')">
+        <div
+          class="cq-toast"
+          [class.cq-toast-success]="toast.type === 'success'"
+          [class.cq-toast-error]="toast.type === 'error'"
+          [class.cq-toast-warning]="toast.type === 'warning'"
+          [class.cq-toast-info]="toast.type === 'info'"
+          [class.cq-toast-exit]="toast.removing"
+        >
           <div
             class="cq-mask-icon"
-            [class]="'cq-mask-icon cq-mask-icon-' + toast.type"
+            [class.cq-mask-icon-success]="toast.type === 'success'"
+            [class.cq-mask-icon-error]="toast.type === 'error'"
+            [class.cq-mask-icon-warning]="toast.type === 'warning'"
+            [class.cq-mask-icon-info]="toast.type === 'info'"
             [style.--mask-url]="'url(' + getIcon(toast.type) + ')'"
             style="width: 20px; height: 20px; flex-shrink: 0"
           ></div>
@@ -47,12 +55,15 @@ const ICON_MAP: Record<string, string> = {
 export class CqToastContainer {
   toasts: ToastConfig[] = [];
 
+  constructor(private cdr: ChangeDetectorRef) {}
+
   getIcon(type: string): string {
     return ICON_MAP[type] || ICON_MAP['info'];
   }
 
   addToast(toast: ToastConfig) {
-    this.toasts.push(toast);
+    this.toasts = [...this.toasts, toast];
+    this.cdr.detectChanges();
 
     if (toast.duration > 0) {
       setTimeout(() => this.dismiss(toast), toast.duration);
@@ -63,9 +74,12 @@ export class CqToastContainer {
     const t = this.toasts.find((x) => x.id === toast.id);
     if (t && !t.removing) {
       t.removing = true;
+      this.cdr.detectChanges();
+
       setTimeout(() => {
         this.toasts = this.toasts.filter((x) => x.id !== toast.id);
-      }, 300); // match exit animation duration
+        this.cdr.detectChanges();
+      }, 300);
     }
   }
 }

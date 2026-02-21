@@ -1,0 +1,277 @@
+// ========== Side Navigation ==========
+// The cq-side-nav HOST element IS the container (no inner nav wrapper).
+// Width + transition are set via @HostBinding in the component.
+// The .cq-side-nav-collapsed class is on the HOST element via @HostBinding.
+
+// Collapsed state — targets children inside the host
+cq-side-nav.cq-side-nav-collapsed {
+  .cq-side-nav-item-label,
+  .cq-side-nav-group-label,
+  .cq-side-nav-group-chevron {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.15s ease,
+      width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .cq-side-nav-header {
+    justify-content: center;
+    padding: 12px 0;
+  }
+
+  .cq-side-nav-item {
+    justify-content: center;
+    padding: 10px 0;
+
+    &::before {
+      width: 0 !important;
+    }
+    &:hover {
+      padding-left: 0;
+    }
+  }
+
+  .cq-side-nav-group-header {
+    justify-content: center;
+    padding: 8px 0;
+  }
+
+  .cq-side-nav-group::before {
+    margin: 4px 8px;
+  }
+}
+
+.cq-side-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--cq-border-default);
+  min-height: 56px;
+  transition:
+    padding 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    justify-content 0.35s;
+}
+
+.cq-side-nav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--cq-radius-md);
+  background: transparent;
+  color: var(--cq-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover {
+    background-color: var(--cq-secondary-hover);
+    color: var(--cq-text-primary);
+  }
+  &:active {
+    transform: scale(0.9);
+  }
+}
+
+.cq-side-nav-toggle-icon {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cq-side-nav-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0;
+
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--cq-border-subtle);
+    border-radius: 4px;
+  }
+}
+
+.cq-side-nav-footer {
+  border-top: 1px solid var(--cq-border-default);
+  padding: 12px 16px;
+  &:empty {
+    display: none;
+  }
+}
+
+// ========== Side Nav Item ==========
+.cq-side-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--cq-text-secondary);
+  font-size: var(--cq-font-size-body, 14px);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    padding-left 0.2s ease;
+
+  // Active indicator bar
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    height: 60%;
+    width: 0;
+    border-radius: 0 3px 3px 0;
+    background: var(--cq-primary);
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .cq-mask-icon {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover:not(.disabled) {
+    background-color: var(--cq-secondary-hover);
+    color: var(--cq-text-primary);
+    padding-left: 20px;
+  }
+
+  &.active {
+    color: var(--cq-text-primary);
+    background: linear-gradient(
+      90deg,
+      var(--cq-primary-transparent, rgba(89, 28, 33, 0.15)) 0%,
+      transparent 100%
+    );
+    font-weight: 500;
+
+    &::before {
+      width: 3px;
+    }
+
+    .cq-mask-icon {
+      background-color: var(--cq-primary) !important;
+    }
+  }
+
+  &.disabled {
+    color: var(--cq-text-disabled);
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.cq-side-nav-item-label {
+  overflow: hidden;
+  transition:
+    opacity 0.2s ease 0.05s,
+    width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ========== Side Nav Group ==========
+.cq-side-nav-group {
+  margin: 4px 0;
+
+  &::before {
+    content: '';
+    display: block;
+    height: 1px;
+    margin: 4px 16px;
+    background: var(--cq-border-default);
+    transition: margin 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+.cq-side-nav-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: var(--cq-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    color: var(--cq-text-secondary);
+  }
+}
+
+.cq-side-nav-group-label {
+  overflow: hidden;
+  transition:
+    opacity 0.2s ease,
+    width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cq-side-nav-group-chevron {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 700;
+  transform: rotate(90deg);
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s ease;
+}
+
+.cq-side-nav-group.expanded .cq-side-nav-group-chevron {
+  transform: rotate(-90deg);
+}
+
+// Group items collapse with max-height
+.cq-side-nav-group-items {
+  max-height: 500px;
+  overflow: hidden;
+  transition:
+    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease;
+  opacity: 1;
+
+  &.cq-group-collapsed {
+    max-height: 0;
+    opacity: 0;
+  }
+}
+
+// ========== Light Theme ==========
+[data-theme='light'] {
+  .cq-side-nav-item.active {
+    background: linear-gradient(
+      90deg,
+      var(--cq-primary-transparent, rgba(163, 61, 71, 0.12)) 0%,
+      transparent 100%
+    );
+  }
+}
