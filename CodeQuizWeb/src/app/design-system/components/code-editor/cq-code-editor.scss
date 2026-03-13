@@ -1,0 +1,144 @@
+.cq-editor {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-md);
+  overflow: hidden;
+  background: #1e1e1e; // Monaco vs-dark bg
+}
+
+// ─── Header ───────────────────────────────────────────
+.cq-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--cq-surface-dark);
+  border-bottom: 1px solid var(--cq-border-default);
+  min-height: 40px;
+}
+
+.cq-editor-file-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--cq-font-mono);
+  font-size: 13px;
+  color: var(--cq-text-muted);
+}
+
+.cq-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cq-editor-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid var(--cq-border-default);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--cq-text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    background: var(--cq-elevated-surface);
+    color: var(--cq-text-primary);
+  }
+}
+
+.cq-editor-run-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--cq-primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.1);
+  }
+
+  &:disabled,
+  &.running {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+// ─── Monaco Container ─────────────────────────────────
+.cq-editor-monaco {
+  flex: 1;
+  min-height: 250px;
+}
+
+// ─── I/O Panel ────────────────────────────────────────
+.cq-editor-io {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--cq-border-default);
+}
+
+.cq-editor-io-col {
+  display: flex;
+  flex-direction: column;
+
+  &:first-child {
+    border-right: 1px solid var(--cq-border-default);
+  }
+}
+
+.cq-editor-io-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cq-text-muted);
+  background: var(--cq-surface-dark);
+  border-bottom: 1px solid var(--cq-border-default);
+}
+
+.cq-editor-io-textarea {
+  padding: 10px 12px;
+  background: var(--cq-background-dark);
+  border: none;
+  color: var(--cq-text-primary);
+  font-family: var(--cq-font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  min-height: 80px;
+
+  &::placeholder {
+    color: var(--cq-text-disabled);
+  }
+}
+
+.cq-editor-io-output {
+  padding: 10px 12px;
+  background: var(--cq-background-dark);
+  margin: 0;
+  color: var(--cq-text-secondary);
+  font-family: var(--cq-font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 80px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

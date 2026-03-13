@@ -1,0 +1,71 @@
+<div class="login-page">
+  <!-- Decorative Background Lines -->
+  <div class="login-bg-line login-bg-line-1">
+    <span class="login-bg-text">Roses are red,</span>
+  </div>
+  <div class="login-bg-line login-bg-line-2">
+    <span class="login-bg-text">Violets are blue,</span>
+  </div>
+  <div class="login-bg-line login-bg-line-3">
+    <span class="login-bg-text login-bg-text-highlight">Unexpected '&#123;' on line 32</span>
+  </div>
+
+  <!-- Centered Login Card -->
+  <div class="login-card">
+    <div class="login-card-inner">
+      <h1 class="login-title">Can you fix it?</h1>
+
+      <form class="login-form" (ngSubmit)="onLogin()">
+        <div class="json-form">
+          <span class="json-brace">&#123;</span>
+
+          <div class="json-field">
+            <span class="json-key">"username"</span>
+            <span class="json-colon">:</span>
+            <input
+              type="text"
+              class="json-input"
+              placeholder="enter_username"
+              [(ngModel)]="username"
+              name="username"
+              autocomplete="username"
+            />
+            <span class="json-comma">,</span>
+          </div>
+
+          <div class="json-field">
+            <span class="json-key">"password"</span>
+            <span class="json-colon">:</span>
+            <input
+              type="password"
+              class="json-input"
+              placeholder="enter_password"
+              [(ngModel)]="password"
+              name="password"
+              autocomplete="current-password"
+            />
+          </div>
+
+          <span class="json-brace">&#125;</span>
+        </div>
+
+        @if (error()) {
+          <div class="login-error">{{ error() }}</div>
+        }
+
+        <cq-button type="primary" [loading]="loading()" loadingText="Logging in...">
+          Login
+        </cq-button>
+      </form>
+
+      <div class="login-links">
+        <button type="button" class="login-link" [routerLink]="['/app/register']">
+          Don't have an account? <strong>Register</strong>
+        </button>
+        <button type="button" class="login-link" (click)="onForgotPassword()">
+          Forgot Password
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

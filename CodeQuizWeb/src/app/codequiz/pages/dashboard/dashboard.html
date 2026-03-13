@@ -1,0 +1,192 @@
+@if (loading()) {
+  <div class="dashboard-loading">
+    <cq-skeleton variant="rectangular" width="100%" height="180px" />
+    <div class="dashboard-grid">
+      <cq-skeleton variant="rectangular" width="100%" height="200px" />
+      <cq-skeleton variant="rectangular" width="100%" height="200px" />
+    </div>
+  </div>
+} @else {
+  <!-- Page Header -->
+  <div class="dash-page-header">
+    <h1>Dashboard</h1>
+    <span class="dash-page-subtitle">Welcome back! Here's an overview of your activity.</span>
+  </div>
+
+  <!-- Hero Card -->
+  <div class="hero-card">
+    <div class="hero-content">
+      @if (hasRunningAttempts()) {
+        <div class="hero-running-badge">● IN PROGRESS</div>
+        <h2 class="hero-title">You have an active quiz!</h2>
+        <p class="hero-subtitle">Don't forget to complete your attempt before time runs out.</p>
+        <div class="hero-actions">
+          <cq-button type="primary" (clicked)="continueAttempt(runningAttempts()[0])">
+            Continue Quiz
+          </cq-button>
+        </div>
+      } @else {
+        <h2 class="hero-title">Ready to test your skills?</h2>
+        <p class="hero-subtitle">
+          Join a quiz with a code or create your own challenge for others.
+        </p>
+        <div class="hero-actions">
+          <cq-button type="primary" (clicked)="navigateJoinQuiz()">Join Quiz</cq-button>
+          <cq-button type="outlined" (clicked)="navigateCreateQuiz()">Create Quiz</cq-button>
+        </div>
+      }
+    </div>
+    <div class="hero-code-panel">
+      <pre class="hero-code-block"><code><span class="cb">&#123;</span>
+  <span class="ck">"joined"</span>: <span class="cv">{{ statsJson().joined }}</span>,
+  <span class="ck">"created"</span>: <span class="cv">{{ statsJson().created }}</span>,
+  <span class="ck">"active"</span>: <span class="cv">{{ statsJson().active }}</span>,
+  <span class="ck">"status"</span>: <span class="cs">"ready"</span>
+<span class="cb">&#125;</span></code></pre>
+      <div class="hero-code-divider"></div>
+      <span class="hero-code-comment">// Keep challenging, Keep coding!</span>
+    </div>
+  </div>
+
+  <!-- Two Column Grid -->
+  <div class="dashboard-grid">
+    <!-- Joined Quizzes Card -->
+    <div class="dash-section-card">
+      <div class="dash-section-header">
+        <div class="dash-section-title-row">
+          <div class="dash-icon-badge dash-icon-primary">
+            <cq-icon src="assets/icons/pencil.svg" [size]="18" color="primary" />
+          </div>
+          <h2 class="dash-section-title">Joined Quizzes</h2>
+        </div>
+        <span class="dash-link" (click)="navigateJoinQuiz()">View All →</span>
+      </div>
+
+      <div class="dash-section-body">
+        @if (joinedAttempts().length === 0) {
+          <div class="dash-empty">
+            <div class="dash-empty-icon">
+              <cq-icon src="assets/icons/clipboard.svg" [size]="22" color="muted" />
+            </div>
+            <span class="dash-empty-title">No quizzes joined yet</span>
+            <span class="dash-empty-hint">Join one using a quiz code</span>
+          </div>
+        } @else {
+          <div class="dash-item-list">
+            @for (attempt of joinedAttempts().slice(0, 5); track attempt.id) {
+              <div class="dash-item-card">
+                <div class="dash-item-top">
+                  <span class="dash-item-title">{{ attempt.quiz.title }}</span>
+                  <cq-badge [type]="getAttemptStatusBadgeType(attempt)">
+                    {{ attempt.endTime ? 'COMPLETED' : 'LIVE' }}
+                  </cq-badge>
+                </div>
+                <div class="dash-item-meta">
+                  <span
+                    >Created by: {{ attempt.quiz.examiner.firstName }}
+                    {{ attempt.quiz.examiner.lastName }}</span
+                  >
+                  <span>{{ attempt.quiz.questionsCount }} Questions</span>
+                </div>
+                @if (!attempt.endTime) {
+                  <div class="dash-item-detail">
+                    <span class="dash-detail-label">Started:</span>
+                    <span class="dash-detail-value">{{
+                      attempt.startTime | date: 'MMM dd, HH:mm'
+                    }}</span>
+                  </div>
+                } @else {
+                  <div class="dash-item-detail">
+                    <span class="dash-detail-label">Score:</span>
+                    <span class="dash-detail-value dash-success-text">{{
+                      formatScore(attempt)
+                    }}</span>
+                  </div>
+                }
+                <div class="dash-item-actions">
+                  @if (!attempt.endTime) {
+                    <cq-button type="primary" (clicked)="continueAttempt(attempt)"
+                      >Continue</cq-button
+                    >
+                  } @else {
+                    <cq-button type="outlined" (clicked)="viewResults(attempt)"
+                      >View Results</cq-button
+                    >
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Created Quizzes Card -->
+    <div class="dash-section-card">
+      <div class="dash-section-header">
+        <div class="dash-section-title-row">
+          <div class="dash-icon-badge dash-icon-success">
+            <cq-icon src="assets/icons/teacher.svg" [size]="18" color="success" />
+          </div>
+          <h2 class="dash-section-title">Created Quizzes</h2>
+        </div>
+        <span class="dash-link" (click)="navigateCreateQuiz()">Manage All →</span>
+      </div>
+
+      <div class="dash-section-body">
+        @if (createdQuizzes().length === 0) {
+          <div class="dash-empty">
+            <div class="dash-empty-icon">
+              <cq-icon src="assets/icons/teacher.svg" [size]="22" color="muted" />
+            </div>
+            <span class="dash-empty-title">No quizzes created yet</span>
+            <span class="dash-empty-hint">Create your first quiz to get started</span>
+            <cq-button type="outlined" (clicked)="navigateCreateQuiz()">+ New Quiz</cq-button>
+          </div>
+        } @else {
+          <div class="dash-item-list">
+            @for (quiz of createdQuizzes().slice(0, 5); track quiz.id) {
+              <div class="dash-item-card">
+                <div class="dash-item-top">
+                  <span class="dash-item-title">{{ quiz.title }}</span>
+                  <cq-badge [type]="getQuizStatusBadgeType(quiz)">
+                    {{ getQuizStatus(quiz) | uppercase }}
+                  </cq-badge>
+                </div>
+                <!-- Stats Grid -->
+                <div class="dash-stats-grid">
+                  <div class="dash-stat">
+                    <span class="dash-stat-value">{{ quiz.questionsCount }}</span>
+                    <span class="dash-stat-label">Questions</span>
+                  </div>
+                  <div class="dash-stat">
+                    <span class="dash-stat-value">{{ quiz.attemptsCount }}</span>
+                    <span class="dash-stat-label">Participants</span>
+                  </div>
+                  <div class="dash-stat">
+                    <span class="dash-stat-value dash-success-text">{{
+                      quiz.averageAttemptScore
+                        ? (quiz.averageAttemptScore | number: '1.0-0') + '%'
+                        : '—'
+                    }}</span>
+                    <span class="dash-stat-label">Avg Score</span>
+                  </div>
+                </div>
+                <!-- Code Badge -->
+                <div class="dash-code-badge" (click)="copyQuizCode(quiz)">
+                  <span class="dash-code-label">Code:</span>
+                  <span class="dash-code-value">{{ quiz.code }}</span>
+                </div>
+                <!-- Actions -->
+                <div class="dash-item-actions dash-item-actions-grid">
+                  <cq-button type="outlined" (clicked)="viewCreatedQuiz(quiz)">View</cq-button>
+                  <cq-button type="danger" (clicked)="deleteCreatedQuiz(quiz)">Delete</cq-button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

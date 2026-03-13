@@ -34,7 +34,9 @@ import {
   CqSkeleton,
   CqEmptyState,
   CqPagination,
+  CqQuestionNav,
 } from '../design-system';
+import type { QuestionNavItem } from '../design-system';
 import { CreateQuizDialog } from './dialogs/create-quiz-dialog';
 
 interface CodeSnippet {
@@ -91,6 +93,7 @@ interface ColorGroup {
     CqSkeleton,
     CqEmptyState,
     CqPagination,
+    CqQuestionNav,
   ],
   templateUrl: './design-system-demo.html',
   styleUrl: './design-system-demo.scss',
@@ -115,6 +118,27 @@ export class DesignSystemDemoComponent {
   // Last dialog result for demo
   lastDialogResult = signal<string>('');
 
+  // Question Nav demo
+  demoQuestionNavItems: QuestionNavItem[] = [
+    { id: 1, order: 1, answered: true },
+    { id: 2, order: 2, answered: true },
+    { id: 3, order: 3, answered: false },
+    { id: 4, order: 4, answered: false },
+    { id: 5, order: 5, answered: false },
+  ];
+  demoSelectedQuestionId = 3;
+
+  demoPrevQuestion() {
+    const idx = this.demoQuestionNavItems.findIndex((q) => q.id === this.demoSelectedQuestionId);
+    if (idx > 0) this.demoSelectedQuestionId = this.demoQuestionNavItems[idx - 1].id;
+  }
+
+  demoNextQuestion() {
+    const idx = this.demoQuestionNavItems.findIndex((q) => q.id === this.demoSelectedQuestionId);
+    if (idx < this.demoQuestionNavItems.length - 1)
+      this.demoSelectedQuestionId = this.demoQuestionNavItems[idx + 1].id;
+  }
+
   // Loading states
   isLoading1 = false;
   isLoading2 = false;
@@ -124,7 +148,6 @@ export class DesignSystemDemoComponent {
 
   // Side nav demo
   sideNavCollapsed = false;
-  sideNavActiveItem = 'dashboard';
 
   // Chip demo
   chipList = ['Angular', 'TypeScript', 'SCSS', 'Design System'];
@@ -910,19 +933,39 @@ this.toast.info('New version available.');`,
       css: [],
       component: [
         {
-          label: 'Side Navigation',
-          html: `<cq-side-nav [(collapsed)]="isCollapsed">
+          label: 'With content (recommended)',
+          html: `<!-- Content goes directly inside each item.
+     The side nav renders sidebar + content area.
+     On mobile (<768px), sidebar becomes a drawer.
+     Host component needs height (e.g. 100vh). -->
+<cq-side-nav>
   <div slot="header">
     <span class="logo">App</span>
   </div>
-  <cq-side-nav-item
-    label="Dashboard" icon="assets/icons/home.svg"
-    [active]="true"
-  ></cq-side-nav-item>
+  <cq-side-nav-item label="Dashboard" icon="...">
+    <h1>Dashboard</h1>
+    <p>Your dashboard content here.</p>
+  </cq-side-nav-item>
   <cq-side-nav-group label="Settings">
     <cq-side-nav-item label="Profile">
+      <h1>Profile</h1>
     </cq-side-nav-item>
   </cq-side-nav-group>
+</cq-side-nav>`,
+        },
+        {
+          label: 'With collapse & events',
+          html: `<!-- [(collapsed)] for two-way collapse binding.
+     (activeItemChange) to react to navigation.
+     [active]="true" to set the initially active item. -->
+<cq-side-nav [(collapsed)]="isCollapsed"
+  (activeItemChange)="onNavChange($event)">
+  <cq-side-nav-item label="Dashboard" icon="...">
+    Dashboard content
+  </cq-side-nav-item>
+  <cq-side-nav-item label="Quizzes" icon="...">
+    Quizzes content
+  </cq-side-nav-item>
 </cq-side-nav>`,
         },
       ],
@@ -1038,8 +1081,8 @@ this.loading.hideAll();`,
           html: `<cq-pagination
   [totalItems]="150"
   [pageSize]="10"
-  [currentPage]="1"
-  (pageChange)="onPageChange($event)">
+  [currentPage]="currentPage"
+  (pageChange)="currentPage = $event">
 </cq-pagination>`,
         },
       ],

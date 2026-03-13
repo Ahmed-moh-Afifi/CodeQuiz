@@ -1,0 +1,216 @@
+@if (loading()) {
+  <div class="view-quiz-loading">
+    <cq-skeleton variant="rectangular" width="100%" height="100%" />
+  </div>
+} @else if (quiz(); as q) {
+  <!-- Header Bar -->
+  <header class="quiz-header">
+    <cq-button type="secondary" (clicked)="goBack()">← Back</cq-button>
+    <div class="quiz-header-title">
+      <h1>{{ q.title }}</h1>
+      <span class="cq-caption-text cq-text-muted">View and grade submissions</span>
+    </div>
+    <button class="toggle-stats-btn" (click)="toggleStatsPanel()" [class.active]="showStats()">
+      <div
+        class="cq-mask-icon"
+        style="--mask-url: url('assets/icons/sidepane.svg'); width: 20px; height: 20px"
+      ></div>
+    </button>
+  </header>
+  <div class="quiz-header-border"></div>
+
+  <!-- Body: Stats Sidebar + Submissions Table -->
+  <div class="quiz-body">
+    <!-- Statistics Sidebar (collapsible) -->
+    @if (showStats()) {
+      <aside class="stats-sidebar">
+        <div class="stats-sidebar-inner">
+          <!-- Header -->
+          <div class="stats-section-header">
+            <div
+              class="cq-mask-icon"
+              style="
+                --mask-url: url('assets/icons/stats.svg');
+                width: 20px;
+                height: 20px;
+                background-color: var(--cq-primary);
+              "
+            ></div>
+            <span>Statistics</span>
+          </div>
+          <div class="stats-divider"></div>
+
+          <!-- Quick Stats Grid -->
+          <div class="stats-quick-grid">
+            <div class="stats-quick-card">
+              <span class="stats-quick-value">{{ totalAttempts() }}</span>
+              <span class="stats-quick-label">Total</span>
+            </div>
+            <div class="stats-quick-card">
+              <span class="stats-quick-value stats-quick-success">{{ submittedAttempts() }}</span>
+              <span class="stats-quick-label">Submitted</span>
+            </div>
+            <div class="stats-quick-card">
+              <span class="stats-quick-value stats-quick-warning">{{
+                averageScore() | number: '1.0-1'
+              }}</span>
+              <span class="stats-quick-label">Average</span>
+            </div>
+            <div class="stats-quick-card">
+              <span class="stats-quick-value">{{ passRate() | number: '1.0-0' }}%</span>
+              <span class="stats-quick-label">Pass Rate</span>
+            </div>
+          </div>
+
+          <div class="stats-divider stats-divider-inset"></div>
+
+          <!-- Grade Details -->
+          <div class="stats-detail-section">
+            <h4>Grade Details</h4>
+            <div class="stats-detail-row">
+              <span>Highest</span>
+              <span class="stats-detail-success">{{ highestScore() | number: '1.0-1' }}</span>
+            </div>
+            <div class="stats-detail-row">
+              <span>Lowest</span>
+              <span class="stats-detail-error">{{ lowestScore() | number: '1.0-1' }}</span>
+            </div>
+            <div class="stats-detail-row">
+              <span>Median</span>
+              <span class="stats-detail-primary">{{ medianScore() | number: '1.0-1' }}</span>
+            </div>
+          </div>
+
+          <div class="stats-divider stats-divider-inset"></div>
+
+          <!-- Grading Curve Placeholder -->
+          <div class="stats-chart-section">
+            <h4>Grading Curve</h4>
+            <div class="stats-chart-placeholder">
+              <span class="cq-text-muted">No grade data available yet</span>
+            </div>
+          </div>
+
+          <!-- AI Assessment Stats -->
+          @if (aiAssessedCount() > 0) {
+            <div class="stats-divider stats-divider-inset"></div>
+            <div class="stats-ai-section">
+              <div class="stats-ai-header">
+                <div
+                  class="cq-mask-icon"
+                  style="
+                    --mask-url: url('assets/icons/smart_toy.svg');
+                    width: 16px;
+                    height: 16px;
+                    background-color: var(--cq-primary);
+                  "
+                ></div>
+                <h4>AI Assessment</h4>
+              </div>
+              <div class="stats-ai-grid">
+                <button class="stats-ai-card" (click)="filterByAiAssessed()">
+                  <span class="stats-ai-value stats-ai-primary">{{ aiAssessedCount() }}</span>
+                  <span class="stats-ai-label">AI Assessed</span>
+                </button>
+                <button class="stats-ai-card" (click)="filterByFlagged()">
+                  <span class="stats-ai-value stats-ai-error">{{ flaggedCount() }}</span>
+                  <span class="stats-ai-label">Flagged</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </aside>
+    }
+
+    <!-- Submissions Table Area -->
+    <div class="submissions-area">
+      <!-- Filter Bar -->
+      @if (activeFilter()) {
+        <div class="filter-bar">
+          <div class="filter-bar-left">
+            <div
+              class="cq-mask-icon"
+              style="
+                --mask-url: url('assets/icons/filter.svg');
+                width: 14px;
+                height: 14px;
+                background-color: var(--cq-text-primary);
+              "
+            ></div>
+            <span>Filtered by:</span>
+            <strong>{{ activeFilter() }}</strong>
+          </div>
+          <cq-button type="outlined" (clicked)="clearFilter()">Clear Filter</cq-button>
+        </div>
+      }
+
+      <!-- Table -->
+      @if (filteredAttempts().length === 0) {
+        <cq-empty-state
+          icon="assets/icons/users.svg"
+          title="No submissions yet"
+          message="Participants will appear here when they join the quiz"
+        />
+      } @else {
+        <div class="cq-table-container">
+          <table class="cq-table">
+            <thead>
+              <tr>
+                <th>Participant</th>
+                <th>Submitted</th>
+                <th>Status</th>
+                <th>Score</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (attempt of filteredAttempts(); track attempt.id) {
+                <tr>
+                  <td>
+                    <span class="student-name"
+                      >{{ attempt.examinee.firstName }} {{ attempt.examinee.lastName }}</span
+                    >
+                  </td>
+                  <td class="cq-table-cell-muted">
+                    @if (attempt.endTime) {
+                      {{ attempt.endTime | date: 'MMM d, HH:mm' }}
+                    } @else {
+                      —
+                    }
+                  </td>
+                  <td>
+                    <div class="status-badges">
+                      @if (hasAiFlags(attempt)) {
+                        <span class="status-badge status-badge-suspicious">Suspicious</span>
+                      }
+                      @if (isFullyGraded(attempt)) {
+                        <span class="status-badge status-badge-graded">Graded</span>
+                      } @else if (isPartiallyGraded(attempt)) {
+                        <span class="status-badge status-badge-partial">Partial</span>
+                      } @else if (attempt.endTime) {
+                        <span class="status-badge status-badge-pending">Pending</span>
+                      } @else {
+                        <cq-badge type="live">In Progress</cq-badge>
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    @if (attempt.grade != null) {
+                      <span class="score-text">{{ attempt.grade | number: '1.0-1' }}</span>
+                    } @else {
+                      <span class="cq-table-cell-muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    <cq-button type="outlined" (clicked)="gradeAttempt(attempt)">Grade</cq-button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+}

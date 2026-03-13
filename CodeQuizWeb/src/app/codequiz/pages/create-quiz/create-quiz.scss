@@ -1,0 +1,462 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.create-loading {
+  padding: 2rem;
+}
+
+// ─── Header ───────────────────────────────────────────
+.create-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: var(--cq-background-dark);
+  flex-shrink: 0;
+}
+
+.create-header-title {
+  flex: 1;
+  min-width: 0;
+
+  h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--cq-text-primary);
+  }
+}
+
+.create-subtitle {
+  font-size: 15px;
+  color: var(--cq-text-muted);
+}
+
+.create-header-border {
+  height: 1px;
+  background: var(--cq-border-default);
+  flex-shrink: 0;
+}
+
+// ─── Body ─────────────────────────────────────────────
+.create-body {
+  display: grid;
+  grid-template-columns: 1.33fr 2fr;
+  gap: 24px;
+  padding: 24px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+// ─── Config Sidebar Card ──────────────────────────────
+.config-card {
+  background: var(--cq-card-background);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.config-section-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+}
+
+.config-inner-card {
+  background: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.config-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  > label {
+    font-size: 15px;
+    color: var(--cq-text-muted);
+  }
+
+  input[type='text'],
+  input[type='number'],
+  input[type='date'],
+  input[type='time'] {
+    padding: 10px 14px;
+    background: var(--cq-background-dark);
+    border: 1px solid var(--cq-border-default);
+    border-radius: 14px;
+    color: var(--cq-text-primary);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.15s;
+
+    &:focus {
+      border-color: var(--cq-primary);
+    }
+
+    &::placeholder {
+      color: var(--cq-text-disabled);
+    }
+  }
+}
+
+.config-field-label {
+  font-size: 15px;
+  color: var(--cq-text-muted);
+}
+
+.duration-input-wrap {
+  position: relative;
+
+  input {
+    width: 100%;
+    padding-right: 50px !important;
+  }
+}
+
+.duration-suffix {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--cq-text-muted);
+}
+
+.config-divider {
+  height: 1px;
+  background: var(--cq-border-default);
+}
+
+.availability-label {
+  font-size: 15px;
+  color: var(--cq-text-muted);
+  text-align: center;
+}
+
+.date-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.date-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-col-label {
+  font-size: 14px;
+  color: var(--cq-text-muted);
+}
+
+.date-inner-card {
+  background: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .config-field > label {
+    font-size: 12px;
+  }
+}
+
+// Checkbox rows
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+
+  input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--cq-primary);
+    cursor: pointer;
+  }
+
+  span {
+    font-size: 14px;
+    color: var(--cq-text-primary);
+  }
+}
+
+.editor-options-grid {
+  background: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-md);
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+// ─── Questions Column ─────────────────────────────────
+.questions-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.questions-header-card {
+  background: var(--cq-card-background);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-lg);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.questions-count {
+  font-size: 15px;
+  color: var(--cq-text-muted);
+}
+
+.questions-list-card {
+  background: var(--cq-card-background);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-lg);
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.questions-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  gap: 8px;
+}
+
+.empty-title {
+  font-size: 18px;
+  color: var(--cq-text-muted);
+}
+
+.empty-hint {
+  font-size: 15px;
+  color: var(--cq-text-disabled);
+}
+
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.question-card {
+  background: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.question-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.question-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.question-order {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+}
+
+.question-card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.question-statement-text {
+  margin: 0;
+  font-size: 15px;
+  color: var(--cq-text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.test-cases-count {
+  font-size: 14px;
+  color: var(--cq-text-muted);
+}
+
+.code-preview {
+  background: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: 12px;
+  padding: 12px;
+  font-family: var(--cq-font-mono);
+  font-size: 13px;
+  color: var(--cq-text-primary);
+  white-space: pre-wrap;
+  margin: 0;
+  max-height: 80px;
+  overflow: hidden;
+}
+
+// Icon buttons
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--cq-border-default);
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  font-size: 14px;
+
+  &:hover {
+    background: var(--cq-elevated-surface);
+  }
+}
+
+.icon-btn-danger:hover {
+  background: rgba(243, 139, 168, 0.15);
+}
+
+// ─── Dialog ───────────────────────────────────────────
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.dialog-panel {
+  background: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-lg);
+  width: 100%;
+  max-width: 640px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--cq-border-default);
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--cq-text-primary);
+  }
+}
+
+.dialog-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+
+  > cq-input,
+  > cq-textarea {
+    display: block;
+    margin-bottom: 16px;
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--cq-border-default);
+}
+
+// Test cases in dialog
+.test-cases-section {
+  margin-top: 16px;
+}
+
+.test-cases-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.test-case-card {
+  background: var(--cq-background-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-md);
+  padding: 16px;
+  margin-bottom: 12px;
+
+  cq-input,
+  cq-textarea {
+    display: block;
+    margin-top: 8px;
+  }
+}
+
+.test-case-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--cq-text-muted);
+}
+
+// ─── Responsive ───────────────────────────────────────
+@media (max-width: 900px) {
+  .create-body {
+    grid-template-columns: 1fr;
+  }
+
+  .date-grid {
+    grid-template-columns: 1fr;
+  }
+}

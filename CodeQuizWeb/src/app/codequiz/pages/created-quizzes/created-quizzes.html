@@ -1,0 +1,101 @@
+<div class="created-quizzes-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header-text">
+      <h1 class="cq-page-title">Created Quizzes</h1>
+      <p class="cq-caption-text cq-text-muted">Manage and monitor your quizzes</p>
+    </div>
+    <cq-button type="primary" icon="assets/icons/plus.svg" (clicked)="navigateCreate()"
+      >Create Quiz</cq-button
+    >
+  </div>
+
+  @if (loading()) {
+    <cq-skeleton variant="rectangular" width="100%" height="400px" />
+  } @else if (quizzes().length === 0) {
+    <cq-empty-state
+      icon="assets/icons/pencil.svg"
+      title="No quizzes created"
+      message="Click the button above to create your first quiz"
+    >
+    </cq-empty-state>
+  } @else {
+    <!-- Data Table -->
+    <div class="cq-table-container">
+      <table class="cq-table">
+        <thead>
+          <tr>
+            <th>Quiz Title</th>
+            <th>Status</th>
+            <th>Schedule</th>
+            <th>Duration</th>
+            <th>Questions</th>
+            <th>Participants</th>
+            <th>Submitted</th>
+            <th>Avg Score</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (quiz of quizzes(); track quiz.id) {
+            <tr>
+              <td>
+                <div class="quiz-title-cell">
+                  <span class="quiz-title">{{ quiz.title }}</span>
+                  <span class="quiz-code" (click)="copyCode(quiz)" title="Click to copy">{{
+                    quiz.code
+                  }}</span>
+                </div>
+              </td>
+              <td>
+                <cq-badge [type]="getStatusBadgeType(quiz)">{{ getStatus(quiz) }}</cq-badge>
+              </td>
+              <td class="cq-table-cell-muted">
+                <div class="schedule-cell">
+                  <span>{{ quiz.startDate | date: 'MMM d, y' }}</span>
+                  <span>{{ quiz.endDate | date: 'MMM d, y' }}</span>
+                </div>
+              </td>
+              <td class="cq-table-cell-muted">{{ formatDuration(quiz.duration) }}</td>
+              <td>{{ quiz.questionsCount }}</td>
+              <td>{{ quiz.attemptsCount }}</td>
+              <td>{{ quiz.submittedAttemptsCount }}</td>
+              <td>
+                @if (quiz.averageAttemptScore) {
+                  <span class="cq-table-cell-success"
+                    >{{ quiz.averageAttemptScore | number: '1.0-0' }}%</span
+                  >
+                } @else {
+                  <span class="cq-table-cell-muted">—</span>
+                }
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="icon-btn" title="View" (click)="viewQuiz(quiz)">
+                    <div class="cq-mask-icon" style="--mask-url: url('assets/icons/eye.svg')"></div>
+                  </button>
+                  <button class="icon-btn" title="Edit" (click)="editQuiz(quiz)">
+                    <div
+                      class="cq-mask-icon"
+                      style="--mask-url: url('assets/icons/pencil.svg')"
+                    ></div>
+                  </button>
+                  <button
+                    class="icon-btn icon-btn-danger"
+                    title="Delete"
+                    (click)="deleteQuiz(quiz)"
+                  >
+                    <div
+                      class="cq-mask-icon"
+                      style="--mask-url: url('assets/icons/trash.svg')"
+                    ></div>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

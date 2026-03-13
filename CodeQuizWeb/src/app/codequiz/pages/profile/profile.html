@@ -1,0 +1,127 @@
+@if (loading()) {
+  <div class="profile-loading">
+    <cq-skeleton height="200px" width="100%" />
+    <cq-skeleton height="300px" width="100%" />
+  </div>
+} @else if (user(); as u) {
+  <!-- Header -->
+  <div class="profile-header">
+    <cq-button type="ghost" (clicked)="goBack()">← Back</cq-button>
+    <div class="profile-header-title">
+      <h1>My Profile</h1>
+      <span class="profile-subtitle">Manage your account settings and security</span>
+    </div>
+  </div>
+  <div class="profile-header-border"></div>
+
+  <!-- Two-column body -->
+  <div class="profile-body">
+    <!-- Left: User Info -->
+    <div class="profile-left">
+      <div class="profile-card">
+        <!-- Profile Information -->
+        <h3 class="section-title">Profile Information</h3>
+        <div class="profile-inner-card">
+          <!-- Avatar -->
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar">{{ u.firstName.charAt(0) }}</div>
+          </div>
+          <!-- Name -->
+          <div class="profile-name-block">
+            <span class="profile-fullname">{{ u.firstName }} {{ u.lastName }}</span>
+            <span class="profile-username">&#64;{{ u.userName }}</span>
+          </div>
+        </div>
+
+        <!-- Account Details -->
+        <h3 class="section-title" style="margin-top: 24px">Account Details</h3>
+        <div class="profile-inner-card">
+          <div class="detail-item">
+            <span class="detail-label">Email Address</span>
+            <span class="detail-value">{{ u.email }}</span>
+          </div>
+          <div class="detail-divider"></div>
+          <div class="detail-item">
+            <span class="detail-label">First Name</span>
+            <span class="detail-value">{{ u.firstName }}</span>
+          </div>
+          <div class="detail-divider"></div>
+          <div class="detail-item">
+            <span class="detail-label">Last Name</span>
+            <span class="detail-value">{{ u.lastName }}</span>
+          </div>
+          <div class="detail-divider"></div>
+          <div class="detail-item">
+            <span class="detail-label">Member Since</span>
+            <span class="detail-value">{{ joinDate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Security -->
+    <div class="profile-right">
+      <!-- Security Settings Header Card -->
+      <div class="security-header-card">
+        <span class="security-icon">🔒</span>
+        <div>
+          <h3 class="section-title">Security Settings</h3>
+          <span class="security-subtitle">Manage your password and account security</span>
+        </div>
+      </div>
+
+      <!-- Change Password Form Card -->
+      <div class="password-card">
+        <div class="password-card-header">
+          <h3 class="section-title">Change Password</h3>
+          <span class="password-hint">Enter your current password and choose a new one</span>
+        </div>
+
+        @if (passwordError()) {
+          <div class="error-message">{{ passwordError() }}</div>
+        }
+
+        <div class="password-inner-card">
+          <div class="password-field">
+            <label>Current Password</label>
+            <input
+              type="password"
+              placeholder="Enter your current password"
+              [ngModel]="currentPassword()"
+              (ngModelChange)="currentPassword.set($event)"
+            />
+          </div>
+
+          <div class="detail-divider"></div>
+
+          <div class="password-field">
+            <label>New Password</label>
+            <input
+              type="password"
+              placeholder="Enter your new password"
+              [ngModel]="newPassword()"
+              (ngModelChange)="newPassword.set($event)"
+            />
+            <span class="field-hint">Password must be at least 6 characters</span>
+          </div>
+
+          <div class="password-field">
+            <label>Confirm New Password</label>
+            <input
+              type="password"
+              placeholder="Confirm your new password"
+              [ngModel]="confirmPassword()"
+              (ngModelChange)="confirmPassword.set($event)"
+            />
+          </div>
+        </div>
+
+        <div class="password-actions">
+          <cq-button type="primary" [loading]="changingPassword()" (clicked)="changePassword()">
+            Update Password
+          </cq-button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

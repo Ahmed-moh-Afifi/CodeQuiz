@@ -1,0 +1,118 @@
+@if (loading()) {
+  <div class="take-quiz-loading">
+    <cq-skeleton variant="rectangular" width="100%" height="100%" />
+  </div>
+} @else {
+  <!-- Header Bar -->
+  <header class="quiz-header">
+    <cq-button type="secondary" (clicked)="goBack()">
+      <cq-icon src="assets/icons/arrow_back_ios_new_rounded.svg" [size]="14" color="current" />
+      Back
+    </cq-button>
+    <div class="quiz-header-title">
+      <h1>{{ attempt()?.quiz?.title }}</h1>
+      <span class="cq-caption-text cq-text-muted">Complete your quiz</span>
+    </div>
+    <div class="quiz-header-right">
+      <div class="timer-badge" [class.timer-danger]="isTimerDanger()">
+        <cq-icon src="assets/icons/clock.svg" [size]="20" color="warning" />
+        <span class="timer-text">{{ remainingTime() }}</span>
+      </div>
+      <cq-button
+        type="primary"
+        [loading]="submitting()"
+        loadingText="Submitting..."
+        (clicked)="submitQuiz()"
+      >
+        Submit Quiz
+      </cq-button>
+    </div>
+  </header>
+  <div class="quiz-header-border"></div>
+
+  <!-- Body: Sidebar + Main -->
+  <div class="quiz-body" [class.submitting]="submitting()">
+    <!-- Sidebar -->
+    <aside class="quiz-sidebar">
+      <cq-question-nav
+        [questions]="navItems()"
+        [selectedId]="selectedQuestion()?.id ?? 0"
+        (questionSelected)="onNavSelect($event)"
+        (previous)="previousQuestion()"
+        (next)="nextQuestion()"
+      >
+        <!-- Save status slotted into extra content -->
+        <div class="save-status-card">
+          <div class="save-status-icon">
+            <cq-icon src="assets/icons/save.svg" [size]="18" color="primary" />
+          </div>
+          <div class="save-status-text">
+            <span class="save-status-label">Last saved</span>
+            <span class="save-status-value">{{ lastSavedText() }}</span>
+          </div>
+          @if (isAutoSaving()) {
+            <span class="save-status-saving">Saving...</span>
+          }
+        </div>
+      </cq-question-nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="quiz-main">
+      @if (selectedQuestion(); as q) {
+        <!-- Question Header -->
+        <div class="question-header">
+          <h2>Question {{ q.order }}</h2>
+          <span class="question-points">Marked out of {{ q.points }}</span>
+        </div>
+
+        <!-- Question Content (scrollable) -->
+        <div class="question-content">
+          <!-- Statement -->
+          <p class="question-statement">{{ q.statement }}</p>
+
+          <!-- Test Cases -->
+          @if (q.testCases?.length) {
+            <div class="test-cases-section">
+              <h3>Examples</h3>
+              @for (tc of q.testCases; track $index) {
+                <div class="test-case-card">
+                  <div class="test-case-field">
+                    <span class="test-case-label">Input</span>
+                    <pre class="test-case-code">{{ formatTestInput(tc) }}</pre>
+                  </div>
+                  <div class="test-case-field">
+                    <span class="test-case-label">Expected Output</span>
+                    <pre class="test-case-code">{{ tc.expectedOutput }}</pre>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Code Editor -->
+          <cq-code-editor
+            [language]="selectedQuestionConfig()?.language ?? 'python'"
+            [code]="codeInEditor()"
+            [initialCode]="selectedQuestion()?.editorCode ?? null"
+            [showRunButton]="!!selectedQuestionConfig()?.allowExecution"
+            [showIO]="!!selectedQuestionConfig()?.allowExecution"
+            [showOutput]="!!selectedQuestionConfig()?.showOutput"
+            [showError]="!!selectedQuestionConfig()?.showError"
+            (codeChange)="onCodeChange($event)"
+            (runRequested)="onRunRequested($event)"
+          />
+        </div>
+      }
+    </main>
+  </div>
+
+  @if (submitting()) {
+    <div class="submitting-overlay">
+      <div class="submitting-content">
+        <h2>Time's up!</h2>
+        <p>Auto-submitting your answers...</p>
+      </div>
+    </div>
+  }
+}

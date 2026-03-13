@@ -1,0 +1,381 @@
+:host {
+  display: block;
+  padding: 32px 24px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// ─── Page Header ──────────────────────────────────────
+.dash-page-header {
+  margin-bottom: 28px;
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--cq-text-primary);
+  }
+}
+
+.dash-page-subtitle {
+  font-size: 15px;
+  color: var(--cq-text-muted);
+}
+
+// ─── Hero Card ────────────────────────────────────────
+.hero-card {
+  display: flex;
+  align-items: stretch;
+  background: var(--cq-card-background);
+  border: 1px solid var(--cq-border-default);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+.hero-content {
+  flex: 1;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.hero-running-badge {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: var(--cq-warning);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+}
+
+.hero-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+}
+
+.hero-subtitle {
+  margin: 0;
+  font-size: 15px;
+  color: var(--cq-text-secondary);
+  max-width: 400px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.hero-code-panel {
+  flex-shrink: 0;
+  width: 300px;
+  background: var(--cq-background-dark);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid var(--cq-border-default);
+}
+
+.hero-code-block {
+  margin: 0;
+  font-family: var(--cq-font-mono);
+  font-size: 13px;
+  line-height: 1.8;
+
+  code {
+    color: var(--cq-text-primary);
+  }
+
+  .cb {
+    color: var(--cq-text-muted);
+  }
+
+  .ck {
+    color: var(--cq-primary);
+  }
+
+  .cv {
+    color: var(--cq-success);
+  }
+
+  .cs {
+    color: var(--cq-success);
+  }
+}
+
+.hero-code-divider {
+  height: 1px;
+  background: var(--cq-border-default);
+  margin: 8px 0;
+}
+
+.hero-code-comment {
+  font-family: var(--cq-font-mono);
+  font-size: 12px;
+  color: var(--cq-text-muted);
+}
+
+// ─── Grid ─────────────────────────────────────────────
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+// ─── Section Cards ────────────────────────────────────
+.dash-section-card {
+  background: var(--cq-card-background);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-lg);
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid var(--cq-border-default);
+}
+
+.dash-section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dash-icon-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.dash-icon-primary {
+  background: rgba(137, 180, 250, 0.15);
+}
+
+.dash-icon-success {
+  background: rgba(166, 227, 161, 0.15);
+}
+
+.dash-section-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+}
+
+.dash-link {
+  font-size: 14px;
+  color: var(--cq-primary);
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.dash-section-body {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+// ─── Empty State ──────────────────────────────────────
+.dash-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 8px;
+}
+
+.dash-empty-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: var(--cq-elevated-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.dash-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cq-text-secondary);
+}
+
+.dash-empty-hint {
+  font-size: 13px;
+  color: var(--cq-text-muted);
+}
+
+// ─── Item List & Cards ────────────────────────────────
+.dash-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dash-item-card {
+  background: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dash-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dash-item-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--cq-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--cq-text-muted);
+}
+
+.dash-item-detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.dash-detail-label {
+  color: var(--cq-text-muted);
+}
+
+.dash-detail-value {
+  font-weight: 600;
+  color: var(--cq-text-primary);
+}
+
+.dash-success-text {
+  color: var(--cq-success);
+}
+
+.dash-item-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.dash-item-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+// ─── Stats Grid (Created Quizzes) ─────────────────────
+.dash-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.dash-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dash-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+}
+
+.dash-stat-label {
+  font-size: 11px;
+  color: var(--cq-text-muted);
+}
+
+// ─── Code Badge ───────────────────────────────────────
+.dash-code-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--cq-elevated-surface);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+
+  &:hover {
+    background: var(--cq-background-dark);
+  }
+}
+
+.dash-code-label {
+  font-size: 13px;
+  color: var(--cq-text-muted);
+}
+
+.dash-code-value {
+  font-family: var(--cq-font-mono);
+  font-weight: 700;
+  color: var(--cq-primary);
+}
+
+// ─── Responsive ───────────────────────────────────────
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  :host {
+    padding: 16px;
+  }
+
+  .hero-card {
+    flex-direction: column;
+  }
+
+  .hero-code-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--cq-border-default);
+  }
+}

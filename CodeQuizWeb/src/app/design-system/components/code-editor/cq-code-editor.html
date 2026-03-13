@@ -1,0 +1,57 @@
+<div class="cq-editor">
+  <!-- Header Bar -->
+  <div class="cq-editor-header">
+    <div class="cq-editor-file-label">
+      <cq-icon src="assets/icons/code.svg" [size]="14" color="muted" />
+      <span>{{ fileLabel }}</span>
+    </div>
+    <div class="cq-editor-actions">
+      @if (initialCode() !== null && !readOnly()) {
+        <button class="cq-editor-action-btn" (click)="resetCode()" title="Reset to starter code">
+          <cq-icon src="assets/icons/refresh.svg" [size]="14" color="muted" />
+          <span>Reset</span>
+        </button>
+      }
+      @if (showRunButton() && !readOnly()) {
+        <button
+          class="cq-editor-run-btn"
+          [class.running]="isRunning()"
+          (click)="onRun()"
+          [disabled]="isRunning()"
+        >
+          <cq-icon src="assets/icons/player_play.svg" [size]="14" color="current" />
+          <span>{{ isRunning() ? 'Running...' : 'Run' }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Monaco Container -->
+  <div class="cq-editor-monaco" #editorContainer></div>
+
+  <!-- I/O Panel -->
+  @if (showIO()) {
+    <div class="cq-editor-io">
+      <div class="cq-editor-io-col">
+        <div class="cq-editor-io-label">
+          <cq-icon src="assets/icons/arrow_forward_ios_rounded.svg" [size]="12" color="muted" />
+          <span>Input</span>
+        </div>
+        <textarea
+          class="cq-editor-io-textarea"
+          rows="4"
+          placeholder="Enter input..."
+          [ngModel]="editorInput()"
+          (ngModelChange)="editorInput.set($event)"
+        ></textarea>
+      </div>
+      <div class="cq-editor-io-col">
+        <div class="cq-editor-io-label">
+          <cq-icon src="assets/icons/arrow_back_ios_new_rounded.svg" [size]="12" color="muted" />
+          <span>Output</span>
+        </div>
+        <pre class="cq-editor-io-output">{{ editorOutput() || 'No output yet' }}</pre>
+      </div>
+    </div>
+  }
+</div>

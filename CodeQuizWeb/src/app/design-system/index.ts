@@ -27,6 +27,9 @@ export * from './components/breadcrumb/cq-breadcrumb';
 export * from './components/skeleton/cq-skeleton';
 export * from './components/empty-state/cq-empty-state';
 export * from './components/pagination/cq-pagination';
+export * from './components/question-nav/cq-question-nav';
+export * from './components/icon/cq-icon';
+export * from './components/code-editor/cq-code-editor';
 export * from './pages/cq-page/cq-page';
 
 // Directives

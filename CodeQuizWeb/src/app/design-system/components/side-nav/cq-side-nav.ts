@@ -5,7 +5,21 @@ import {
   EventEmitter,
   ViewEncapsulation,
   HostBinding,
+  ContentChildren,
+  QueryList,
+  AfterContentInit,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  TemplateRef,
+  ChangeDetectorRef,
+  NgZone,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { Subscription, fromEvent } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+
+const MOBILE_BREAKPOINT = 768;
 
 // ========== Side Nav Item ==========
 @Component({
@@ -18,7 +32,7 @@ import {
       [class.active]="active"
       [class.disabled]="disabled"
       [attr.disabled]="disabled ? '' : null"
-      (click)="!disabled && selected.emit()"
+      (click)="handleClick()"
     >
       @if (icon) {
         <div
@@ -29,6 +43,9 @@ import {
       }
       <span class="cq-side-nav-item-label">{{ label }}</span>
     </button>
+    <ng-template #contentTpl>
+      <ng-content></ng-content>
+    </ng-template>
   `,
   styles: [
     `
@@ -44,6 +61,14 @@ export class CqSideNavItem {
   @Input() active = false;
   @Input() disabled = false;
   @Output() selected = new EventEmitter<void>();
+
+  @ViewChild('contentTpl', { static: true }) contentTemplate!: TemplateRef<any>;
+
+  handleClick() {
+    if (!this.disabled) {
+      this.selected.emit();
+    }
+  }
 }
 
 // ========== Side Nav Group ==========
@@ -79,55 +104,175 @@ export class CqSideNavGroup {
 @Component({
   selector: 'cq-side-nav',
   standalone: true,
+  imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   template: `
-    <div class="cq-side-nav-header">
-      <ng-content select="[slot=header]"></ng-content>
-      <button
-        class="cq-side-nav-toggle"
-        (click)="toggleCollapse()"
-        [attr.aria-label]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-      >
-        <span class="cq-side-nav-toggle-icon">{{ collapsed ? '›' : '‹' }}</span>
-      </button>
+    <!-- Mobile top bar (hamburger + active page label) -->
+    @if (isMobile) {
+      <div class="cq-side-nav-mobile-bar">
+        <button class="cq-side-nav-hamburger" (click)="mobileOpen = true" aria-label="Open menu">
+          <span class="cq-hamburger-line"></span>
+          <span class="cq-hamburger-line"></span>
+          <span class="cq-hamburger-line"></span>
+        </button>
+        <span class="cq-side-nav-mobile-title">{{ activeItem?.label }}</span>
+      </div>
+    }
+
+    <!-- Backdrop for mobile drawer -->
+    @if (isMobile && mobileOpen) {
+      <div class="cq-side-nav-backdrop" (click)="mobileOpen = false"></div>
+    }
+
+    <!-- Rail / Drawer -->
+    <div
+      class="cq-side-nav-rail"
+      [class.cq-side-nav-rail-mobile]="isMobile"
+      [class.cq-side-nav-rail-open]="isMobile && mobileOpen"
+    >
+      <div class="cq-side-nav-header">
+        <div class="cq-side-nav-header-content">
+          <ng-content select="[slot=header]"></ng-content>
+        </div>
+        @if (isMobile) {
+          <button class="cq-side-nav-toggle" (click)="mobileOpen = false" aria-label="Close menu">
+            <span class="cq-side-nav-toggle-icon">✕</span>
+          </button>
+        } @else {
+          <button
+            class="cq-side-nav-toggle"
+            (click)="toggleCollapse()"
+            [attr.aria-label]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+          >
+            <span class="cq-side-nav-toggle-icon">{{ collapsed ? '›' : '‹' }}</span>
+          </button>
+        }
+      </div>
+      <div class="cq-side-nav-body">
+        <ng-content></ng-content>
+      </div>
+      <div class="cq-side-nav-footer">
+        <ng-content select="[slot=footer]"></ng-content>
+      </div>
     </div>
-    <div class="cq-side-nav-body">
-      <ng-content></ng-content>
-    </div>
-    <div class="cq-side-nav-footer">
-      <ng-content select="[slot=footer]"></ng-content>
-    </div>
+
+    @if (activeItem?.contentTemplate) {
+      <div class="cq-side-nav-content">
+        <ng-container [ngTemplateOutlet]="activeItem!.contentTemplate"></ng-container>
+      </div>
+    }
   `,
-  styles: [
-    `
-      cq-side-nav:not(._) {
-        display: flex;
-        flex-direction: column;
-        flex-shrink: 0;
-        min-height: 100%;
-        background-color: var(--cq-surface-dark);
-        border-right: 1px solid var(--cq-border-default);
-        overflow: hidden;
-        width: 240px;
-        transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-    `,
-  ],
+  styles: [],
 })
-export class CqSideNav {
+export class CqSideNav implements OnInit, AfterContentInit, OnDestroy {
+  @ContentChildren(CqSideNavItem, { descendants: true })
+  items!: QueryList<CqSideNavItem>;
+
   @Input() collapsed = false;
   @Output() collapsedChange = new EventEmitter<boolean>();
 
+  /** Emits whenever the active item changes. */
+  @Output() activeItemChange = new EventEmitter<CqSideNavItem>();
+
+  /** The currently active nav item (read-only for external access). */
+  activeItem: CqSideNavItem | null = null;
+
+  /** Whether the viewport is at mobile size. */
+  isMobile = false;
+  /** Whether the mobile drawer is open. */
+  mobileOpen = false;
+
+  private itemSubs: Subscription[] = [];
+  private itemsChangeSub: Subscription | null = null;
+  private resizeSub: Subscription | null = null;
+
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
+  ) {}
+
   @HostBinding('class.cq-side-nav-collapsed') get isCollapsed() {
-    return this.collapsed;
+    return this.collapsed && !this.isMobile;
   }
 
-  @HostBinding('style.width.px') get hostWidth() {
-    return this.collapsed ? 56 : 240;
+  @HostBinding('class.cq-side-nav-mobile') get isMobileHost() {
+    return this.isMobile;
+  }
+
+  ngOnInit() {
+    this.checkMobile();
+    this.ngZone.runOutsideAngular(() => {
+      this.resizeSub = fromEvent(window, 'resize')
+        .pipe(debounceTime(100))
+        .subscribe(() => {
+          this.ngZone.run(() => this.checkMobile());
+        });
+    });
+  }
+
+  ngAfterContentInit() {
+    this.setupItems();
+    this.itemsChangeSub = this.items.changes.subscribe(() => this.setupItems());
+  }
+
+  ngOnDestroy() {
+    this.cleanupSubs();
+    this.itemsChangeSub?.unsubscribe();
+    this.resizeSub?.unsubscribe();
+  }
+
+  /** Programmatically select an item by its label or reference. */
+  selectItem(item: CqSideNavItem) {
+    this.items.forEach((i) => (i.active = false));
+    item.active = true;
+    this.activeItem = item;
+    this.activeItemChange.emit(item);
+    // Auto-close drawer on mobile after selection
+    if (this.isMobile) {
+      this.mobileOpen = false;
+    }
   }
 
   toggleCollapse() {
     this.collapsed = !this.collapsed;
     this.collapsedChange.emit(this.collapsed);
+  }
+
+  private checkMobile() {
+    const wasMobile = this.isMobile;
+    this.isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+    if (!this.isMobile) {
+      this.mobileOpen = false;
+    }
+    if (wasMobile !== this.isMobile) {
+      this.cdr.markForCheck();
+    }
+  }
+
+  private cleanupSubs() {
+    this.itemSubs.forEach((s) => s.unsubscribe());
+    this.itemSubs = [];
+  }
+
+  private setupItems() {
+    this.cleanupSubs();
+
+    // Subscribe to each item's selected event
+    this.items.forEach((item) => {
+      this.itemSubs.push(item.selected.subscribe(() => this.selectItem(item)));
+    });
+
+    // Activate the first [active]="true" item, or the first non-disabled item
+    if (!this.activeItem || !this.items.find((i) => i === this.activeItem)) {
+      const activeItem = this.items.find((i) => i.active);
+      if (activeItem) {
+        this.selectItem(activeItem);
+      } else {
+        const firstEnabled = this.items.find((i) => !i.disabled);
+        if (firstEnabled) {
+          this.selectItem(firstEnabled);
+        }
+      }
+    }
   }
 }

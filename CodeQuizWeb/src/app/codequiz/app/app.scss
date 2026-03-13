@@ -1,0 +1,84 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+}
+
+// ─── User Profile Card in sidebar footer ──────────────
+.user-profile-card {
+  background-color: var(--cq-surface-dark);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-xl, 16px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.user-profile-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--cq-transition-fast);
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.user-avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 20px 16px;
+
+  cq-avatar {
+    --cq-avatar-bg: linear-gradient(135deg, var(--cq-primary), var(--cq-primary-hover));
+  }
+
+  :host ::ng-deep .cq-avatar-lg {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--cq-primary), var(--cq-primary-hover));
+  }
+}
+
+.user-name {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--cq-background-dark);
+  color: var(--cq-text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--cq-border-default);
+  color: var(--cq-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--cq-transition-fast);
+
+  &:hover {
+    background: rgba(var(--cq-error-rgb, 235, 87, 87), 0.1);
+    color: var(--cq-error);
+  }
+}
+
+.logout-icon {
+  font-size: 16px;
+}

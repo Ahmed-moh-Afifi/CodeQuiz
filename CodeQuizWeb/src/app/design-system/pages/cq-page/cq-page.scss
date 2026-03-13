@@ -1,0 +1,85 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.cq-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+// ─── Header ───────────────────────────────────────────
+.cq-page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: var(--cq-background-dark);
+  border-bottom: 1px solid var(--cq-border-default);
+  flex-shrink: 0;
+}
+
+.cq-page-header-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-md);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  flex-shrink: 0;
+
+  img {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) saturate(100%) invert(82%) sepia(10%) saturate(500%) hue-rotate(190deg)
+      brightness(95%) contrast(90%);
+  }
+
+  &:hover {
+    background: var(--cq-elevated-surface);
+  }
+}
+
+.cq-page-header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.cq-page-header-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cq-page-header-subtitle {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--cq-text-muted);
+}
+
+.cq-page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+// ─── Body ─────────────────────────────────────────────
+.cq-page-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px;
+}

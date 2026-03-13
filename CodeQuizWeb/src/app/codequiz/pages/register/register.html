@@ -1,0 +1,110 @@
+<div class="register-page">
+  <!-- Decorative Background Lines -->
+  <div class="register-bg-line register-bg-line-1">
+    <span class="register-bg-text">Roses are red,</span>
+  </div>
+  <div class="register-bg-line register-bg-line-2">
+    <span class="register-bg-text">Violets are blue,</span>
+  </div>
+  <div class="register-bg-line register-bg-line-3">
+    <span class="register-bg-text register-bg-text-highlight">Unexpected '&#123;' on line 32</span>
+  </div>
+
+  <!-- Centered Register Card -->
+  <div class="register-card">
+    <div class="register-card-inner">
+      <h1 class="register-title">Can you fix it?</h1>
+
+      <form class="register-form" (ngSubmit)="onRegister()">
+        <div class="json-form">
+          <span class="json-brace">&#123;</span>
+
+          <div class="json-field">
+            <span class="json-key">"firstName"</span>
+            <span class="json-colon">:</span>
+            <input
+              type="text"
+              class="json-input"
+              placeholder="your_first_name"
+              [(ngModel)]="firstName"
+              name="firstName"
+              autocomplete="given-name"
+            />
+            <span class="json-comma">,</span>
+          </div>
+
+          <div class="json-field">
+            <span class="json-key">"lastName"</span>
+            <span class="json-colon">:</span>
+            <input
+              type="text"
+              class="json-input"
+              placeholder="your_last_name"
+              [(ngModel)]="lastName"
+              name="lastName"
+              autocomplete="family-name"
+            />
+            <span class="json-comma">,</span>
+          </div>
+
+          <div class="json-field">
+            <span class="json-key">"email"</span>
+            <span class="json-colon">:</span>
+            <input
+              type="email"
+              class="json-input"
+              placeholder="you@example.com"
+              [(ngModel)]="email"
+              name="email"
+              autocomplete="email"
+            />
+            <span class="json-comma">,</span>
+          </div>
+
+          <div class="json-field">
+            <span class="json-key">"username"</span>
+            <span class="json-colon">:</span>
+            <input
+              type="text"
+              class="json-input"
+              placeholder="choose_username"
+              [(ngModel)]="username"
+              name="username"
+              autocomplete="username"
+            />
+            <span class="json-comma">,</span>
+          </div>
+
+          <div class="json-field">
+            <span class="json-key">"password"</span>
+            <span class="json-colon">:</span>
+            <input
+              type="password"
+              class="json-input"
+              placeholder="min_6_characters"
+              [(ngModel)]="password"
+              name="password"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <span class="json-brace">&#125;</span>
+        </div>
+
+        @if (error()) {
+          <div class="register-error">{{ error() }}</div>
+        }
+
+        <cq-button type="primary" [loading]="loading()" loadingText="Creating account...">
+          Register
+        </cq-button>
+      </form>
+
+      <div class="register-links">
+        <button type="button" class="register-link" [routerLink]="['/app/login']">
+          Already have an account? <strong>Sign In</strong>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

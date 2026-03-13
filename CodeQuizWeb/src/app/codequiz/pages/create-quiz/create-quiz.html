@@ -1,0 +1,251 @@
+@if (loading()) {
+  <div class="create-loading">
+    <cq-skeleton variant="rectangular" width="100%" height="500px" />
+  </div>
+} @else {
+  <!-- Header -->
+  <div class="create-header">
+    <cq-button type="ghost" (clicked)="goBack()">
+      <cq-icon src="assets/icons/arrow_back_ios_new_rounded.svg" [size]="14" color="current" />
+      Back
+    </cq-button>
+    <div class="create-header-title">
+      <h1>{{ pageTitle }}</h1>
+      <span class="create-subtitle">Configure your quiz settings and add questions</span>
+    </div>
+    <cq-button type="primary" [loading]="saving()" (clicked)="publishQuiz()">
+      Save and Publish
+    </cq-button>
+  </div>
+  <div class="create-header-border"></div>
+
+  <!-- Two-column body -->
+  <div class="create-body">
+    <!-- Left: Configuration sidebar card -->
+    <div class="config-card">
+      <!-- Quiz Configuration Section -->
+      <div class="config-section">
+        <h3 class="config-section-title">Quiz Configuration</h3>
+        <div class="config-inner-card">
+          <div class="config-field">
+            <label>Quiz Title</label>
+            <input type="text" placeholder="Enter quiz title" [(ngModel)]="quizTitle" />
+          </div>
+          <label class="checkbox-row">
+            <input type="checkbox" [(ngModel)]="allowMultipleAttempts" />
+            <span>Allow Multiple Attempts</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Quiz Timing Section -->
+      <div class="config-section">
+        <h3 class="config-section-title">Quiz Timing</h3>
+        <div class="config-inner-card">
+          <div class="config-field">
+            <label>Duration (minutes)</label>
+            <div class="duration-input-wrap">
+              <input type="number" placeholder="e.g. 60" [(ngModel)]="durationMinutes" />
+              <span class="duration-suffix">mins</span>
+            </div>
+          </div>
+
+          <div class="config-divider"></div>
+          <span class="availability-label">Availability Window</span>
+
+          <div class="date-grid">
+            <!-- From -->
+            <div class="date-col">
+              <span class="date-col-label">From</span>
+              <div class="date-inner-card">
+                <div class="config-field">
+                  <label>Date</label>
+                  <input type="date" [(ngModel)]="startDate" />
+                </div>
+                <div class="config-field">
+                  <label>Time</label>
+                  <input type="time" [(ngModel)]="startTime" />
+                </div>
+              </div>
+            </div>
+            <!-- To -->
+            <div class="date-col">
+              <span class="date-col-label">To</span>
+              <div class="date-inner-card">
+                <div class="config-field">
+                  <label>Date</label>
+                  <input type="date" [(ngModel)]="endDate" />
+                </div>
+                <div class="config-field">
+                  <label>Time</label>
+                  <input type="time" [(ngModel)]="endTime" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editor Settings Section -->
+      <div class="config-section">
+        <h3 class="config-section-title">Editor Settings</h3>
+        <div class="config-inner-card">
+          <div class="config-field">
+            <label>Programming Language</label>
+            <cq-select [options]="languageOptions" [(ngModel)]="selectedLanguage" />
+          </div>
+          <div class="config-field">
+            <label>Editor Options</label>
+            <div class="editor-options-grid">
+              <label class="checkbox-row">
+                <input type="checkbox" [(ngModel)]="allowIntellisense" />
+                <span>IntelliSense</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" [(ngModel)]="allowSignatureHelp" />
+                <span>Signature Help</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" [(ngModel)]="allowExecution" />
+                <span>Run Code</span>
+              </label>
+              @if (allowExecution) {
+                <label class="checkbox-row">
+                  <input type="checkbox" [(ngModel)]="showOutput" />
+                  <span>Show Output</span>
+                </label>
+                <label class="checkbox-row">
+                  <input type="checkbox" [(ngModel)]="showErrors" />
+                  <span>Show Errors</span>
+                </label>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Questions -->
+    <div class="questions-col">
+      <!-- Questions Header Card -->
+      <div class="questions-header-card">
+        <div>
+          <h3 class="config-section-title">Questions Overview</h3>
+          <span class="questions-count">{{ questions().length }} questions added</span>
+        </div>
+        <cq-button type="primary" (clicked)="openAddQuestion()">Add Question</cq-button>
+      </div>
+
+      <!-- Questions List Card -->
+      <div class="questions-list-card">
+        @if (questions().length === 0) {
+          <div class="questions-empty">
+            <span class="empty-title">No questions added yet</span>
+            <span class="empty-hint">Click 'Add Question' to get started</span>
+          </div>
+        } @else {
+          <div class="questions-list">
+            @for (q of questions(); track q.order; let i = $index) {
+              <div class="question-card">
+                <!-- Question Header -->
+                <div class="question-card-header">
+                  <div class="question-card-title">
+                    <span class="question-order">Question {{ q.order }}</span>
+                    <cq-badge type="info">{{ q.points }} pts</cq-badge>
+                  </div>
+                  <div class="question-card-actions">
+                    <button class="icon-btn" title="Edit" (click)="openEditQuestion(i)">
+                      <cq-icon src="assets/icons/pencil.svg" [size]="14" color="current" />
+                    </button>
+                    <button
+                      class="icon-btn icon-btn-danger"
+                      title="Delete"
+                      (click)="deleteQuestion(i)"
+                    >
+                      <cq-icon src="assets/icons/trash.svg" [size]="14" color="error" />
+                    </button>
+                  </div>
+                </div>
+                <!-- Statement -->
+                <p class="question-statement-text">{{ q.statement || '(No statement)' }}</p>
+                <!-- Test Cases Count -->
+                <span class="test-cases-count">Test Cases: {{ q.testCases.length }}</span>
+                <!-- Code Preview -->
+                @if (q.editorCode) {
+                  <pre class="code-preview">{{ q.editorCode }}</pre>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Question Dialog (overlay) -->
+  @if (showQuestionDialog()) {
+    <div class="dialog-overlay" (click)="closeQuestionDialog()">
+      <div class="dialog-panel" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <h2>{{ editingQuestionIndex !== null ? 'Edit Question' : 'Add Question' }}</h2>
+          <button class="icon-btn" (click)="closeQuestionDialog()">
+            <cq-icon src="assets/icons/close.svg" [size]="14" color="current" />
+          </button>
+        </div>
+
+        <div class="dialog-body">
+          <cq-textarea
+            label="Question Statement"
+            placeholder="Describe the problem..."
+            [rows]="3"
+            [(ngModel)]="qStatement"
+          />
+          <cq-textarea
+            label="Editor Code (starter code)"
+            placeholder="// Starter code..."
+            [rows]="5"
+            [(ngModel)]="qEditorCode"
+          />
+          <cq-input label="Points" type="number" placeholder="e.g. 10" [(ngModel)]="qPoints" />
+
+          <!-- Test Cases -->
+          <div class="test-cases-section">
+            <div class="test-cases-header">
+              <span class="config-field-label">Test Cases</span>
+              <cq-button type="outlined" (clicked)="addTestCase()">+ Add</cq-button>
+            </div>
+            @for (tc of qTestCases; track tc.testCaseNumber; let j = $index) {
+              <div class="test-case-card">
+                <div class="test-case-header">
+                  <span>Test Case {{ tc.testCaseNumber }}</span>
+                  <button class="icon-btn icon-btn-danger" (click)="removeTestCase(j)">
+                    <cq-icon src="assets/icons/trash.svg" [size]="14" color="error" />
+                  </button>
+                </div>
+                <cq-textarea
+                  label="Input (one per line)"
+                  placeholder="Enter input..."
+                  [rows]="2"
+                  [ngModel]="getTestCaseInputText(tc)"
+                  (ngModelChange)="updateTestCaseInput(tc, $event)"
+                />
+                <cq-input
+                  label="Expected Output"
+                  placeholder="Expected output..."
+                  [(ngModel)]="tc.expectedOutput"
+                />
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="dialog-footer">
+          <cq-button type="outlined" (clicked)="closeQuestionDialog()">Cancel</cq-button>
+          <cq-button type="primary" (clicked)="saveQuestion()">
+            {{ editingQuestionIndex !== null ? 'Update' : 'Add' }}
+          </cq-button>
+        </div>
+      </div>
+    </div>
+  }
+}

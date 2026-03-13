@@ -1,0 +1,31 @@
+<cq-side-nav>
+  <div slot="header">
+    <span class="logo">
+      <img src="assets/icons/widelogo.png" alt="CodeQuiz Logo" height="40px" />
+    </span>
+  </div>
+  <cq-side-nav-item label="Dashboard" icon="assets/icons/layout_grid.svg">
+    <app-dashboard />
+  </cq-side-nav-item>
+  <cq-side-nav-item label="Created Quizzes" icon="assets/icons/pencil.svg">
+    <app-created-quizzes />
+  </cq-side-nav-item>
+  <cq-side-nav-item label="Joined Quizzes" icon="assets/icons/copy_check.svg">
+    <app-joined-quizzes />
+  </cq-side-nav-item>
+  <div slot="footer">
+    @if (user; as u) {
+      <div class="user-profile-card">
+        <button class="user-profile-top" (click)="openProfile()">
+          <div class="user-avatar">
+            <cq-avatar size="lg" [initials]="u.firstName.charAt(0)" />
+          </div>
+          <div class="user-name">{{ u.firstName }} {{ u.lastName }}</div>
+        </button>
+        <button class="logout-btn" (click)="logout()">
+          <span class="logout-icon">↪</span> Logout
+        </button>
+      </div>
+    }
+  </div>
+</cq-side-nav>

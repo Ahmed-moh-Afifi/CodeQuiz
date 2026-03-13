@@ -1137,10 +1137,10 @@
         Non-blocking notifications that appear at the bottom-right and auto-dismiss.
       </p>
       <div class="demo-row">
-        <cq-button type="success" (click)="showSuccessToast()">Success Toast</cq-button>
-        <cq-button type="danger" (click)="showErrorToast()">Error Toast</cq-button>
-        <cq-button type="warning" (click)="showWarningToast()">Warning Toast</cq-button>
-        <cq-button type="outlined" (click)="showInfoToast()">Info Toast</cq-button>
+        <cq-button type="success" (clicked)="showSuccessToast()">Success Toast</cq-button>
+        <cq-button type="danger" (clicked)="showErrorToast()">Error Toast</cq-button>
+        <cq-button type="warning" (clicked)="showWarningToast()">Warning Toast</cq-button>
+        <cq-button type="outlined" (clicked)="showInfoToast()">Info Toast</cq-button>
       </div>
     </div>
   </section>
@@ -1428,44 +1428,36 @@
     }
     <div class="cq-card" style="padding: 0; overflow: hidden; display: flex; height: 300px">
       <cq-side-nav [(collapsed)]="sideNavCollapsed">
-        <cq-side-nav-item
-          label="Dashboard"
-          icon="assets/icons/home.svg"
-          [active]="sideNavActiveItem === 'dashboard'"
-          (selected)="sideNavActiveItem = 'dashboard'"
-        ></cq-side-nav-item>
-        <cq-side-nav-item
-          label="Quizzes"
-          icon="assets/icons/code.svg"
-          [active]="sideNavActiveItem === 'quizzes'"
-          (selected)="sideNavActiveItem = 'quizzes'"
-        ></cq-side-nav-item>
+        <cq-side-nav-item label="Dashboard" icon="assets/icons/home.svg">
+          <div style="padding: 24px">
+            <h3 class="cq-item-title">Dashboard</h3>
+            <p class="cq-body-text">
+              Welcome to the dashboard. Here you can see an overview of your quizzes and stats.
+            </p>
+          </div>
+        </cq-side-nav-item>
+        <cq-side-nav-item label="Quizzes" icon="assets/icons/code.svg">
+          <div style="padding: 24px">
+            <h3 class="cq-item-title">Quizzes</h3>
+            <p class="cq-body-text">Browse and manage your quizzes here.</p>
+          </div>
+        </cq-side-nav-item>
         <cq-side-nav-group label="Settings">
-          <cq-side-nav-item
-            label="Profile"
-            [active]="sideNavActiveItem === 'profile'"
-            (selected)="sideNavActiveItem = 'profile'"
-          ></cq-side-nav-item>
-          <cq-side-nav-item
-            label="Preferences"
-            [active]="sideNavActiveItem === 'preferences'"
-            (selected)="sideNavActiveItem = 'preferences'"
-          ></cq-side-nav-item>
+          <cq-side-nav-item label="Profile">
+            <div style="padding: 24px">
+              <h3 class="cq-item-title">Profile Settings</h3>
+              <p class="cq-body-text">Update your profile information.</p>
+            </div>
+          </cq-side-nav-item>
+          <cq-side-nav-item label="Preferences">
+            <div style="padding: 24px">
+              <h3 class="cq-item-title">Preferences</h3>
+              <p class="cq-body-text">Customize your experience.</p>
+            </div>
+          </cq-side-nav-item>
         </cq-side-nav-group>
         <cq-side-nav-item label="Disabled" [disabled]="true"></cq-side-nav-item>
       </cq-side-nav>
-      <div
-        style="
-          flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 24px;
-          color: var(--cq-text-secondary);
-        "
-      >
-        Active: {{ sideNavActiveItem }}
-      </div>
     </div>
   </section>
 
@@ -1511,7 +1503,7 @@
       <p class="cq-body-text cq-mb-md">
         Blocks the UI during operations. Click below to see a 2.5-second demo.
       </p>
-      <cq-button type="primary" (click)="showLoading()">Show Loading Overlay</cq-button>
+      <cq-button type="primary" (clicked)="showLoading()">Show Loading Overlay</cq-button>
     </div>
   </section>
 
@@ -1821,6 +1813,30 @@
         [currentPage]="demoPaginationPage"
         (pageChange)="demoPaginationPage = $event"
       ></cq-pagination>
+    </div>
+  </section>
+
+  <!-- ─── Question Nav ─────────────────────────────────── -->
+  <section>
+    <div class="demo-section-header">
+      <h2 class="demo-section-title" style="margin-bottom: 0">Question Navigation</h2>
+    </div>
+    <div class="cq-card" style="max-width: 320px">
+      <div class="demo-label cq-mb-md">
+        Used in quiz-taking, grading, and review pages for navigating questions.
+      </div>
+      <cq-question-nav
+        [questions]="demoQuestionNavItems"
+        [selectedId]="demoSelectedQuestionId"
+        [showProgress]="true"
+        (questionSelected)="demoSelectedQuestionId = $event.id"
+        (previous)="demoPrevQuestion()"
+        (next)="demoNextQuestion()"
+      >
+        <div style="text-align: center; padding: 8px 0">
+          <span class="cq-caption-text cq-text-muted">Last saved: just now</span>
+        </div>
+      </cq-question-nav>
     </div>
   </section>
 

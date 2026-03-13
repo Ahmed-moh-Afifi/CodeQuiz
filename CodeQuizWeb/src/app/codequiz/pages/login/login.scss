@@ -1,0 +1,200 @@
+// Login page — matches MAUI desktop code-themed design
+// Centered card over a 3-row decorative background with poetic lines
+
+.login-page {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--cq-background-dark);
+  overflow: hidden;
+}
+
+// ─── Decorative Background Lines ──────────────────────
+.login-bg-line {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.login-bg-text {
+  font-family: var(--cq-font-mono);
+  font-size: clamp(32px, 5vw, 60px);
+  font-style: italic;
+  color: var(--cq-primary);
+  opacity: 0.08;
+  white-space: nowrap;
+}
+
+.login-bg-text-highlight {
+  font-style: normal;
+  font-weight: 700;
+  opacity: 0.12;
+}
+
+.login-bg-line-1 {
+  top: 18%;
+}
+
+.login-bg-line-2 {
+  top: 42%;
+}
+
+.login-bg-line-3 {
+  top: 66%;
+}
+
+// ─── Card ─────────────────────────────────────────────
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 24px;
+  background: rgba(var(--cq-surface-dark-rgb, 30, 30, 46), 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--cq-border-default);
+  border-radius: var(--cq-radius-xl, 16px);
+  box-shadow: var(--cq-shadow-xl);
+}
+
+.login-card-inner {
+  padding: 40px 32px;
+}
+
+.login-title {
+  font-family: var(--cq-font-mono);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--cq-text-primary);
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+// ─── JSON-Style Form ──────────────────────────────────
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.json-form {
+  font-family: var(--cq-font-mono);
+  font-size: 15px;
+  line-height: 2.4;
+  padding: 4px 0;
+}
+
+.json-brace {
+  color: var(--cq-text-muted);
+  font-size: 18px;
+  display: block;
+}
+
+.json-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 24px;
+}
+
+.json-key {
+  color: #9cdcfe;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.json-colon {
+  color: var(--cq-text-muted);
+  flex-shrink: 0;
+}
+
+.json-comma {
+  color: var(--cq-text-muted);
+  flex-shrink: 0;
+}
+
+.json-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--cq-border-default);
+  color: #ce9178; // string color
+  font-family: var(--cq-font-mono);
+  font-size: 15px;
+  padding: 2px 4px;
+  outline: none;
+  transition: border-color var(--cq-transition-fast);
+
+  &::placeholder {
+    color: var(--cq-text-disabled);
+    font-style: italic;
+  }
+
+  &:focus {
+    border-bottom-color: var(--cq-primary);
+  }
+}
+
+// ─── Error ────────────────────────────────────────────
+.login-error {
+  text-align: center;
+  font-size: 13px;
+  color: var(--cq-error);
+  padding: 8px 12px;
+  background: rgba(var(--cq-error-rgb, 235, 87, 87), 0.1);
+  border-radius: var(--cq-radius-md);
+}
+
+// ─── Links ────────────────────────────────────────────
+.login-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.login-link {
+  background: none;
+  border: none;
+  color: var(--cq-text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color var(--cq-transition-fast);
+
+  &:hover {
+    color: var(--cq-primary);
+  }
+
+  strong {
+    color: var(--cq-primary);
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────
+@media (max-width: 480px) {
+  .login-card-inner {
+    padding: 32px 20px;
+  }
+
+  .json-field {
+    padding-left: 16px;
+  }
+
+  .json-form {
+    font-size: 13px;
+  }
+
+  .json-input {
+    font-size: 13px;
+  }
+}

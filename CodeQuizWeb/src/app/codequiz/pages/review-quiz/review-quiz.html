@@ -1,0 +1,184 @@
+@if (loading()) {
+  <div class="review-loading">
+    <cq-skeleton height="40px" width="300px" />
+    <cq-skeleton height="500px" width="100%" />
+  </div>
+} @else if (attempt()) {
+  <!-- Header -->
+  <div class="review-header">
+    <cq-button type="ghost" (clicked)="goBack()">
+      <cq-icon src="assets/icons/arrow_back_ios_new_rounded.svg" [size]="14" color="current" />
+      Back
+    </cq-button>
+    <div class="review-header-title">
+      <h1>{{ attempt()!.quiz.title }}</h1>
+      <span class="review-subtitle">Review your submission</span>
+    </div>
+  </div>
+  <div class="review-header-border"></div>
+
+  <!-- Body -->
+  <div class="review-body">
+    <!-- Sidebar -->
+    <aside class="review-sidebar">
+      <cq-question-nav
+        [questions]="navItems()"
+        [selectedId]="selectedQuestion()?.id ?? 0"
+        [showProgress]="false"
+        (questionSelected)="onNavSelect($event)"
+        (previous)="previousQuestion()"
+        (next)="nextQuestion()"
+      >
+        <!-- Score summary slotted inside nav -->
+        <div class="score-card">
+          <div class="score-label">Your Score</div>
+          <div class="score-value">
+            {{ attempt()!.grade ?? '—' }}
+            <span class="score-max">/ {{ attempt()!.quiz.totalPoints }}</span>
+          </div>
+          <cq-progress-bar
+            [value]="gradePercentage()"
+            [type]="gradePercentage() >= 50 ? 'success' : 'error'"
+          />
+          <div class="score-percent">{{ gradePercentage() | number: '1.0-1' }}%</div>
+        </div>
+      </cq-question-nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="review-main">
+      @if (selectedQuestion(); as q) {
+        <!-- Question header with grade badge -->
+        <div class="question-header">
+          <h2>Question {{ q.order }}</h2>
+          <div class="grade-badge">
+            <span class="grade-label">Grade:</span>
+            @if (currentSolution()?.receivedGrade != null) {
+              <span class="grade-value">{{
+                currentSolution()!.receivedGrade | number: '1.1-1'
+              }}</span>
+            } @else {
+              <span class="grade-value grade-pending">—</span>
+            }
+            <span class="grade-max">/ {{ q.points }}</span>
+          </div>
+        </div>
+
+        <!-- Scrollable content -->
+        <div class="question-content">
+          <!-- Statement -->
+          <p class="question-statement">{{ q.statement }}</p>
+
+          <!-- Test Cases (Examples) -->
+          @if (q.testCases?.length) {
+            <div class="test-cases-section">
+              <h3>Examples</h3>
+              @for (tc of q.testCases; track $index) {
+                <div class="test-case-card">
+                  <div class="test-case-field">
+                    <span class="test-case-label">Input</span>
+                    <pre class="test-case-code">{{ formatTestInput(tc) }}</pre>
+                  </div>
+                  <div class="test-case-field">
+                    <span class="test-case-label">Expected Output</span>
+                    <pre class="test-case-code">{{ tc.expectedOutput }}</pre>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          @if (currentSolution(); as sol) {
+            <!-- Test Results -->
+            @if (sol.evaluationResults?.length) {
+              <div class="eval-results-section">
+                <div class="eval-results-header">
+                  <h3>Test Results</h3>
+                  <cq-badge type="info">{{ passedTestsText() }}</cq-badge>
+                </div>
+                @for (result of sol.evaluationResults; track $index) {
+                  <div
+                    class="test-result"
+                    [class.pass]="result.isSuccessful"
+                    [class.fail]="!result.isSuccessful"
+                  >
+                    <cq-icon
+                      [src]="
+                        result.isSuccessful ? 'assets/icons/success.svg' : 'assets/icons/error.svg'
+                      "
+                      [size]="16"
+                      [color]="result.isSuccessful ? 'success' : 'error'"
+                    />
+                    <span class="test-result-label">Test Case {{ $index + 1 }}</span>
+                    <span
+                      class="test-result-status"
+                      [class.pass]="result.isSuccessful"
+                      [class.fail]="!result.isSuccessful"
+                    >
+                      {{ result.isSuccessful ? 'Passed' : 'Failed' }}
+                    </span>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- AI Feedback Panel -->
+            @if (showAiFeedback() && currentAiAssessment(); as ai) {
+              <div class="ai-panel">
+                <div class="ai-panel-header">
+                  <cq-badge [type]="ai.isValid ? 'success' : 'error'">
+                    {{ ai.isValid ? 'Valid' : 'Invalid' }}
+                  </cq-badge>
+                  <h3>AI Feedback</h3>
+                </div>
+                <!-- Reasoning -->
+                @if (ai.reasoning) {
+                  <div class="ai-feedback-box">
+                    <span class="ai-label">Feedback</span>
+                    <div class="ai-reasoning-text">{{ ai.reasoning }}</div>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Instructor Feedback -->
+            @if (sol.feedback) {
+              <div class="instructor-feedback-panel">
+                <div class="instructor-feedback-header">
+                  <cq-icon src="assets/icons/feedback.svg" [size]="20" color="primary" />
+                  <div>
+                    <h3>Instructor Feedback</h3>
+                    @if (sol.evaluatedBy) {
+                      <span class="feedback-author">by {{ sol.evaluatedBy }}</span>
+                    }
+                  </div>
+                </div>
+                <div class="instructor-feedback-box">{{ sol.feedback }}</div>
+              </div>
+            }
+          }
+
+          <!-- Code Editor (read-only) -->
+          <div class="code-section">
+            <div class="code-header">
+              <h3>Your Code</h3>
+              <span class="language-tag">{{ q.questionConfiguration.language }}</span>
+            </div>
+            <cq-code-editor
+              [language]="q.questionConfiguration.language"
+              [code]="currentSolution()?.code ?? 'No code submitted'"
+              [readOnly]="true"
+              [showRunButton]="true"
+              [showIO]="true"
+              [showOutput]="q.questionConfiguration.showOutput"
+              [showError]="q.questionConfiguration.showError"
+              (runRequested)="onRunRequested($event)"
+            />
+          </div>
+        </div>
+      } @else {
+        <div class="no-question">Select a question from the sidebar</div>
+      }
+    </main>
+  </div>
+}

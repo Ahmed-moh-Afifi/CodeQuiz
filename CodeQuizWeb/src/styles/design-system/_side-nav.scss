@@ -1,10 +1,45 @@
 // ========== Side Navigation ==========
-// The cq-side-nav HOST element IS the container (no inner nav wrapper).
-// Width + transition are set via @HostBinding in the component.
+// cq-side-nav is a flex-row layout: rail (sidebar) + content area.
+// The .cq-side-nav-rail holds header, body, footer (the traditional sidebar).
+// The .cq-side-nav-content displays the active item's projected content.
 // The .cq-side-nav-collapsed class is on the HOST element via @HostBinding.
+// On mobile (<768px), the rail becomes an overlay drawer.
 
-// Collapsed state — targets children inside the host
+cq-side-nav {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+}
+
+// ========== Rail (sidebar column) ==========
+.cq-side-nav-rail {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100%;
+  background-color: var(--cq-surface-dark);
+  border-right: 1px solid var(--cq-border-default);
+  overflow: hidden;
+  width: 240px;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ========== Content area ==========
+.cq-side-nav-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
+}
+
+// ========== Collapsed state ==========
 cq-side-nav.cq-side-nav-collapsed {
+  .cq-side-nav-rail {
+    width: 56px;
+  }
+
+  .cq-side-nav-header-content,
   .cq-side-nav-item-label,
   .cq-side-nav-group-label,
   .cq-side-nav-group-chevron {
@@ -35,8 +70,13 @@ cq-side-nav.cq-side-nav-collapsed {
   }
 
   .cq-side-nav-group-header {
-    justify-content: center;
-    padding: 8px 0;
+    display: none;
+  }
+
+  // Force all group items visible when collapsed (even if group was toggled closed)
+  .cq-side-nav-group-items {
+    max-height: 500px !important;
+    opacity: 1 !important;
   }
 
   .cq-side-nav-group::before {
@@ -51,9 +91,21 @@ cq-side-nav.cq-side-nav-collapsed {
   padding: 16px;
   border-bottom: 1px solid var(--cq-border-default);
   min-height: 56px;
+  gap: 8px;
   transition:
     padding 0.35s cubic-bezier(0.4, 0, 0.2, 1),
     justify-content 0.35s;
+}
+
+// Wrapper for header slot content — hides cleanly on collapse
+.cq-side-nav-header-content {
+  overflow: hidden;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  transition:
+    opacity 0.2s ease 0.05s,
+    width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cq-side-nav-toggle {
@@ -262,6 +314,100 @@ cq-side-nav.cq-side-nav-collapsed {
   &.cq-group-collapsed {
     max-height: 0;
     opacity: 0;
+  }
+}
+
+// ========== Mobile ==========
+// Mobile layout: column (top bar + content), drawer overlays
+cq-side-nav.cq-side-nav-mobile {
+  flex-direction: column;
+}
+
+.cq-side-nav-mobile-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: var(--cq-surface-dark);
+  border-bottom: 1px solid var(--cq-border-default);
+  min-height: 56px;
+  flex-shrink: 0;
+}
+
+.cq-side-nav-mobile-title {
+  font-size: var(--cq-font-size-body, 14px);
+  font-weight: 600;
+  color: var(--cq-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cq-side-nav-hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--cq-radius-md);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 8px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--cq-secondary-hover);
+  }
+}
+
+.cq-hamburger-line {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background-color: var(--cq-text-primary);
+  border-radius: 1px;
+  transition: transform 0.25s ease;
+}
+
+// Backdrop
+.cq-side-nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  animation: cq-fade-in 0.2s ease;
+}
+
+// Mobile rail = drawer overlay
+.cq-side-nav-rail-mobile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  z-index: 1000;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: none;
+
+  &.cq-side-nav-rail-open {
+    transform: translateX(0);
+    box-shadow:
+      4px 0 24px rgba(0, 0, 0, 0.3),
+      1px 0 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+@keyframes cq-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
